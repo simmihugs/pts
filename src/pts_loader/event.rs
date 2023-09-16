@@ -37,6 +37,14 @@ impl fmt::Debug for Event {
 }
 
 impl Event {
+    pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
+	Some(self.starttime)
+    }
+    
+    pub fn get_endtime(&self) -> Option<DateTime<Utc>> {
+	self.endtime
+    }
+    
     pub fn calculate_endtime(&mut self) {
         self.endtime = Some(self.starttime + Duration::milliseconds(self.duration));
         match &mut self.sistandard {

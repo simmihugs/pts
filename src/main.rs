@@ -1,13 +1,28 @@
 mod pts_loader;
+mod commandline;
 
+use commandline::{CommandlineOptions::*, Commandline, ProgrammMode::*};
 use pts_loader::dataset::DataSet;
 
 fn main() -> std::io::Result<()> {
-    let filename = "hdplus_20230915_26886.pts";
-    match DataSet::init(filename) {
-    	Ok (dataset) => dataset.print_n_si(3),
-    	Err (e) => println!("Some error: {}", e),
+    match Commandline::parse() {
+	StopRightHere => Commandline::print_help(),
+	Repl => println!("{}", "run interactively"),
+	SingleFile(cmd) => {
+	    let filename = cmd.filename();
+	    match DataSet::init(filename) {
+		Ok (dataset) => {
+		    match cmd.options() {
+			SiErrors => dataset.print_sierrors(),
+			VaEventLogoErrors => println!("Show me all logo errors"),
+			GrepIllegalEvents(..) => println!("Grep for illegal events"),
+		    }
+		}
+		Err(e) => println!("{e}"),
+	    }
+	}
     }
 
     Ok(())
 }
+

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -24,6 +25,24 @@ impl fmt::Debug for Define {
 }
 
 impl Define {
+    pub fn get_endtime(&self) -> Option<DateTime<Utc>> {
+        match self {
+            Define::vaEvent(ref event) => event.get_endtime(),
+            Define::siEvent(ref event) => event.get_endtime(),
+            Define::logoEvent(ref event) => event.get_endtime(),
+            Define::layoutEvent(ref event) => event.get_endtime(),
+        }
+    }
+
+    pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
+        match self {
+            Define::vaEvent(ref event) => event.get_starttime(),
+            Define::siEvent(ref event) => event.get_starttime(),
+            Define::logoEvent(ref event) => event.get_starttime(),
+            Define::layoutEvent(ref event) => event.get_starttime(),
+        }
+    }
+
     pub fn calculate_endtime(&mut self) {
         match self {
             Define::vaEvent(ref mut event) => event.calculate_endtime(),
