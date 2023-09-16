@@ -1,15 +1,30 @@
 # pts
 A pts file parser
 
-## Current status
+## help page
+```
+╭[simmi@xubu] ~/Projects/pts
+╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v -h                 
+Usage: pts [OPTIONS]
 
-currently a hard coded pts file is loaded, deserialized and the first
-3 SiEvents are printed.
+Options:
+  -f, --filename <FILENAME>            [default: DEFAULT]
+  -r, --repl                           
+  -v, --verbose                        
+  -s, --sierror                        
+  -l, --logoerror                      
+  -i, --illegalevents <ILLEGALEVENTS>  [default: DEFAULT]
+  -h, --help                           Print help
+  -V, --version                        Print version
+╭[simmi@xubu] ~/Projects/pts
+╰─> 
+```
+
+## Basic usage
 
 ```
 ╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                            on branch main
-
+╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                    
 2 sierrors
 SiEvent: {
 	title: Free Fenster
@@ -35,8 +50,6 @@ SiEvent: {
 		displayed endtime: 2023-09-15T15:30:00.000Z
 	}
 }
-
-
 ╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                            on branch main
+╰─> 
 ```
