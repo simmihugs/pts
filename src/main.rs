@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
 	    match DataSet::init(filename) {
 		Ok (dataset) => {
 		    match cmd.options() {
-			SiErrors => dataset.print_sierrors(),
+			SiErrors => dataset.print_si_errors(cmd.verbose()),
 			VaEventLogoErrors => println!("Show me all logo errors"),
 			GrepIllegalEvents(..) => println!("Grep for illegal events"),
 		    }

@@ -8,6 +8,9 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     repl: bool,
+    
+    #[arg(short, long, default_value_t = false)]
+    verbose: bool,
 
     #[arg(short, long, default_value_t = false)]
     sierror: bool,
@@ -75,6 +78,10 @@ impl Commandline {
 
     pub fn options(&self) -> &CommandlineOptions {
         &self.options
+    }
+
+    pub fn verbose(&self) -> bool {
+        self.args.verbose
     }
 
     pub fn print_help() {

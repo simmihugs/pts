@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-
 use super::define::*;
+use colored::Colorize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct DataSet {
@@ -75,8 +75,19 @@ impl DataSet {
             .for_each(|define| define.calculate_endtime());
     }
 
+    fn print_si_error_verbose(
+        &self,
+        err: Box<SiError>,
+        display_err: Box<SiError>,
+        event: &Define,
+        next_event: &Define,
+        verbose: bool,
+    ) {
+        event.print_si_events_verbose(next_event, &err, &display_err, verbose);
+    }
+
     #[allow(dead_code)]
-    pub fn print_sierrors(&self) {
+    pub fn print_si_errors(&self, verbose: bool) {
         let si_events: &mut Vec<&Define> = &mut self
             .eventcommands
             .define
@@ -92,21 +103,50 @@ impl DataSet {
 
         if si_events.len() > 1 {
             let mut si_errors = Vec::new();
-	    let head = si_events[0];
-	    let tail = &si_events.drain(1..).into_iter().collect::<Vec<&Define>>();
-            tail.into_iter().fold(head, |acc, value| {
-                if acc.get_endtime() != value.get_starttime() {
-                    si_errors.push((acc, value));
-                    value
-                } else {
-                    value
+            let head = si_events[0];
+            si_events.drain(1..).into_iter().fold(head, |acc, value| {
+                match acc.get_si_error(value) {
+                    SiError::SomeError(err, display_err) => {
+                        si_errors.push((err, display_err, acc, value));
+                        value
+                    }
+                    _ => value,
                 }
             });
 
-            println!("{} sierrors", si_errors.len());
-            for (a, b) in si_errors {
-                println!("{:?}", a);
-                println!("{:?}\n\n", b);
+            let nerrors = format!(
+                "{}",
+                &si_errors.iter().fold(0, |mut acc, value| {
+                    let (err, display_err, _, _) = value;
+		    
+		    if let SiError::Overlap = **err {
+			acc += 1;
+		    }
+		    else if let SiError::Gap = **err {
+			acc += 1;
+		    }
+		    
+		    if let SiError::Gap = **display_err {	
+			acc += 1;
+		    }
+		    else if let SiError::Overlap = **display_err {	
+			acc += 1;
+		    }
+
+		    acc
+                })
+            );
+	    
+            println!(
+                "{} sierrors",
+                if 0 == si_errors.len() {
+                    nerrors.green()
+                } else {
+                    nerrors.red()
+                }
+            );
+            for (err, display_err, event, next_event) in si_errors {
+                self.print_si_error_verbose(err, display_err, event, next_event, verbose);
             }
         }
     }
