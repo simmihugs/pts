@@ -14,3 +14,8 @@ Cargo.lock
 *.pdb
 
 *.pts
+
+
+# Added by cargo
+
+/target
