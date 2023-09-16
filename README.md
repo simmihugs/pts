@@ -8,45 +8,35 @@ currently a hard coded pts file is loaded, deserialized and the first
 
 ```
 ╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run                                                   on branch main
-    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
-     Running `target/debug/pts`
-siEvent: {
+╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                            on branch main
+
+2 sierrors
+SiEvent: {
 	title: Free Fenster
 	eventid: HDPLUHD_4832103_SI
 	serviceid: HDPLUHD
 	programid: HDPLUHD_4832103
 	startime:  2023-09-15T06:00:00.000Z
-	endtime:   2023-09-15T12:35:00.000Z
+	endtime:   2023-09-15T12:32:00.000Z #<-- Time gap
 	SiStandard: {
-		starttime: 2023-09-15T06:00:00.000Z
-		endtime:   2023-09-15T12:35:00.000Z
+		displayed starttime: 2023-09-15T06:00:00.000Z
+		displayed endtime: 2023-09-15T12:35:10.000Z #<-- Time overlap
 	}
 }
-siEvent: {
+SiEvent: {
 	title: Sendepause
 	eventid: HDPLUHD_4844932_SI
 	serviceid: HDPLUHD
 	programid: HDPLUHD_4844932
-	startime:  2023-09-15T12:35:00.000Z
+	startime:  2023-09-15T12:35:00.000Z #<-- Time gap
 	endtime:   2023-09-15T15:30:00.000Z
 	SiStandard: {
-		starttime: 2023-09-15T12:35:00.000Z
-		endtime:   2023-09-15T15:30:00.000Z
+		displayed starttime: 2023-09-15T12:35:00.000Z #<-- Time overlap
+		displayed endtime: 2023-09-15T15:30:00.000Z
 	}
 }
-siEvent: {
-	title: Free Fenster
-	eventid: HDPLUHD_4844933_SI
-	serviceid: HDPLUHD
-	programid: HDPLUHD_4844933
-	startime:  2023-09-15T15:30:00.000Z
-	endtime:   2023-09-15T18:00:00.000Z
-	SiStandard: {
-		starttime: 2023-09-15T15:30:00.000Z
-		endtime:   2023-09-15T18:00:00.000Z
-	}
-}
+
+
 ╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run                                                   on branch main
+╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                            on branch main
 ```
