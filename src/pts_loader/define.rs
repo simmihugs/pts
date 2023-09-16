@@ -89,6 +89,15 @@ impl Define {
         }
     }
 
+    pub fn get_title(&self) -> String {
+        match self {
+            Define::vaEvent(ref event) => event.get_title(),
+            Define::siEvent(ref event) => event.get_title(),
+            Define::logoEvent(ref event) => event.get_title(),
+            Define::layoutEvent(ref event) => event.get_title(),
+        }	
+    }
+    
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match self {
             Define::vaEvent(ref event) => event.get_dendtime(),

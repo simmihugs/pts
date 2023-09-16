@@ -75,6 +75,100 @@ impl DataSet {
             .for_each(|define| define.calculate_endtime());
     }
 
+    fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool) {
+        let va_events: Vec<_> = events
+            .iter()
+            .filter(|x| {
+                if let Define::vaEvent(..) = x {
+                    return true;
+                }
+                return false;
+            })
+            .collect();
+        if va_events.len() > 0 {
+            println!("{} VaEvents", va_events.len());
+            if verbose {
+                va_events.iter().for_each(|x| println!("{:?}", x));
+            }
+        }
+    }
+    fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool) {
+        let si_events: Vec<_> = events
+            .iter()
+            .filter(|x| {
+                if let Define::siEvent(..) = x {
+                    return true;
+                }
+                return false;
+            })
+            .collect();
+        if si_events.len() > 0 {
+            println!("{} SiEvents", si_events.len());
+            if verbose {
+                si_events.iter().for_each(|x| println!("{:?}", x));
+            }
+        }
+    }
+    fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool) {
+        let logo_events: Vec<_> = events
+            .iter()
+            .filter(|x| {
+                if let Define::logoEvent(..) = x {
+                    return true;
+                }
+                return false;
+            })
+            .collect();
+        if logo_events.len() > 0 {
+            println!("{} LogoEvents", logo_events.len());
+            if verbose {
+                logo_events.iter().for_each(|x| println!("{:?}", x));
+            }
+        }
+    }
+    fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, verbose: bool) {
+        let layout_events: Vec<_> = events
+            .iter()
+            .filter(|x| {
+                if let Define::layoutEvent(..) = x {
+                    return true;
+                }
+                return false;
+            })
+            .collect();
+        if layout_events.len() > 0 {
+            println!("{} LayoutEvents", layout_events.len());
+            if verbose {
+                layout_events.iter().for_each(|x| println!("{:?}", x));
+            }
+        }
+    }
+
+    pub fn look_for_illegals(&self, illegals: &Vec<String>, verbose: bool) {
+        let events: &Vec<&Define> = &self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                for illegal in illegals {
+                    if x.get_title().contains(illegal) {
+                        return true;
+                    }
+                }
+                return false;
+            })
+            .collect();
+
+        if events.len() == 0 {
+            println!("0 events found.");
+        } else {
+            self.look_for_illegals_si_events(events, verbose);
+            self.look_for_illegals_va_events(events, verbose);
+            self.look_for_illegals_logo_events(events, verbose);
+            self.look_for_illegals_layout_events(events, verbose);	    
+        }
+    }
+
     fn print_si_error_verbose(
         &self,
         err: Box<SiError>,
@@ -118,25 +212,23 @@ impl DataSet {
                 "{}",
                 &si_errors.iter().fold(0, |mut acc, value| {
                     let (err, display_err, _, _) = value;
-		    
-		    if let SiError::Overlap = **err {
-			acc += 1;
-		    }
-		    else if let SiError::Gap = **err {
-			acc += 1;
-		    }
-		    
-		    if let SiError::Gap = **display_err {	
-			acc += 1;
-		    }
-		    else if let SiError::Overlap = **display_err {	
-			acc += 1;
-		    }
 
-		    acc
+                    if let SiError::Overlap = **err {
+                        acc += 1;
+                    } else if let SiError::Gap = **err {
+                        acc += 1;
+                    }
+
+                    if let SiError::Gap = **display_err {
+                        acc += 1;
+                    } else if let SiError::Overlap = **display_err {
+                        acc += 1;
+                    }
+
+                    acc
                 })
             );
-	    
+
             println!(
                 "{} sierrors",
                 if 0 == si_errors.len() {

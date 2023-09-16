@@ -38,6 +38,10 @@ impl fmt::Debug for Event {
 }
 
 impl Event {
+    pub fn get_title(&self) -> String {
+	self.title.to_string()
+    }
+    
     pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
         Some(self.starttime)
     }

@@ -15,7 +15,7 @@ fn main() -> std::io::Result<()> {
 		    match cmd.options() {
 			SiErrors => dataset.print_si_errors(cmd.verbose()),
 			VaEventLogoErrors => println!("Show me all logo errors"),
-			GrepIllegalEvents(..) => println!("Grep for illegal events"),
+			GrepIllegalEvents(illegals) => dataset.look_for_illegals(&illegals, cmd.verbose()),
 		    }
 		}
 		Err(e) => println!("{e}"),
