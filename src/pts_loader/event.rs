@@ -39,9 +39,9 @@ impl fmt::Debug for Event {
 
 impl Event {
     pub fn get_title(&self) -> String {
-	self.title.to_string()
+        self.title.to_string()
     }
-    
+
     pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
         Some(self.starttime)
     }
@@ -109,11 +109,12 @@ impl Event {
     ) {
         self.print_si_event_verbose(true, err, display_err, verbose);
         event.print_si_event_verbose(false, err, display_err, verbose);
-	println!("");
+        println!("");
     }
 
-    pub fn print_si_event_verbose(
+    pub fn print_event_verbose(
         &self,
+        kind: &str,
         first: bool,
         err: &Box<SiError>,
         display_err: &Box<SiError>,
@@ -185,11 +186,21 @@ impl Event {
         };
         if verbose {
             println!(
-                "SiEvent: {{{title}{eventid}{serviceid}{programid}\n\t{}\n\t{}{}}}",
+                "{kind}: {{{title}{eventid}{serviceid}{programid}\n\t{}\n\t{}{}}}",
                 s, e, si
             );
         } else {
             println!("{}\n{}\n{}\n{}", &self.programid, s, e, si);
         }
+    }
+
+    pub fn print_si_event_verbose(
+        &self,
+        first: bool,
+        err: &Box<SiError>,
+        display_err: &Box<SiError>,
+        verbose: bool,
+    ) {
+        self.print_event_verbose("SiEvent", first, err, display_err, verbose);
     }
 }

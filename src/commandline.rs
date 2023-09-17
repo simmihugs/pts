@@ -8,11 +8,11 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     repl: bool,
-    
+
     #[arg(short, long, default_value_t = false)]
     verbose: bool,
 
-    #[arg(short, long, default_value_t = false)]
+    #[arg(short, long, default_value_t = true)]
     sierror: bool,
 
     #[arg(short, long, default_value_t = false)]
@@ -22,67 +22,76 @@ struct Args {
     illegalevents: String,
 }
 
+// impl Args {
+//     pub fn repl(&self) -> bool {
+//         self.repl
+//     }
+// }
+
 pub struct Commandline {
     args: Args,
-    options: CommandlineOptions,
+    //options: CommandlineOptions,
 }
 
-pub enum ProgrammMode {
-    SingleFile(Commandline),
-    Repl,
-    StopRightHere,
-}
+// pub enum ProgrammMode {
+//     SingleFile(Commandline),
+//     Repl,
+//     StopRightHere,
+// }
 
-pub enum CommandlineOptions {
-    SiErrors,
-    VaEventLogoErrors,
-    GrepIllegalEvents(Vec<String>),
-}
+// pub enum CommandlineOptions {
+//     SiErrors,
+//     VaEventLogoErrors,
+//     GrepIllegalEvents(Vec<String>),
+// }
 
-impl CommandlineOptions {
-    fn new(args: &Args) -> Self {
-        if args.sierror {
-            CommandlineOptions::SiErrors
-        } else if args.logoerror {
-            CommandlineOptions::VaEventLogoErrors
-        } else if args.illegalevents != "DEFAULT" {
-            CommandlineOptions::GrepIllegalEvents(
-                args.illegalevents
-                    .split(';')
-                    .into_iter()
-                    .map(|x| String::from(x))
-                    .collect(),
-            )
-        } else {
-            //default
-            CommandlineOptions::SiErrors
-        }
-    }
-}
+// impl CommandlineOptions {
+//     fn new(args: &Args) -> Self {
+//         if args.sierror {
+//             CommandlineOptions::SiErrors
+//         } else if args.logoerror {
+//             CommandlineOptions::VaEventLogoErrors
+//         } else if args.illegalevents != "DEFAULT" {
+//             CommandlineOptions::GrepIllegalEvents(
+//                 args.illegalevents
+//                     .split(';')
+//                     .into_iter()
+//                     .map(|x| String::from(x))
+//                     .collect(),
+//             )
+//         } else {
+//             //default
+//             CommandlineOptions::SiErrors
+//         }
+//     }
+// }
 
 impl Commandline {
-    pub fn parse() -> ProgrammMode {
-        let args: Args = Args::parse();
-        let options = CommandlineOptions::new(&args);
-
-        if args.repl {
-            ProgrammMode::Repl
-        } else {
-            if args.filename == "DEFAULT" {
-                ProgrammMode::StopRightHere
-            } else {
-                ProgrammMode::SingleFile(Commandline { args, options })
-            }
+    pub fn parse() -> Self {
+        Self {
+            args: Args::parse(),
         }
-    }
-
-    pub fn options(&self) -> &CommandlineOptions {
-        &self.options
     }
 
     pub fn verbose(&self) -> bool {
         self.args.verbose
     }
+
+    pub fn repl(&self) -> bool {
+        self.args.repl
+    }
+
+    pub fn sierror(&self) -> bool {
+        self.args.sierror
+    }
+
+    pub fn logoerror(&self) -> bool {
+        self.args.logoerror
+    }
+    
+    // pub fn illegalevents(&self) -> &String {
+    //     &self.args.illegalevents
+    // }
 
     pub fn print_help() {
         let mut cmd = Args::command();

@@ -2,6 +2,8 @@ use super::define::*;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
+use crate::commandline::*;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct DataSet {
     filename: Option<String>,
@@ -165,7 +167,7 @@ impl DataSet {
             self.look_for_illegals_si_events(events, verbose);
             self.look_for_illegals_va_events(events, verbose);
             self.look_for_illegals_logo_events(events, verbose);
-            self.look_for_illegals_layout_events(events, verbose);	    
+            self.look_for_illegals_layout_events(events, verbose);
         }
     }
 
@@ -180,7 +182,13 @@ impl DataSet {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose);
     }
 
-    #[allow(dead_code)]
+    pub fn execute(&self, cmd: &Commandline) {
+        println!("repl: {:?}", cmd.repl());
+        println!("sierror: {:?}", cmd.sierror());
+        println!("logoerror: {:?}", cmd.logoerror());
+        println!("verbose: {:?}", cmd.verbose());
+    }
+
     pub fn print_si_errors(&self, verbose: bool) {
         let si_events: &mut Vec<&Define> = &mut self
             .eventcommands
@@ -239,6 +247,119 @@ impl DataSet {
             );
             for (err, display_err, event, next_event) in si_errors {
                 self.print_si_error_verbose(err, display_err, event, next_event, verbose);
+            }
+        }
+    }
+
+    pub fn print_logo_errors(&self, verbose: bool) {
+        let logo_events: &Vec<&Define> = &self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::logoEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect();
+
+        let layout_events: &Vec<&Define> = &self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::layoutEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect();
+
+        let va_events: &Vec<&Define> = &self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::vaEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect();
+
+        let mut layout_errors = Vec::new();
+        for va_event in va_events {
+            for layout in layout_events {
+                if va_event.get_starttime() == layout.get_starttime() {
+                    if va_event.get_dendtime() != layout.get_dendtime() {
+                        layout_errors.push((layout, va_event));
+                    }
+                }
+            }
+        }
+
+        let mut logo_errors = Vec::new();
+        for va_event in va_events {
+            for logo in logo_events {
+                if va_event.get_starttime() <= logo.get_starttime()
+                    && logo.get_starttime() <= va_event.get_endtime()
+                {
+                    if va_event.get_endtime() <= logo.get_endtime() {
+                        logo_errors.push((logo, va_event));
+                    }
+                }
+            }
+        }
+
+        println!("{} layout errors", layout_errors.len());
+        if layout_errors.len() != 0 {
+            for (layout, va_event) in layout_errors.iter() {
+                if let Define::layoutEvent(event) = layout {
+                    event.print_event_verbose(
+                        "Layout",
+                        true,
+                        &Box::new(SiError::NoError),
+                        &Box::new(SiError::NoError),
+                        verbose,
+                    );
+                }
+                if let Define::vaEvent(event) = va_event {
+                    event.print_event_verbose(
+                        "VaEvent",
+                        true,
+                        &Box::new(SiError::NoError),
+                        &Box::new(SiError::NoError),
+                        verbose,
+                    );
+                }
+            }
+        }
+
+        println!("{} logo errors", logo_errors.len());
+        if logo_errors.len() != 0 {
+            for (logo, va_event) in logo_errors.iter() {
+                if let Define::logoEvent(event) = logo {
+                    event.print_event_verbose(
+                        "Logo",
+                        true,
+                        &Box::new(SiError::NoError),
+                        &Box::new(SiError::NoError),
+                        verbose,
+                    );
+                }
+                if let Define::vaEvent(event) = va_event {
+                    event.print_event_verbose(
+                        "VaEvent",
+                        true,
+                        &Box::new(SiError::NoError),
+                        &Box::new(SiError::NoError),
+                        verbose,
+                    );
+                }
             }
         }
     }
