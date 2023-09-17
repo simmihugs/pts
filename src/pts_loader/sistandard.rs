@@ -56,12 +56,13 @@ impl SiStandard {
         write!(f, "SiStandard: {{{startime}{endtime}}}",)
     }
 
+    #[allow(dead_code, unused_variables)]
     pub fn print_si_standard_verbose(
         &self,
         first: bool,
         display_err: &Box<SiError>,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) -> String {
         let startime = format!(
             "{:10} {}",

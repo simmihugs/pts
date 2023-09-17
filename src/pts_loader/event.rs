@@ -106,17 +106,11 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) {
-<<<<<<< HEAD
-        self.print_si_event_verbose(true, err, display_err, verbose);
-        event.print_si_event_verbose(false, err, display_err, verbose);
-        println!("");
-=======
         self.print_si_event_verbose(true, err, display_err, verbose, utc);
         event.print_si_event_verbose(false, err, display_err, verbose, utc);
-	println!("");
->>>>>>> 790aac3e66d56a27fc2db4e3950f49da9a6e7f03
+        println!("");
     }
 
     pub fn print_event_verbose(
@@ -126,7 +120,7 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) {
         let starttime = format!(
             "{:10} {}",
@@ -190,7 +184,9 @@ impl Event {
         };
         let si = match &self.sistandard {
             None => "".to_string(),
-            Some(sistandard) => sistandard.print_si_standard_verbose(first, display_err, verbose, utc),
+            Some(sistandard) => {
+                sistandard.print_si_standard_verbose(first, display_err, verbose, utc)
+            }
         };
         if verbose {
             println!(
@@ -208,7 +204,8 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
+        utc: bool,
     ) {
-        self.print_event_verbose("SiEvent", first, err, display_err, verbose);
+        self.print_event_verbose("SiEvent", first, err, display_err, verbose, utc);
     }
 }

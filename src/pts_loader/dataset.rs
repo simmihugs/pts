@@ -2,7 +2,7 @@ use super::define::*;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
-use crate::commandline::*;
+//use crate::commandline::*;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct DataSet {
@@ -77,6 +77,7 @@ impl DataSet {
             .for_each(|define| define.calculate_endtime());
     }
 
+    #[allow(dead_code, unused_variables)]
     fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let va_events: Vec<_> = events
             .iter()
@@ -94,6 +95,8 @@ impl DataSet {
             }
         }
     }
+
+    #[allow(dead_code, unused_variables)]
     fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let si_events: Vec<_> = events
             .iter()
@@ -111,6 +114,8 @@ impl DataSet {
             }
         }
     }
+
+    #[allow(dead_code, unused_variables)]
     fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let logo_events: Vec<_> = events
             .iter()
@@ -128,6 +133,8 @@ impl DataSet {
             }
         }
     }
+
+    #[allow(dead_code, unused_variables)]
     fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let layout_events: Vec<_> = events
             .iter()
@@ -146,6 +153,7 @@ impl DataSet {
         }
     }
 
+    #[allow(dead_code)]
     pub fn look_for_illegals(&self, illegals: &Vec<String>, verbose: bool, utc: bool) {
         let events: &Vec<&Define> = &self
             .eventcommands
@@ -164,17 +172,10 @@ impl DataSet {
         if events.len() == 0 {
             println!("0 events found.");
         } else {
-<<<<<<< HEAD
-            self.look_for_illegals_si_events(events, verbose);
-            self.look_for_illegals_va_events(events, verbose);
-            self.look_for_illegals_logo_events(events, verbose);
-            self.look_for_illegals_layout_events(events, verbose);
-=======
             self.look_for_illegals_si_events(events, verbose, utc);
             self.look_for_illegals_va_events(events, verbose, utc);
             self.look_for_illegals_logo_events(events, verbose, utc);
-            self.look_for_illegals_layout_events(events, verbose, utc);	    
->>>>>>> 790aac3e66d56a27fc2db4e3950f49da9a6e7f03
+            self.look_for_illegals_layout_events(events, verbose, utc);
         }
     }
 
@@ -185,24 +186,13 @@ impl DataSet {
         event: &Define,
         next_event: &Define,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose, utc);
     }
 
-<<<<<<< HEAD
-    pub fn execute(&self, cmd: &Commandline) {
-        println!("repl: {:?}", cmd.repl());
-        println!("sierror: {:?}", cmd.sierror());
-        println!("logoerror: {:?}", cmd.logoerror());
-        println!("verbose: {:?}", cmd.verbose());
-    }
-
-    pub fn print_si_errors(&self, verbose: bool) {
-=======
     #[allow(dead_code)]
     pub fn print_si_errors(&self, verbose: bool, utc: bool) {
->>>>>>> 790aac3e66d56a27fc2db4e3950f49da9a6e7f03
         let si_events: &mut Vec<&Define> = &mut self
             .eventcommands
             .define
@@ -264,7 +254,7 @@ impl DataSet {
         }
     }
 
-    pub fn print_logo_errors(&self, verbose: bool) {
+    pub fn print_logo_errors(&self, verbose: bool, utc: bool) {
         let logo_events: &Vec<&Define> = &self
             .eventcommands
             .define
@@ -338,6 +328,7 @@ impl DataSet {
                         &Box::new(SiError::NoError),
                         &Box::new(SiError::NoError),
                         verbose,
+                        utc,
                     );
                 }
                 if let Define::vaEvent(event) = va_event {
@@ -347,6 +338,7 @@ impl DataSet {
                         &Box::new(SiError::NoError),
                         &Box::new(SiError::NoError),
                         verbose,
+                        utc,
                     );
                 }
             }
@@ -362,6 +354,7 @@ impl DataSet {
                         &Box::new(SiError::NoError),
                         &Box::new(SiError::NoError),
                         verbose,
+                        utc,
                     );
                 }
                 if let Define::vaEvent(event) = va_event {
@@ -371,6 +364,7 @@ impl DataSet {
                         &Box::new(SiError::NoError),
                         &Box::new(SiError::NoError),
                         verbose,
+                        utc,
                     );
                 }
             }
