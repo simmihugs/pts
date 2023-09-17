@@ -12,7 +12,14 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     verbose: bool,
 
+<<<<<<< HEAD
     #[arg(short, long, default_value_t = true)]
+=======
+    #[arg(short, long, default_value_t = false)]
+    utc: bool,
+
+    #[arg(short, long, default_value_t = false)]
+>>>>>>> 790aac3e66d56a27fc2db4e3950f49da9a6e7f03
     sierror: bool,
 
     #[arg(short, long, default_value_t = false)]
@@ -73,6 +80,17 @@ impl Commandline {
         }
     }
 
+<<<<<<< HEAD
+=======
+    pub fn options(&self) -> &CommandlineOptions {
+        &self.options
+    }
+
+    pub fn utc(&self) -> bool {
+        self.args.utc
+    }
+
+>>>>>>> 790aac3e66d56a27fc2db4e3950f49da9a6e7f03
     pub fn verbose(&self) -> bool {
         self.args.verbose
     }
