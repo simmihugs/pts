@@ -254,9 +254,8 @@ impl DataSet {
         }
     }
 
-    pub fn print_logo_errors(&self, verbose: bool, utc: bool) {
-        let logo_events: &Vec<&Define> = &self
-            .eventcommands
+    fn get_logo_events(&self) -> Vec<&Define> {
+        self.eventcommands
             .define
             .iter()
             .filter(|x| {
@@ -266,23 +265,12 @@ impl DataSet {
                     false
                 }
             })
-            .collect();
+            .collect::<Vec<&Define>>()
+            .to_vec()
+    }
 
-        let layout_events: &Vec<&Define> = &self
-            .eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::layoutEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect();
-
-        let va_events: &Vec<&Define> = &self
-            .eventcommands
+    fn get_va_events(&self) -> Vec<&Define> {
+        self.eventcommands
             .define
             .iter()
             .filter(|x| {
@@ -292,9 +280,33 @@ impl DataSet {
                     false
                 }
             })
-            .collect();
+            .collect::<Vec<&Define>>()
+            .to_vec()
+    }
+
+    fn get_layout_events(&self) -> Vec<&Define> {
+        self.eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::layoutEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<&Define>>()
+            .to_vec()
+    }
+
+    pub fn print_logo_errors(&self, verbose: bool, utc: bool) {
+        let logo_events = &self.get_logo_events();
+        let layout_events = &self.get_layout_events();
+        let va_events = &self.get_va_events();
 
         let mut layout_errors = Vec::new();
+        let mut logo_errors = Vec::new();
+
         for va_event in va_events {
             for layout in layout_events {
                 if va_event.get_starttime() == layout.get_starttime() {
@@ -305,7 +317,6 @@ impl DataSet {
             }
         }
 
-        let mut logo_errors = Vec::new();
         for va_event in va_events {
             for logo in logo_events {
                 if va_event.get_starttime() <= logo.get_starttime()
