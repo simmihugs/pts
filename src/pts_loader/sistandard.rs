@@ -61,6 +61,7 @@ impl SiStandard {
         first: bool,
         display_err: &Box<SiError>,
         verbose: bool,
+	utc: bool,
     ) -> String {
         let startime = format!(
             "{:10} {}",

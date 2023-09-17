@@ -79,10 +79,11 @@ impl Define {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
 	verbose: bool,
+	utc: bool,
     ) {
         match self {
             Define::siEvent(event1) => match other {
-                Define::siEvent(event2) => event1.print_si_events_verbose(event2, err, display_err, verbose),
+                Define::siEvent(event2) => event1.print_si_events_verbose(event2, err, display_err, verbose, utc),
                 _ => (),
             },
             _ => (),

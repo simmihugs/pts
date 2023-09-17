@@ -106,9 +106,10 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
+	utc: bool,
     ) {
-        self.print_si_event_verbose(true, err, display_err, verbose);
-        event.print_si_event_verbose(false, err, display_err, verbose);
+        self.print_si_event_verbose(true, err, display_err, verbose, utc);
+        event.print_si_event_verbose(false, err, display_err, verbose, utc);
 	println!("");
     }
 
@@ -118,6 +119,7 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
+	utc: bool,
     ) {
         let starttime = format!(
             "{:10} {}",
@@ -181,7 +183,7 @@ impl Event {
         };
         let si = match &self.sistandard {
             None => "".to_string(),
-            Some(sistandard) => sistandard.print_si_standard_verbose(first, display_err, verbose),
+            Some(sistandard) => sistandard.print_si_standard_verbose(first, display_err, verbose, utc),
         };
         if verbose {
             println!(
