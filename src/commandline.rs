@@ -29,7 +29,6 @@ pub struct Commandline {
     args: Args,
 }
 
-
 impl Commandline {
     pub fn parse() -> Self {
         Self {
@@ -44,7 +43,7 @@ impl Commandline {
     pub fn utc(&self) -> bool {
         self.args.utc
     }
-    
+
     pub fn repl(&self) -> bool {
         self.args.repl
     }
@@ -56,7 +55,7 @@ impl Commandline {
     pub fn logoerror(&self) -> bool {
         self.args.logoerror
     }
-    
+
     pub fn print_help() {
         let mut cmd = Args::command();
         let _ = cmd.print_help();
@@ -64,5 +63,14 @@ impl Commandline {
 
     pub fn filename(&self) -> &String {
         &self.args.filename
+    }
+
+    pub fn illegalevents(&self) -> Vec<String> {
+        self.args
+            .illegalevents
+            .split(';')
+            .map(|x| String::from(x))
+            .collect::<Vec<String>>()
+            .to_vec()
     }
 }

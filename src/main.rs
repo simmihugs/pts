@@ -20,9 +20,10 @@ fn main() -> std::io::Result<()> {
 		    dataset.print_logo_errors(cmd.verbose(), cmd.utc());
 		}
 
-		// if cmd.illegalevents() {
-		//     dataset.look_for_illegals(&illegals, cmd.verbose()),
-		// }
+		let illegals = cmd.illegalevents();
+		if illegals.len() > 0 {
+		    dataset.look_for_illegals(&illegals, cmd.verbose(), cmd.utc())
+		}
 	    },
 	    _ => Commandline::print_help(),
 	}
