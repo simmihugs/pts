@@ -32,6 +32,141 @@ fn load_file(filename: &str) -> std::io::Result<String> {
     }
 }
 
+pub struct SpecialEvent<'a> {
+    vec: Vec<&'a Define>,
+}
+
+impl<'a> SpecialEvent<'a> {
+    pub fn new(vec: Vec<&'a Define>) -> Self {
+        Self { vec }
+    }
+
+    pub fn print_table(&self, verbose: bool, utc: bool) -> (i64, i64) {
+        let mut logoerror = 0;
+        let mut iderror = 0;
+        let layout_events: Vec<_> = self
+            .vec
+            .iter()
+            .filter(|x| match x {
+                Define::layoutEvent(..) => true,
+                _ => false,
+            })
+            .collect();
+
+        let logo_events: Vec<_> = self
+            .vec
+            .iter()
+            .filter(|x| match x {
+                Define::logoEvent(..) => true,
+                _ => false,
+            })
+            .collect();
+
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    let mut layouts = Vec::new();
+                    let mut logos = Vec::new();
+                    for layout in &layout_events {
+                        if event.get_starttime() == layout.get_starttime() {
+                            if event.get_dendtime() != layout.get_dendtime() {
+                                logoerror += 1;
+                                layouts.push((true, layout));
+                            } else {
+                                layouts.push((false, layout));
+                            }
+                        }
+                    }
+                    for logo in &logo_events {
+                        if event.get_starttime() <= logo.get_starttime()
+                            && logo.get_starttime() <= event.get_endtime()
+                        {
+                            if event.get_endtime() <= logo.get_endtime() {
+                                logoerror += 1;
+                                logos.push((true, logo));
+                            } else {
+                                logos.push((false, logo));
+                            }
+                        }
+                    }
+
+                    let mut logostr = String::new();
+                    if event.get_contentid() == "cb7a119f84cb7b117b1b"
+                        || event.get_contentid() == "392654926764849cd5dc"
+                    {
+                        logostr = format!("{:20}", "");
+                    } else {
+                        for (error, logo) in &logos {
+                            if *error {
+                                logostr += &format!("ERROR {}", logo.get_title());
+                            } else {
+                                logostr += &format!("{}", logo.get_title());
+                            }
+                        }
+                        for (error, laoyut) in &layouts {
+                            if *error {
+                                logostr += &format!("ERROR {}", laoyut.get_title());
+                            } else {
+                                logostr += &format!("{}", laoyut.get_title());
+                            }
+                        }
+                        if logostr.len() == 0 {
+                            logostr = format!("{:20}", "ERROR_NO_LOGO");
+                        } else if logostr.chars().count() > 20 {
+                            logostr = format!(
+                                "{:20}",
+                                logostr
+                                    .chars()
+                                    .into_iter()
+                                    .enumerate()
+                                    .filter(|(i, _)| *i < 20)
+                                    .fold(String::new(), |mut acc, (_, c)| {
+                                        acc += &format!("{}", c);
+                                        return acc;
+                                    })
+                            );
+                        } else {
+                            logostr = format!("{:20}", logostr);
+                        }
+                    }
+
+                    let contentid = event.get_contentid();
+                    if contentid.contains("-") {
+                        iderror += 1;
+                    }
+                    if logostr.contains("ERROR") && logoerror == 0 {
+                        logoerror = 1;
+                    }
+
+                    if verbose {
+                        println!(
+                            "| {} | {} | {} | {} | {} | {:20} | {} |",
+                            event.title_to_string(),
+                            event.programid_to_string(),
+                            event.starttime_to_string(utc),
+                            event.endtime_to_string(utc),
+                            event.duration_to_string(),
+                            if contentid.contains("-") {
+                                contentid.red()
+                            } else {
+                                contentid.red().clear()
+                            },
+                            if logostr.contains("ERROR") {
+                                logostr.red()
+                            } else {
+                                logostr.red().clear()
+                            },
+                        );
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        (logoerror, iderror)
+    }
+}
+
 impl DataSet {
     #[allow(dead_code)]
     pub fn get_filename(&self) -> &str {
@@ -191,47 +326,47 @@ impl DataSet {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose, utc);
     }
 
-    fn get_logo_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::logoEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-    }
+    // fn get_logo_events(&self) -> Vec<&Define> {
+    //     self.eventcommands
+    //         .define
+    //         .iter()
+    //         .filter(|x| {
+    //             if let Define::logoEvent(..) = x {
+    //                 true
+    //             } else {
+    //                 false
+    //             }
+    //         })
+    //         .collect::<Vec<&Define>>()
+    // }
 
-    fn get_va_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::vaEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-    }
+    // fn get_va_events(&self) -> Vec<&Define> {
+    //     self.eventcommands
+    //         .define
+    //         .iter()
+    //         .filter(|x| {
+    //             if let Define::vaEvent(..) = x {
+    //                 true
+    //             } else {
+    //                 false
+    //             }
+    //         })
+    //         .collect::<Vec<&Define>>()
+    // }
 
-    fn get_layout_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::layoutEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-    }
+    // fn get_layout_events(&self) -> Vec<&Define> {
+    //     self.eventcommands
+    //         .define
+    //         .iter()
+    //         .filter(|x| {
+    //             if let Define::layoutEvent(..) = x {
+    //                 true
+    //             } else {
+    //                 false
+    //             }
+    //         })
+    //         .collect::<Vec<&Define>>()
+    // }
 
     fn get_si_events(&self) -> Vec<&Define> {
         self.eventcommands
@@ -245,6 +380,87 @@ impl DataSet {
                 }
             })
             .collect::<Vec<&Define>>()
+    }
+
+    fn get_special_events(&self) -> Vec<SpecialEvent> {
+        let special_events = self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::siEvent(..) = x {
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect::<Vec<&Define>>();
+
+        let indeces: Vec<Vec<usize>> = special_events
+            .iter()
+            .enumerate()
+            .filter(|(_, &x)| {
+                x.get_contentid() == "cb7a119f84cb7b117b1b"
+                    || x.get_contentid() == "392654926764849cd5dc"
+            })
+            .map(|(i, _)| i as usize)
+            .collect::<Vec<usize>>()
+            .chunks(2)
+            .map(|s| s.into())
+            .collect();
+
+        let mut result = Vec::new();
+        for vec in &indeces {
+            result.push(SpecialEvent::new(special_events[vec[0]..=vec[1]].to_vec()));
+        }
+
+        result
+    }
+
+    fn print_head(&self, yes: bool) {
+        if yes {
+            let mut line = String::new();
+            for _ in 0..(30 + 20 + 23 + 23 + 12 + 20 + 20 + 20) {
+                line += "-";
+            }
+            println!("|{}|", line);
+            println!(
+                "| {:30} | {:20} | {:23} | {:23} | {:12} | {:20} | {:20} |",
+                "title", "programid", "start", "end", "duration", "contentid", "logo",
+            );
+            println!("|{}|", line);
+        }
+    }
+
+    #[allow(unused_variables)]
+    pub fn print_special_events(&self, verbose: bool, utc: bool) {
+        let special_events = &self.get_special_events();
+        let mut id_errors = 0;
+        let mut logo_errors = 0;
+        self.print_head(verbose && special_events.len() > 0);
+        special_events.iter().for_each(|special_event| {
+            let (lerrors, ierrors) = special_event.print_table(verbose, utc);
+            id_errors += ierrors;
+            logo_errors += lerrors;
+        });
+        self.print_head(verbose && special_events.len() > 0);
+
+        println!(
+            "{:3} id errors",
+            if id_errors > 0 {
+                format!("{}", id_errors).red()
+            } else {
+                format!("{}", id_errors).green()
+            }
+        );
+        println!(
+            "{:3} logo errors",
+            if logo_errors > 0 {
+                format!("{}", logo_errors).red()
+            } else {
+                format!("{}", logo_errors).green()
+            }
+        );
     }
 
     #[allow(dead_code)]
@@ -286,7 +502,7 @@ impl DataSet {
             );
 
             println!(
-                "{} sierrors",
+                "{:3} sierrors",
                 if 0 == si_errors.len() {
                     nerrors.green()
                 } else {
@@ -299,88 +515,102 @@ impl DataSet {
         }
     }
 
-    pub fn print_logo_errors(&self, verbose: bool, utc: bool) {
-        let logo_events = &self.get_logo_events();
-        let layout_events = &self.get_layout_events();
-        let va_events = &self.get_va_events();
+    // pub fn print_logo_and_layout_errors(&self, verbose: bool, utc: bool) {
+    //     let logo_events = &self.get_logo_events();
+    //     let layout_events = &self.get_layout_events();
+    //     let va_events = &self.get_va_events();
 
-        let mut layout_errors = Vec::new();
-        let mut logo_errors = Vec::new();
+    //     let mut layout_errors = Vec::new();
+    //     let mut logo_errors = Vec::new();
 
-        for va_event in va_events {
-            for layout in layout_events {
-                if va_event.get_starttime() == layout.get_starttime() {
-                    if va_event.get_dendtime() != layout.get_dendtime() {
-                        layout_errors.push((layout, va_event));
-                    }
-                }
-            }
-        }
+    //     for va_event in va_events {
+    //         for layout in layout_events {
+    //             if va_event.get_starttime() == layout.get_starttime() {
+    //                 if va_event.get_dendtime() != layout.get_dendtime() {
+    //                     layout_errors.push((layout, va_event));
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        for va_event in va_events {
-            for logo in logo_events {
-                if va_event.get_starttime() <= logo.get_starttime()
-                    && logo.get_starttime() <= va_event.get_endtime()
-                {
-                    if va_event.get_endtime() <= logo.get_endtime() {
-                        logo_errors.push((logo, va_event));
-                    }
-                }
-            }
-        }
+    //     for va_event in va_events {
+    //         for logo in logo_events {
+    //             if va_event.get_starttime() <= logo.get_starttime()
+    //                 && logo.get_starttime() <= va_event.get_endtime()
+    //             {
+    //                 if va_event.get_endtime() <= logo.get_endtime() {
+    //                     logo_errors.push((logo, va_event));
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        println!("{} layout errors", layout_errors.len());
-        if layout_errors.len() != 0 {
-            for (layout, va_event) in layout_errors.iter() {
-                if let Define::layoutEvent(event) = layout {
-                    event.print_event_verbose(
-                        "Layout",
-                        true,
-                        &Box::new(SiError::NoError),
-                        &Box::new(SiError::NoError),
-                        verbose,
-                        utc,
-                    );
-                }
-                if let Define::vaEvent(event) = va_event {
-                    event.print_event_verbose(
-                        "VaEvent",
-                        true,
-                        &Box::new(SiError::NoError),
-                        &Box::new(SiError::NoError),
-                        verbose,
-                        utc,
-                    );
-                }
-            }
-        }
+    //     println!(
+    //         "{:3} layout errors",
+    //         if layout_errors.len() == 0 {
+    //             format!("{}", layout_errors.len()).green()
+    //         } else {
+    //             format!("{}", layout_errors.len()).red()
+    //         }
+    //     );
+    //     if layout_errors.len() != 0 {
+    //         for (layout, va_event) in layout_errors.iter() {
+    //             if let Define::layoutEvent(event) = layout {
+    //                 event.print_event_verbose(
+    //                     "Layout",
+    //                     true,
+    //                     &Box::new(SiError::NoError),
+    //                     &Box::new(SiError::NoError),
+    //                     verbose,
+    //                     utc,
+    //                 );
+    //             }
+    //             if let Define::vaEvent(event) = va_event {
+    //                 event.print_event_verbose(
+    //                     "VaEvent",
+    //                     true,
+    //                     &Box::new(SiError::NoError),
+    //                     &Box::new(SiError::NoError),
+    //                     verbose,
+    //                     utc,
+    //                 );
+    //             }
+    //         }
+    //     }
 
-        println!("{} logo errors", logo_errors.len());
-        if logo_errors.len() != 0 {
-            for (logo, va_event) in logo_errors.iter() {
-                if let Define::logoEvent(event) = logo {
-                    event.print_event_verbose(
-                        "Logo",
-                        true,
-                        &Box::new(SiError::NoError),
-                        &Box::new(SiError::NoError),
-                        verbose,
-                        utc,
-                    );
-                }
-                if let Define::vaEvent(event) = va_event {
-                    event.print_event_verbose(
-                        "VaEvent",
-                        true,
-                        &Box::new(SiError::NoError),
-                        &Box::new(SiError::NoError),
-                        verbose,
-                        utc,
-                    );
-                }
-            }
-        }
-    }
+    //     println!(
+    //         "{:3} logo errors",
+    //         if logo_errors.len() == 0 {
+    //             format!("{}", logo_errors.len()).green()
+    //         } else {
+    //             format!("{}", logo_errors.len()).red()
+    //         }
+    //     );
+    //     if logo_errors.len() != 0 {
+    //         for (logo, va_event) in logo_errors.iter() {
+    //             if let Define::logoEvent(event) = logo {
+    //                 event.print_event_verbose(
+    //                     "Logo",
+    //                     true,
+    //                     &Box::new(SiError::NoError),
+    //                     &Box::new(SiError::NoError),
+    //                     verbose,
+    //                     utc,
+    //                 );
+    //             }
+    //             if let Define::vaEvent(event) = va_event {
+    //                 event.print_event_verbose(
+    //                     "VaEvent",
+    //                     true,
+    //                     &Box::new(SiError::NoError),
+    //                     &Box::new(SiError::NoError),
+    //                     verbose,
+    //                     utc,
+    //                 );
+    //             }
+    //         }
+    //     }
+    // }
 
     fn print_n_events(&self, all: bool, _define: &str, n: u64) {
         let mut i = 0;

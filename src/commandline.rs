@@ -3,7 +3,7 @@ use clap::{CommandFactory, Parser};
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    #[arg(short, long, default_value_t = String::from("DEFAULT"))]
+    #[arg(short, long, default_value_t = String::from("YOU_PICK_A_FILE"))]
     filename: String,
 
     #[arg(short, long, default_value_t = false)]
@@ -13,16 +13,22 @@ struct Args {
     verbose: bool,
 
     #[arg(short, long, default_value_t = false)]
+    ps_event: bool,
+
+    #[arg(short, long, default_value_t = false)]
     utc: bool,
 
-    #[arg(short, long, default_value_t = true)]
+    #[arg(short, long, default_value_t = false)]
     sierror: bool,
 
     #[arg(short, long, default_value_t = false)]
     logoerror: bool,
 
-    #[arg(short, long, default_value_t = String::from("DEFAULT"))]
+    #[arg(short, long, default_value_t = String::from("YOU_PICK_ILLEGAL_EVENTS"))]
     illegalevents: String,
+
+    #[arg(short, long, default_value_t = false)]
+    all: bool,
 }
 
 pub struct Commandline {
@@ -34,6 +40,10 @@ impl Commandline {
         Self {
             args: Args::parse(),
         }
+    }
+
+    pub fn ps_event(&self) -> bool {
+        self.args.ps_event
     }
 
     pub fn verbose(&self) -> bool {
@@ -55,6 +65,10 @@ impl Commandline {
     pub fn logoerror(&self) -> bool {
         self.args.logoerror
     }
+    
+    pub fn all(&self) -> bool {
+        self.args.all
+    }
 
     pub fn print_help() {
         let mut cmd = Args::command();
@@ -65,12 +79,23 @@ impl Commandline {
         &self.args.filename
     }
 
-    pub fn illegalevents(&self) -> Vec<String> {
-        self.args
-            .illegalevents
-            .split(';')
-            .map(|x| String::from(x))
-            .collect::<Vec<String>>()
-            .to_vec()
+    pub fn no_option(&self) -> bool {
+	!(self.all() || self.logoerror() || self.ps_event() || self.sierror())
+    }
+    
+    pub fn illegalevents(&self) -> Option<Vec<String>> {
+        let illegals = &self.args.illegalevents;
+        if illegals == "YOU_PICK_ILLEGAL_EVENTS" {
+            None
+        } else {
+            Some(
+                self.args
+                    .illegalevents
+                    .split(';')
+                    .map(|x| String::from(x))
+                    .collect::<Vec<String>>()
+                    .to_vec(),
+            )
+        }
     }
 }
