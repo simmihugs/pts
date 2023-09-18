@@ -29,6 +29,9 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     all: bool,
+
+    #[arg(short, long, default_value_t = String::from("YOU_PICK_A_CSV"))]
+    csv: String,
 }
 
 pub struct Commandline {
@@ -79,8 +82,16 @@ impl Commandline {
         &self.args.filename
     }
 
+    pub fn csv(&self) -> &String {
+        &self.args.csv
+    }
+    
+    pub fn write_csv(&self) -> bool {
+        self.args.csv != "YOU_PICK_A_CSV"
+    }
+
     pub fn no_option(&self) -> bool {
-	!(self.all() || self.logoerror() || self.ps_event() || self.sierror())
+	!(self.all() || self.write_csv() || self.logoerror() || self.ps_event() || self.sierror())
     }
     
     pub fn illegalevents(&self) -> Option<Vec<String>> {

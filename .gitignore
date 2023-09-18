@@ -14,7 +14,7 @@ Cargo.lock
 *.pdb
 
 *.pts
-
+*.csv
 
 # Added by cargo
 

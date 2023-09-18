@@ -257,7 +257,7 @@ impl Event {
     }
     
     pub fn programid_to_string(&self) -> String {
-        format!("{:20}", self.programid)
+        format!("{}", self.programid)
     }
     
     pub fn endtime_to_string(&self, utc: bool) -> String {
@@ -272,22 +272,11 @@ impl Event {
     pub fn title_to_string(&self) -> String {
         let title = &self.title;
         if title.len() < 30 {
-            format!("{:30}", title)
+            format!("{}", title)
         } else {
             format!("{}", &title[..30])
         }
     }
-
-    // pub fn print_table(&self) {
-    //     println!(
-    //         "| {} | {} | {} | {} | {} |",
-    //         self.title_to_string(),
-    //         self.starttime_to_string(),
-    //         self.endtime_to_string(),
-    //         self.duration_to_string(),
-    //         self.get_contentid()
-    //     )
-    // }
 
     pub fn print_si_event_verbose(
         &self,

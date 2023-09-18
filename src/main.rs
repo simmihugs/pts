@@ -20,6 +20,13 @@ fn main() -> std::io::Result<()> {
                     dataset.print_special_events(cmd.verbose(), cmd.utc());
                 }
 
+                if cmd.write_csv() {
+                    match dataset.write_special_events_csv(cmd.csv(), cmd.utc()) {
+                        Err(e) => println!("{}", e),
+                        Ok(..) => println!("Wrote csv to {}", cmd.csv()),
+                    }
+                }
+
                 match cmd.illegalevents() {
                     None => (),
                     Some(illegals) => {
