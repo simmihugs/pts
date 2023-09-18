@@ -130,7 +130,7 @@ impl<'a> SpecialEvent<'a> {
 
         if verbose {
             println!("{}", special_event);
-        }        
+        }
         special_event += &format!(";;;;;\n");
 
         special_event
@@ -331,7 +331,7 @@ impl DataSet {
             .collect();
         let length = va_events.len();
         println!(
-            "{:3} VaEvents",
+            "{:3} illegal vaEvents found",
             if length == 0 {
                 format!("{}", length).green()
             } else {
@@ -355,7 +355,14 @@ impl DataSet {
             })
             .collect();
         if si_events.len() > 0 {
-            println!("{} SiEvents", si_events.len());
+            println!(
+                "{:3} illegal siEvents found",
+                if 0 == si_events.len() {
+                    format!("{}", si_events.len()).green()
+                } else {
+                    format!("{}", si_events.len()).red()
+                }
+            );
             if verbose {
                 si_events.iter().for_each(|x| println!("{:?}", x));
             }
@@ -374,7 +381,7 @@ impl DataSet {
             })
             .collect();
         if logo_events.len() > 0 {
-            println!("{} LogoEvents", logo_events.len());
+            println!("{} illegal logoEvents found", logo_events.len());
             if verbose {
                 logo_events.iter().for_each(|x| println!("{:?}", x));
             }
@@ -393,7 +400,7 @@ impl DataSet {
             })
             .collect();
         if layout_events.len() > 0 {
-            println!("{} LayoutEvents", layout_events.len());
+            println!("{} illegal layoutEvents found", layout_events.len());
             if verbose {
                 layout_events.iter().for_each(|x| println!("{:?}", x));
             }
@@ -417,7 +424,7 @@ impl DataSet {
             .collect();
 
         if events.len() == 0 {
-            println!("{:3} events found.", format!("0").green());
+            println!("{:3} illegal events found.", format!("0").green());
         } else {
             self.look_for_illegals_si_events(events, verbose, utc);
             self.look_for_illegals_va_events(events, verbose, utc);
@@ -526,7 +533,12 @@ impl DataSet {
         }
     }
 
-    pub fn write_special_events_csv(&self, filename: &str, verbose: bool, utc: bool) -> std::io::Result<()> {
+    pub fn write_special_events_csv(
+        &self,
+        filename: &str,
+        verbose: bool,
+        utc: bool,
+    ) -> std::io::Result<()> {
         use std::fs::File;
         use std::io::prelude::*;
         let special_events = &self.get_special_events();
