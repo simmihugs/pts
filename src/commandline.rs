@@ -90,8 +90,20 @@ impl Commandline {
         self.args.csv != "YOU_PICK_A_CSV"
     }
 
+    pub fn look_for_illegalevents(&self) -> bool {
+        match self.illegalevents() {
+            None => false,
+            _ => true,
+        }
+    }
+
     pub fn no_option(&self) -> bool {
-        !(self.all() || self.write_csv() || self.logoerror() || self.ps_event() || self.sierror())
+        !(self.look_for_illegalevents()
+            || self.all()
+            || self.write_csv()
+            || self.logoerror()
+            || self.ps_event()
+            || self.sierror())
     }
 
     pub fn illegalevents(&self) -> Option<Vec<String>> {

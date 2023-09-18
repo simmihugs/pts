@@ -327,11 +327,17 @@ impl DataSet {
                 return false;
             })
             .collect();
-        if va_events.len() > 0 {
-            println!("{} VaEvents", va_events.len());
-            if verbose {
-                va_events.iter().for_each(|x| println!("{:?}", x));
+        let length = va_events.len();
+        println!(
+            "{:3} VaEvents",
+            if length == 0 {
+                format!("{}", length).green()
+            } else {
+                format!("{}", length).red()
             }
+        );
+        if verbose {
+            va_events.iter().for_each(|x| println!("{:?}", x));
         }
     }
 
@@ -409,7 +415,7 @@ impl DataSet {
             .collect();
 
         if events.len() == 0 {
-            println!("0 events found.");
+            println!("{:3} events found.", format!("0").green());
         } else {
             self.look_for_illegals_si_events(events, verbose, utc);
             self.look_for_illegals_va_events(events, verbose, utc);
