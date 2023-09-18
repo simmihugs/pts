@@ -5,6 +5,9 @@ use commandline::Commandline;
 use pts_loader::dataset::DataSet;
 
 fn main() -> std::io::Result<()> {
+    
+    println!("{}", "Summer is the best!");
+    
     let cmd = Commandline::parse();
     if cmd.filename() == "DEFAULT" && !cmd.repl() {
         Commandline::print_help();

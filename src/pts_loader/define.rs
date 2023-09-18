@@ -110,15 +110,6 @@ impl Define {
         }
     }
 
-    // pub fn print_table(&self) {
-    //     match self {
-    //         Define::siEvent(..) => (),
-    //         Define::vaEvent(ref event) => event.print_table(),
-    //         Define::logoEvent(ref event) => event.print_table(),
-    //         Define::layoutEvent(ref event) => event.print_table(),
-    //     }
-    // }
-
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match self {
             Define::vaEvent(ref event) => event.get_dendtime(),
