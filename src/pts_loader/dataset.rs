@@ -85,34 +85,13 @@ impl<'a> SpecialEvent<'a> {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    // let mut layouts = Vec::new();
-                    // let mut logos = Vec::new();
-                    // for layout in &layout_events {
-                    //     println!("{:?}", layout);
-                    //     if event.get_starttime() == layout.get_starttime() {
-                    //         if event.get_endtime() == layout.get_endtime() {
-                    //             layouts.push(layout);
-                    //         }
-                    //     }
-                    // }
-                    // for logo in &logo_events {
-                    //     println!("{:?}", logo);
-                    //     if event.get_starttime() <= logo.get_starttime()
-                    //         && logo.get_starttime() <= event.get_endtime()
-                    //     {
-                    //         if event.get_endtime() <= logo.get_endtime() {
-                    //             logos.push(logo);
-                    //         }
-                    //     }
-                    // }
-
                     let logos = self.find_logo(event);
                     let mut logostr = String::new();
                     if event.get_contentid() == "cb7a119f84cb7b117b1b"
                         || event.get_contentid() == "392654926764849cd5dc"
                         || event.get_contentid() == "e90dfb84e30edf611e32"
                         || event.get_contentid() == "b1735b7c5101727b3c6c"
-                        || event.get_contentid().contains("UHD1_WERBUNG")
+                        || event.get_contentid().contains("WERBUNG")
                     {
                         logostr = format!("{}", "");
                     } else {
@@ -207,6 +186,9 @@ impl<'a> SpecialEvent<'a> {
                     let mut logostr = String::new();
                     if event.get_contentid() == "cb7a119f84cb7b117b1b"
                         || event.get_contentid() == "392654926764849cd5dc"
+                        || event.get_title().contains("Black")
+                        || event.get_title().contains("NK_Maschinen_der_Superlat")
+                        || event.get_contentid().contains("WERBUNG")
                     {
                         logostr = format!("{}", "");
                     } else {
@@ -243,27 +225,36 @@ impl<'a> SpecialEvent<'a> {
                     }
 
                     let contentid = event.get_contentid();
-                    if contentid.contains("-") {
+                    if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderror += 1;
                     }
-                    if logostr.contains("ERROR") && logoerror == 0 {
+                    if logostr.contains("ERROR") && logoerror == 0 && contentid != "UHD1_WERBUNG-01"{
                         logoerror = 1;
+                    }
+
+                    let mut title = event.title_to_string();
+                    if title == " -  UHD1_WERBUNG-01" {
+                        title = "Werbung".to_string();
+                    } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
+                        title = "Dranbleiben".to_string();
+                    } else if event.get_contentid() == "392654926764849cd5dc" {
+                        title = "Pausentafel ".to_string();
                     }
 
                     if verbose {
                         println!(
-                            "| {:30} | {:20} | {:23} | {:23} | {:12} | {:20} | {:20} |",
-                            event.title_to_string(),
+                            "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                            title,
                             event.programid_to_string(),
                             event.starttime_to_string(utc),
                             event.endtime_to_string(utc),
                             event.duration_to_string(),
-                            if contentid.contains("-") {
+                            if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                                 contentid.red()
                             } else {
                                 contentid.red().clear()
                             },
-                            if logostr.contains("ERROR") {
+                            if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
                                 logostr.red()
                             } else {
                                 logostr.red().clear()
@@ -487,18 +478,36 @@ impl DataSet {
         result
     }
 
-    fn print_head(&self, yes: bool) {
-        if yes {
-            let mut line = String::new();
-            for _ in 0..(30 + 20 + 23 + 23 + 12 + 20 + 20 + 20) {
-                line += "-";
-            }
-            println!("|{}|", line);
+    fn print_line(&self, verbose: bool) {
+        if verbose {
+            println!("|{}|", self.line(158));
+        }
+    }
+
+    fn line(&self, n: u64) -> String {
+        let mut line = String::new();
+        for _ in 0..n {
+            line += "-";
+        }   
+
+        line
+    }
+
+    fn print_line_cross(&self, verbose: bool) {
+        if verbose {
+           println!(
+                "|{}+{}+{}+{}+{}+{}+{}|",
+                self.line(32),self.line(17),self.line(25),self.line(25), self.line(14), self.line(22), self.line(17),
+            );
+        }
+    }
+
+    fn print_head(&self, verbose: bool) {
+        if verbose {
             println!(
-                "| {:30} | {:20} | {:23} | {:23} | {:12} | {:20} | {:20} |",
+                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                 "title", "programid", "start", "end", "duration", "contentid", "logo",
             );
-            println!("|{}|", line);
         }
     }
 
@@ -509,6 +518,10 @@ impl DataSet {
 
         let mut file = File::create(filename)?;
 
+        match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
+            _ => (),
+        }
+    
         special_events.iter().for_each(|special_event| {
             match file.write_all(special_event.to_string(utc).as_bytes()) {
                 Err(..) => (),
@@ -523,14 +536,18 @@ impl DataSet {
         let special_events = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
+        self.print_line(verbose);
         self.print_head(verbose && special_events.len() > 0);
+        self.print_line_cross(verbose);
 
         special_events.iter().for_each(|special_event| {
             let (lerrors, ierrors) = special_event.print_table(verbose, utc);
+            self.print_line_cross(verbose);
             id_errors += ierrors;
             logo_errors += lerrors;
         });
         self.print_head(verbose && special_events.len() > 0);
+        self.print_line(verbose);
 
         println!(
             "{:3} id errors",

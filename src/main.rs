@@ -38,9 +38,8 @@ fn main() -> std::io::Result<()> {
                     Commandline::print_help();
                 }
             }
-            _ => Commandline::print_help(),
+            Err(e) => {println!("{}", e); Commandline::print_help()},
         }
     }
-
     Ok(())
 }
