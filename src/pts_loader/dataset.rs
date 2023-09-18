@@ -80,7 +80,7 @@ impl<'a> SpecialEvent<'a> {
         logos
     }
 
-    pub fn to_string(&self, utc: bool) -> String {
+    pub fn to_string(&self, verbose: bool, utc: bool) -> String {
         let mut special_event = String::new();
         for s in &self.vec {
             match s {
@@ -128,7 +128,9 @@ impl<'a> SpecialEvent<'a> {
             }
         }
 
-        println!("{}", special_event);
+        if verbose {
+            println!("{}", special_event);
+        }        
         special_event += &format!(";;;;;\n");
 
         special_event
@@ -524,7 +526,7 @@ impl DataSet {
         }
     }
 
-    pub fn write_special_events_csv(&self, filename: &str, utc: bool) -> std::io::Result<()> {
+    pub fn write_special_events_csv(&self, filename: &str, verbose: bool, utc: bool) -> std::io::Result<()> {
         use std::fs::File;
         use std::io::prelude::*;
         let special_events = &self.get_special_events();
@@ -536,7 +538,7 @@ impl DataSet {
         }
 
         special_events.iter().for_each(|special_event| {
-            match file.write_all(special_event.to_string(utc).as_bytes()) {
+            match file.write_all(special_event.to_string(verbose, utc).as_bytes()) {
                 Err(..) => (),
                 Ok(..) => (),
             }
