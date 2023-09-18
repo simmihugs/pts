@@ -121,7 +121,7 @@ impl Event {
     ) {
         self.print_si_event_verbose(true, err, display_err, verbose, utc);
         event.print_si_event_verbose(false, err, display_err, verbose, utc);
-        println!("");
+      	println!("");
     }
 
     pub fn print_event_verbose(

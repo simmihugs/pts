@@ -315,8 +315,7 @@ impl DataSet {
             .for_each(|define| define.calculate_endtime());
     }
 
-    #[allow(dead_code, unused_variables)]
-    fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let va_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -334,8 +333,7 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code, unused_variables)]
-    fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+  fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let si_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -353,8 +351,7 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code, unused_variables)]
-    fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+  fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let logo_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -372,26 +369,7 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code, unused_variables)]
-    fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
-        let layout_events: Vec<_> = events
-            .iter()
-            .filter(|x| {
-                if let Define::layoutEvent(..) = x {
-                    return true;
-                }
-                return false;
-            })
-            .collect();
-        if layout_events.len() > 0 {
-            println!("{} LayoutEvents", layout_events.len());
-            if verbose {
-                layout_events.iter().for_each(|x| println!("{:?}", x));
-            }
-        }
-    }
-
-    #[allow(dead_code)]
+  #[allow(dead_code)]
     pub fn look_for_illegals(&self, illegals: &Vec<String>, verbose: bool, utc: bool) {
         let events: &Vec<&Define> = &self
             .eventcommands

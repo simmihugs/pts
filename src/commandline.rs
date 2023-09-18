@@ -71,7 +71,6 @@ impl Commandline {
     
     pub fn all(&self) -> bool {
         self.args.all
-    }
 
     pub fn print_help() {
         let mut cmd = Args::command();
