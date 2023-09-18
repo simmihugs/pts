@@ -3,28 +3,29 @@ A pts file parser
 
 ## help page
 ```
-╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v -h                 
-Usage: pts [OPTIONS]
+pts> .\target\release\pts.exe -h
+Usage: pts.exe [OPTIONS]
 
 Options:
-  -f, --filename <FILENAME>            [default: DEFAULT]
-  -r, --repl                           
-  -v, --verbose                        
-  -s, --sierror                        
-  -l, --logoerror                      
-  -i, --illegalevents <ILLEGALEVENTS>  [default: DEFAULT]
+  -f, --filename <FILENAME>            [default: YOU_PICK_A_FILE]
+  -r, --repl
+  -v, --verbose
+  -p, --ps-event
+  -u, --utc
+  -s, --sierror
+  -l, --logoerror
+  -i, --illegalevents <ILLEGALEVENTS>  [default: YOU_PICK_ILLEGAL_EVENTS]
+  -a, --all
+  -c, --csv <CSV>                      [default: YOU_PICK_A_CSV]
   -h, --help                           Print help
   -V, --version                        Print version
-╭[simmi@xubu] ~/Projects/pts
-╰─> 
+pts>
 ```
 
 ## Basic usage
 
 ```
-╭[simmi@xubu] ~/Projects/pts
-╰─> cargo run  -- -f hdplus_20230915_26886.pts  -v                    
+.\pts.exe -f hdplus_20230915_26886.pts  -v
 2 sierrors
 SiEvent: {
 	title: Free Fenster
@@ -50,6 +51,4 @@ SiEvent: {
 		displayed endtime: 2023-09-15T15:30:00.000Z
 	}
 }
-╭[simmi@xubu] ~/Projects/pts
-╰─> 
 ```
