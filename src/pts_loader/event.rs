@@ -1,6 +1,6 @@
 use super::define::SiError;
 use super::sistandard::*;
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Duration, Utc, Local};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -29,6 +29,9 @@ pub struct Event {
     duration: i64,
 
     endtime: Option<DateTime<Utc>>,
+
+    #[serde(rename = "contentId")]
+    contentid: Option<String>,
 }
 
 impl fmt::Debug for Event {
@@ -39,9 +42,13 @@ impl fmt::Debug for Event {
 
 impl Event {
     pub fn get_title(&self) -> String {
-	self.title.to_string()
+        self.title.to_string()
     }
-    
+
+    pub fn get_contentid(&self) -> String {
+        self.contentid.clone().unwrap()
+    }
+
     pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
         Some(self.starttime)
     }
@@ -92,11 +99,15 @@ impl Event {
         let programid = format!("\n\tprogramid: {}", &self.programid);
         let sistandard: String = match &self.sistandard {
             None => "".to_string(),
-            Some(sistandard) => format!("\n\t{:?}\n", sistandard),
+            Some(sistandard) => format!("\n\t{:?}", sistandard),
+        };
+        let contentid: String = match &self.contentid {
+            None => "".to_string(),
+            Some(sistandard) => format!("\n\tcontentId: {}", sistandard),
         };
         write!(
             f,
-            "{kind}: {{{title}{eventid}{serviceid}{programid}{starttime}{endtime}{sistandard}}}"
+            "{kind}: {{{title}{eventid}{serviceid}{programid}{starttime}{endtime}{contentid}{sistandard}\n}}"
         )
     }
 
@@ -106,20 +117,21 @@ impl Event {
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) {
         self.print_si_event_verbose(true, err, display_err, verbose, utc);
         event.print_si_event_verbose(false, err, display_err, verbose, utc);
-	println!("");
+      	println!("");
     }
 
-    pub fn print_si_event_verbose(
+    pub fn print_event_verbose(
         &self,
+        kind: &str,
         first: bool,
         err: &Box<SiError>,
         display_err: &Box<SiError>,
         verbose: bool,
-	utc: bool,
+        utc: bool,
     ) {
         let starttime = format!(
             "{:10} {}",
@@ -183,15 +195,97 @@ impl Event {
         };
         let si = match &self.sistandard {
             None => "".to_string(),
-            Some(sistandard) => sistandard.print_si_standard_verbose(first, display_err, verbose, utc),
+            Some(sistandard) => {
+                sistandard.print_si_standard_verbose(first, display_err, verbose, utc)
+            }
         };
         if verbose {
             println!(
-                "SiEvent: {{{title}{eventid}{serviceid}{programid}\n\t{}\n\t{}{}}}",
+                "{kind}: {{{title}{eventid}{serviceid}{programid}\n\t{}\n\t{}{}}}",
                 s, e, si
             );
         } else {
             println!("{}\n{}\n{}\n{}", &self.programid, s, e, si);
         }
+    }
+
+    pub fn duration_to_string(&self) -> String {
+        let mut milliseconds = self.duration;
+        let hours = milliseconds / 3600_000;
+        milliseconds -= hours * 3600_000;
+
+        let minutes = milliseconds / 60_000;
+        milliseconds -= minutes * 60_000;
+
+        let seconds = milliseconds / 1000;
+        milliseconds -= seconds * 1000;
+
+        format!(
+            "{}:{}:{}.{}",
+            if hours < 10 {
+                format!("0{hours}")
+            } else {
+                format!("{hours}")
+            },
+            if minutes < 10 {
+                format!("0{minutes}")
+            } else {
+                format!("{minutes}")
+            },
+            if seconds < 10 {
+                format!("0{seconds}")
+            } else {
+                format!("{seconds}")
+            },
+            if milliseconds < 10 {
+                format!("00{milliseconds}")
+            } else if milliseconds < 100 {
+                format!("0{milliseconds}")
+            } else {
+                format!("{milliseconds}")
+            }
+        )
+    }
+
+    pub fn starttime_to_string(&self, utc: bool) -> String {
+	if utc {
+            format!("{}", self.starttime.format("%d.%m.%Y %H:%M:%S%.3f"))	    
+	} else {
+	    let starttime: DateTime<Local> = DateTime::from(self.starttime);
+	    format!("{}", starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
+	}
+    }
+    
+    pub fn programid_to_string(&self) -> String {
+        format!("{}", self.programid)
+    }
+    
+    pub fn endtime_to_string(&self, utc: bool) -> String {
+	if utc {
+            format!("{}", self.endtime.unwrap().format("%d.%m.%Y %H:%M:%S%.3f"))	    
+	} else {
+	    let endtime: DateTime<Local> = DateTime::from(self.endtime.unwrap());
+	    format!("{}", endtime.format("%d.%m.%Y %H:%M:%S%.3f"))
+	}
+    }
+
+    pub fn title_to_string(&self) -> String {
+        let title = &self.title;
+        if title.len() < 30 {
+            format!("{}", title)
+        } else {
+            format!("{}", &title[..30])
+        }
+    }
+
+    pub fn print_si_event_verbose(
+        &self,
+        first: bool,
+        err: &Box<SiError>,
+        display_err: &Box<SiError>,
+        verbose: bool,
+        utc: bool,
+    ) {
+        self.print_event_verbose("SiEvent", first, err, display_err, verbose, utc);
     }
 }

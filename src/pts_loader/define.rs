@@ -99,6 +99,24 @@ impl Define {
         }	
     }
     
+    pub fn get_contentid(&self) -> String {
+        match self {
+            Define::vaEvent(ref event) => event.get_contentid(),
+            Define::siEvent(ref event) => event.get_contentid(),
+            Define::logoEvent(ref event) => event.get_contentid(),
+            Define::layoutEvent(ref event) => event.get_contentid(),
+        }	
+    }
+    
+    // pub fn print_table(&self) {
+    //     match self {
+    //         Define::siEvent(..) => (),
+    //         Define::vaEvent(ref event) => event.print_table(),
+    //         Define::logoEvent(ref event) => event.print_table(),
+    //         Define::layoutEvent(ref event) => event.print_table(),
+    //     }	
+    // }
+    
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match self {
             Define::vaEvent(ref event) => event.get_dendtime(),
