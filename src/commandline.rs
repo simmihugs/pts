@@ -21,9 +21,6 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     sierror: bool,
 
-    #[arg(short, long, default_value_t = false)]
-    logoerror: bool,
-
     #[arg(short, long, default_value_t = String::from("YOU_PICK_ILLEGAL_EVENTS"))]
     illegalevents: String,
 
@@ -65,10 +62,6 @@ impl Commandline {
         self.args.sierror
     }
 
-    pub fn logoerror(&self) -> bool {
-        self.args.logoerror
-    }
-
     pub fn all(&self) -> bool {
         self.args.all
     }
@@ -101,7 +94,6 @@ impl Commandline {
         !(self.look_for_illegalevents()
             || self.all()
             || self.write_csv()
-            || self.logoerror()
             || self.ps_event()
             || self.sierror())
     }
