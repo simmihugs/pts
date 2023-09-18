@@ -78,12 +78,14 @@ impl Define {
         other: &Define,
         err: &Box<SiError>,
         display_err: &Box<SiError>,
-	verbose: bool,
-	utc: bool,
+        verbose: bool,
+        utc: bool,
     ) {
         match self {
             Define::siEvent(event1) => match other {
-                Define::siEvent(event2) => event1.print_si_events_verbose(event2, err, display_err, verbose, utc),
+                Define::siEvent(event2) => {
+                    event1.print_si_events_verbose(event2, err, display_err, verbose, utc)
+                }
                 _ => (),
             },
             _ => (),
@@ -96,27 +98,27 @@ impl Define {
             Define::siEvent(ref event) => event.get_title(),
             Define::logoEvent(ref event) => event.get_title(),
             Define::layoutEvent(ref event) => event.get_title(),
-        }	
+        }
     }
-    
+
     pub fn get_contentid(&self) -> String {
         match self {
             Define::vaEvent(ref event) => event.get_contentid(),
             Define::siEvent(ref event) => event.get_contentid(),
             Define::logoEvent(ref event) => event.get_contentid(),
             Define::layoutEvent(ref event) => event.get_contentid(),
-        }	
+        }
     }
-    
+
     // pub fn print_table(&self) {
     //     match self {
     //         Define::siEvent(..) => (),
     //         Define::vaEvent(ref event) => event.print_table(),
     //         Define::logoEvent(ref event) => event.print_table(),
     //         Define::layoutEvent(ref event) => event.print_table(),
-    //     }	
+    //     }
     // }
-    
+
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match self {
             Define::vaEvent(ref event) => event.get_dendtime(),

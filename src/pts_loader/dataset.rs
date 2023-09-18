@@ -228,7 +228,8 @@ impl<'a> SpecialEvent<'a> {
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderror += 1;
                     }
-                    if logostr.contains("ERROR") && logoerror == 0 && contentid != "UHD1_WERBUNG-01"{
+                    if logostr.contains("ERROR") && logoerror == 0 && contentid != "UHD1_WERBUNG-01"
+                    {
                         logoerror = 1;
                     }
 
@@ -315,7 +316,8 @@ impl DataSet {
             .for_each(|define| define.calculate_endtime());
     }
 
-fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    #[allow(unused_variables)]
+    fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let va_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -333,7 +335,8 @@ fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc:
         }
     }
 
-  fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    #[allow(unused_variables)]
+    fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let si_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -351,7 +354,8 @@ fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc:
         }
     }
 
-  fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    #[allow(unused_variables)]
+    fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
         let logo_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -369,7 +373,26 @@ fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc:
         }
     }
 
-  #[allow(dead_code)]
+    #[allow(unused_variables)]
+    fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+        let layout_events: Vec<_> = events
+            .iter()
+            .filter(|x| {
+                if let Define::layoutEvent(..) = x {
+                    return true;
+                }
+                return false;
+            })
+            .collect();
+        if layout_events.len() > 0 {
+            println!("{} LayoutEvents", layout_events.len());
+            if verbose {
+                layout_events.iter().for_each(|x| println!("{:?}", x));
+            }
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn look_for_illegals(&self, illegals: &Vec<String>, verbose: bool, utc: bool) {
         let events: &Vec<&Define> = &self
             .eventcommands
@@ -466,16 +489,22 @@ fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc:
         let mut line = String::new();
         for _ in 0..n {
             line += "-";
-        }   
+        }
 
         line
     }
 
     fn print_line_cross(&self, verbose: bool) {
         if verbose {
-           println!(
+            println!(
                 "|{}+{}+{}+{}+{}+{}+{}|",
-                self.line(32),self.line(17),self.line(25),self.line(25), self.line(14), self.line(22), self.line(17),
+                self.line(32),
+                self.line(17),
+                self.line(25),
+                self.line(25),
+                self.line(14),
+                self.line(22),
+                self.line(17),
             );
         }
     }
@@ -499,7 +528,7 @@ fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc:
         match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
             _ => (),
         }
-    
+
         special_events.iter().for_each(|special_event| {
             match file.write_all(special_event.to_string(utc).as_bytes()) {
                 Err(..) => (),

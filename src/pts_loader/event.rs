@@ -1,6 +1,6 @@
 use super::define::SiError;
 use super::sistandard::*;
-use chrono::{DateTime, Duration, Utc, Local};
+use chrono::{DateTime, Duration, Local, Utc};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -121,7 +121,7 @@ impl Event {
     ) {
         self.print_si_event_verbose(true, err, display_err, verbose, utc);
         event.print_si_event_verbose(false, err, display_err, verbose, utc);
-      	println!("");
+        println!("");
     }
 
     pub fn print_event_verbose(
@@ -248,25 +248,25 @@ impl Event {
     }
 
     pub fn starttime_to_string(&self, utc: bool) -> String {
-	if utc {
-            format!("{}", self.starttime.format("%d.%m.%Y %H:%M:%S%.3f"))	    
-	} else {
-	    let starttime: DateTime<Local> = DateTime::from(self.starttime);
-	    format!("{}", starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
-	}
+        if utc {
+            format!("{}", self.starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
+        } else {
+            let starttime: DateTime<Local> = DateTime::from(self.starttime);
+            format!("{}", starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
+        }
     }
-    
+
     pub fn programid_to_string(&self) -> String {
         format!("{}", self.programid)
     }
-    
+
     pub fn endtime_to_string(&self, utc: bool) -> String {
-	if utc {
-            format!("{}", self.endtime.unwrap().format("%d.%m.%Y %H:%M:%S%.3f"))	    
-	} else {
-	    let endtime: DateTime<Local> = DateTime::from(self.endtime.unwrap());
-	    format!("{}", endtime.format("%d.%m.%Y %H:%M:%S%.3f"))
-	}
+        if utc {
+            format!("{}", self.endtime.unwrap().format("%d.%m.%Y %H:%M:%S%.3f"))
+        } else {
+            let endtime: DateTime<Local> = DateTime::from(self.endtime.unwrap());
+            format!("{}", endtime.format("%d.%m.%Y %H:%M:%S%.3f"))
+        }
     }
 
     pub fn title_to_string(&self) -> String {

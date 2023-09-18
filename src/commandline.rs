@@ -68,9 +68,10 @@ impl Commandline {
     pub fn logoerror(&self) -> bool {
         self.args.logoerror
     }
-    
+
     pub fn all(&self) -> bool {
         self.args.all
+    }
 
     pub fn print_help() {
         let mut cmd = Args::command();
@@ -84,15 +85,15 @@ impl Commandline {
     pub fn csv(&self) -> &String {
         &self.args.csv
     }
-    
+
     pub fn write_csv(&self) -> bool {
         self.args.csv != "YOU_PICK_A_CSV"
     }
 
     pub fn no_option(&self) -> bool {
-	!(self.all() || self.write_csv() || self.logoerror() || self.ps_event() || self.sierror())
+        !(self.all() || self.write_csv() || self.logoerror() || self.ps_event() || self.sierror())
     }
-    
+
     pub fn illegalevents(&self) -> Option<Vec<String>> {
         let illegals = &self.args.illegalevents;
         if illegals == "YOU_PICK_ILLEGAL_EVENTS" {
