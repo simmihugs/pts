@@ -191,10 +191,50 @@ impl DataSet {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose, utc);
     }
 
-    #[allow(dead_code)]
-    pub fn print_si_errors(&self, verbose: bool, utc: bool) {
-        let si_events: &mut Vec<&Define> = &mut self
-            .eventcommands
+    fn get_logo_events(&self) -> Vec<&Define> {
+        self.eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::logoEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<&Define>>()
+    }
+
+    fn get_va_events(&self) -> Vec<&Define> {
+        self.eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::vaEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<&Define>>()
+    }
+
+    fn get_layout_events(&self) -> Vec<&Define> {
+        self.eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::layoutEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<&Define>>()
+    }
+
+    fn get_si_events(&self) -> Vec<&Define> {
+        self.eventcommands
             .define
             .iter()
             .filter(|x| {
@@ -204,7 +244,12 @@ impl DataSet {
                     false
                 }
             })
-            .collect();
+            .collect::<Vec<&Define>>()
+    }
+
+    #[allow(dead_code)]
+    pub fn print_si_errors(&mut self, verbose: bool, utc: bool) {
+        let mut si_events: Vec<&Define> = self.get_si_events();
 
         if si_events.len() > 1 {
             let mut si_errors = Vec::new();
@@ -252,51 +297,6 @@ impl DataSet {
                 self.print_si_error_verbose(err, display_err, event, next_event, verbose, utc);
             }
         }
-    }
-
-    fn get_logo_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::logoEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-            .to_vec()
-    }
-
-    fn get_va_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::vaEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-            .to_vec()
-    }
-
-    fn get_layout_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::layoutEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
-            .to_vec()
     }
 
     pub fn print_logo_errors(&self, verbose: bool, utc: bool) {

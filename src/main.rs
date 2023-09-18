@@ -11,7 +11,7 @@ fn main() -> std::io::Result<()> {
     } else {
 	let filename = cmd.filename();
 	match DataSet::init(filename) {
-	    Ok (dataset) => {
+	    Ok (mut dataset) => {
 		if cmd.sierror() {
 		    dataset.print_si_errors(cmd.verbose(), cmd.utc());
 		}
