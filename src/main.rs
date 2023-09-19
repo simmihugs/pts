@@ -8,7 +8,9 @@ use repl::Repl;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
-    if cmd.filename() == "DEFAULT" && !cmd.repl() {
+    if cmd.filename() == "YOU_PICK_A_FILE" && cmd.repl() {
+        Repl::start_without_data(&cmd);
+    } else if cmd.filename() == "YOU_PICK_A_FILE" {
         Commandline::print_help();
     } else {
         let filename = cmd.filename();

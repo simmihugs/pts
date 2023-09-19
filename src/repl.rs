@@ -97,23 +97,34 @@ impl Repl {
         }
     }
 
-    pub fn start(cmd: &Commandline, _dataset: &DataSet) {
+    fn run_repl(cmd: &Commandline, files: &mut Vec<DataSet>) {
         use std::io;
         let mut user_io = String::new();
-        let dataset = _dataset.clone();
-        let mut files = vec![dataset];
         loop {
-            io::stdout().write_all(b"> ").expect("Failed to write line");
+            io::stdout()
+                .write_all(b"pts-repl> ")
+                .expect("Failed to write line");
             io::stdout().flush().expect("flush failed!");
             io::stdin()
                 .read_line(&mut user_io)
                 .expect("Failed to read line");
 
-            match Repl::parse(&cmd, user_io, &mut files) {
+            match Repl::parse(&cmd, user_io, files) {
                 Ok(..) => (),
                 Err(..) => break,
             }
             user_io = "".to_string();
         }
+    }
+
+    pub fn start_without_data(cmd: &Commandline) {
+        let mut files = Vec::new();
+        Repl::run_repl(&cmd, &mut files);
+    }
+
+    pub fn start(cmd: &Commandline, _dataset: &DataSet) {
+        let dataset = _dataset.clone();
+        let mut files = vec![dataset];
+        Repl::run_repl(&cmd, &mut files);
     }
 }
