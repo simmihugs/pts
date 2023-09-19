@@ -3,7 +3,11 @@ use crate::pts_loader::dataset::DataSet;
 use std::io::Write;
 
 #[derive(Clone)]
-pub struct Repl {}
+pub struct Repl;
+
+macro_rules! strings {
+    ($($x:expr),*) => (vec![$($x.to_string()),*]);
+}
 
 impl Repl {
     fn print_help() {
@@ -18,27 +22,11 @@ impl Repl {
         user_io: String,
         files: &mut Vec<DataSet>,
     ) -> Result<String, ()> {
-        let help: Vec<String> = [":help", ":h", "-h", "-help"]
-            .iter()
-            .map(|x| String::from(*x))
-            .collect();
-        let quit: Vec<String> = [":quit", ":q", "-q", "-quit"]
-            .iter()
-            .map(|x| String::from(*x))
-            .collect();
-        let load: Vec<String> = [":load", ":f", "-f ", "-load"]
-            .iter()
-            .map(|x| String::from(*x))
-            .collect();
-        let list: Vec<String> = [":list", ":l", "-l", "-list"]
-            .iter()
-            .map(|x| String::from(*x))
-            .collect();
-        let all: Vec<String> = [":all", ":a", "-a", "-all"]
-            .iter()
-            .map(|x| String::from(*x))
-            .collect();
-
+        let help: Vec<String> = strings![":help", ":h", "-h", "-help"];
+        let quit: Vec<String> = strings![":quit", ":q", "-q", "-quit"];
+        let load: Vec<String> = strings![":load", ":f", "-f ", "-load"];
+        let list: Vec<String> = strings![":list", ":l", "-l", "-list"];
+        let all: Vec<String> = strings![":all", ":a", "-a", "-all"];
         let user_io_clean = user_io
             .replace("\r", "")
             .replace("\n", "")
