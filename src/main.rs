@@ -1,8 +1,10 @@
 mod commandline;
 mod pts_loader;
+mod repl;
 
 use commandline::Commandline;
 use pts_loader::dataset::DataSet;
+use repl::Repl;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
@@ -32,6 +34,10 @@ fn main() -> std::io::Result<()> {
                     Some(illegals) => {
                         dataset.look_for_illegals(&illegals, cmd.verbose(), cmd.utc())
                     }
+                }
+
+                if cmd.repl() {
+                    Repl::start(&cmd);
                 }
 
                 if cmd.no_option() {
