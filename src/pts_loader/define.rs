@@ -5,7 +5,7 @@ use std::fmt;
 use super::event::*;
 
 #[allow(non_camel_case_types)]
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub enum Define {
     vaEvent(Event),
     logoEvent(Event),

@@ -37,7 +37,7 @@ fn main() -> std::io::Result<()> {
                 }
 
                 if cmd.repl() {
-                    Repl::start(&cmd);
+                    Repl::start(&cmd, &dataset);
                 }
 
                 if cmd.no_option() {

@@ -4,7 +4,7 @@ use colored::Colorize;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct SiStandard {
     #[serde(rename = "displayedStart")]
     #[serde(deserialize_with = "starttime_from_str")]

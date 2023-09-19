@@ -3,7 +3,7 @@ use crate::pts_loader::event::Event;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DataSet {
     filename: Option<String>,
 
@@ -11,7 +11,7 @@ pub struct DataSet {
     eventcommands: EventCommands,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct EventCommands {
     #[serde(rename = "DEFINE")]
     define: Vec<Define>,
