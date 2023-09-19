@@ -74,7 +74,7 @@ impl Repl {
                                 Err(e) => println!("{}", e),
                                 Ok(data) => {
                                     println!("Loaded file: {}", new_file);
-                                    files.push(data.clone());
+                                    files.push(data);
                                 }
                             }
                         } else {
