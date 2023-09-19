@@ -1,8 +1,6 @@
-use std::io::Write;
-
-use crate::pts_loader::dataset::DataSet;
-
 use super::commandline::Commandline;
+use crate::pts_loader::dataset::DataSet;
+use std::io::Write;
 
 #[derive(Clone)]
 pub struct Repl {}
