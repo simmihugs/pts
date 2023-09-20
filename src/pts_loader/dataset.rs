@@ -96,7 +96,7 @@ impl<'a> SpecialEvent<'a> {
                         logostr = format!("{}", "");
                     } else {
                         for logo in &logos {
-                            logostr += &format!("{}", logo.get_title());
+                            logostr += &format!("{}", logo.get_logo());
                         }
                         if logostr.len() == 0 {
                             logostr = format!("{}", "ERROR_NO_LOGO");
