@@ -273,6 +273,41 @@ impl<'a> SpecialEvent<'a> {
     }
 }
 
+#[derive(Clone)]
+enum Block<'a> {
+    Begin { index: usize, event: &'a Define },
+    End { index: usize, event: &'a Define },
+}
+
+impl<'a> Block<'a> {
+    pub fn index(&self) -> usize {
+        match self {
+            Block::Begin { index, .. } => *index,
+            Block::End { index, .. } => *index,
+        }
+    }
+    pub fn event(&self) -> &'a Define {
+        match self {
+            Block::Begin { event, .. } => event,
+            Block::End { event, .. } => event,
+        }
+    }
+
+    pub fn is_begin(&self) -> bool {
+        match self {
+            Block::Begin { .. } => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_end(&self) -> bool {
+        match self {
+            Block::Begin { .. } => false,
+            _ => true,
+        }
+    }
+}
+
 impl DataSet {
     #[allow(dead_code)]
     pub fn get_filename(&self) -> &str {
@@ -459,7 +494,7 @@ impl DataSet {
             .collect::<Vec<&Define>>()
     }
 
-    fn get_special_events(&self) -> Vec<SpecialEvent> {
+    fn get_special_events(&self) -> (Vec<SpecialEvent>, Vec<Block<'_>>) {
         let special_events = self
             .eventcommands
             .define
@@ -473,29 +508,48 @@ impl DataSet {
             })
             .collect::<Vec<&Define>>();
 
-        let indeces: Vec<Vec<usize>> = special_events
+        let blocks = special_events
             .iter()
             .enumerate()
             .filter(|(_, &x)| {
                 x.get_contentid() == "cb7a119f84cb7b117b1b"
                     || x.get_contentid() == "392654926764849cd5dc"
             })
-            .map(|(i, _)| i as usize)
-            .collect::<Vec<usize>>()
-            .chunks(2)
-            .map(|s| s.into())
-            .collect();
-
-        let mut result = Vec::new();
-        for vec in &indeces {
-            if vec.len() == 2 {
-                result.push(SpecialEvent::new(special_events[vec[0]..=vec[1]].to_vec()));
-            } else if vec.len() == 1 {
-                println!("missing accompany for event:\n{:?}", special_events[vec[0]])
+            .map(|(i, x)| {
+                if x.get_contentid() == "cb7a119f84cb7b117b1b" {
+                    Block::Begin {
+                        index: i as usize,
+                        event: x,
+                    }
+                } else {
+                    Block::End {
+                        index: i as usize,
+                        event: x,
+                    }
+                }
+            })
+            .collect::<Vec<Block<'_>>>();
+        let mut errors = Vec::new();
+        let mut pairs = Vec::new();
+        for (i, block) in blocks.iter().enumerate() {
+            if block.is_begin() && i + 1 < blocks.len() && blocks[i + 1].is_end() {
+                pairs.push((block, &blocks[i + 1]));
+            } else if block.is_begin() {
+                errors.push(block.clone());
+            } else if block.is_end() && i == 0 {
+                errors.push(block.clone());
             }
         }
 
-        result
+        let mut result = Vec::new();
+        for vec in &pairs {
+            let (begin, end) = vec;
+            result.push(SpecialEvent::new(
+                special_events[begin.index()..=end.index()].to_vec(),
+            ));
+        }
+
+        (result, errors)
     }
 
     fn print_line(&self, verbose: bool) {
@@ -545,7 +599,7 @@ impl DataSet {
     ) -> std::io::Result<()> {
         use std::fs::File;
         use std::io::prelude::*;
-        let special_events = &self.get_special_events();
+        let (special_events, _errors) = &self.get_special_events();
 
         let mut file = File::create(filename)?;
 
@@ -564,13 +618,12 @@ impl DataSet {
     }
 
     pub fn print_special_events(&self, verbose: bool, utc: bool) {
-        let special_events = &self.get_special_events();
+        let (special_events, errors) = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
         self.print_line(verbose);
         self.print_head(verbose && special_events.len() > 0);
         self.print_line_cross(verbose);
-
         special_events.iter().for_each(|special_event| {
             let (lerrors, ierrors) = special_event.print_table(verbose, utc);
             self.print_line_cross(verbose);
@@ -596,6 +649,25 @@ impl DataSet {
                 format!("{}", logo_errors).green()
             }
         );
+        println!(
+            "{:3} special event block errors",
+            if errors.len() == 0 {
+                format!("{}", 0).green()
+            } else {
+                format!("{}", errors.len()).red()
+            }
+        );
+        if verbose {
+            for block in errors {
+                if block.is_begin() {
+                    println!("{}", "missing end to event:".red());
+                    println!("{:?}", block.event());
+                } else {
+                    println!("{}", "missing begin to event:".red());
+                    println!("{:?}", block.event());
+                }
+            }
+        }
     }
 
     #[allow(dead_code)]
