@@ -101,6 +101,14 @@ impl Define {
         }
     }
 
+    pub fn get_logo(&self) -> String {
+        match self {
+            Define::logoEvent(ref event) => event.get_logo(),
+            Define::layoutEvent(ref event) => event.get_logo(),
+            _ => panic!("No logo"),
+        }
+    }
+
     pub fn get_contentid(&self) -> String {
         match self {
             Define::vaEvent(ref event) => event.get_contentid(),

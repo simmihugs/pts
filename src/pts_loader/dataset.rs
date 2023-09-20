@@ -123,15 +123,11 @@ impl<'a> SpecialEvent<'a> {
                         event.get_contentid(),
                         logostr,
                     );
+                    special_event += &format!(";;;;;\n");
                 }
                 _ => (),
             }
         }
-
-        if verbose {
-            println!("{}", special_event);
-        }
-        special_event += &format!(";;;;;\n");
 
         special_event
     }
@@ -196,18 +192,19 @@ impl<'a> SpecialEvent<'a> {
                     } else {
                         for (error, logo) in &logos {
                             if *error {
-                                logostr += &format!("ERROR {}", logo.get_title());
+                                logostr += &format!("ERROR {}", logo.get_logo());
                             } else {
-                                logostr += &format!("{}", logo.get_title());
+                                logostr += &format!(" {}", logo.get_logo());
                             }
                         }
                         for (error, laoyut) in &layouts {
                             if *error {
-                                logostr += &format!("ERROR {}", laoyut.get_title());
+                                logostr += &format!("ERROR {}", laoyut.get_logo());
                             } else {
-                                logostr += &format!("{}", laoyut.get_title());
+                                logostr += &format!(" {}", laoyut.get_logo());
                             }
                         }
+
                         if logostr.len() == 0 {
                             logostr = format!("{}", "ERROR_NO_LOGO");
                         } else if logostr.chars().count() > 20 {
@@ -244,6 +241,13 @@ impl<'a> SpecialEvent<'a> {
                         title = "Pausentafel ".to_string();
                     }
 
+                    if logostr.len() < 15 {
+                        for _ in 0..15 - logostr.len() {
+                            logostr += " ";
+                        }
+                    }
+                    logostr = logostr.drain(0..14).collect::<String>();
+
                     if verbose {
                         println!(
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
@@ -258,6 +262,9 @@ impl<'a> SpecialEvent<'a> {
                                 contentid.red().clear()
                             },
                             if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
+                                logostr.red()
+                            } else if logos.len() + layouts.len() > 1 {
+                                logoerror += 1;
                                 logostr.red()
                             } else {
                                 logostr.red().clear()
