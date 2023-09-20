@@ -488,7 +488,11 @@ impl DataSet {
 
         let mut result = Vec::new();
         for vec in &indeces {
-            result.push(SpecialEvent::new(special_events[vec[0]..=vec[1]].to_vec()));
+            if vec.len() == 2 {
+                result.push(SpecialEvent::new(special_events[vec[0]..=vec[1]].to_vec()));
+            } else if vec.len() == 1 {
+                println!("missing accompany for event:\n{:?}", special_events[vec[0]])
+            }
         }
 
         result
