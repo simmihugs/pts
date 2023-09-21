@@ -182,11 +182,10 @@ impl Repl {
     fn run_repl(files: &mut Vec<DataSet>) {
         use std::io;
         let mut user_io = String::new();
-        let rocket = emojis::get("🚀").unwrap();
-	println!("{}", "Welcome to pts repl! 🚀");
-        loop {
+        println!("Welcome to pts repl! 🚀");  
+	loop {
             io::stdout()
-                .write_all(b"pts-repl")
+                .write_all(b"pts-repl> ")
                 .expect("Failed to write line");
             io::stdout().flush().expect("flush failed!");
             io::stdin()
