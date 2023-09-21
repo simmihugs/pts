@@ -40,6 +40,18 @@ impl fmt::Debug for Event {
     }
 }
 
+fn take(s: &str, length: usize) -> String {
+    let mut result = format!("{}", s);
+    if s.len() >= length {
+        result.drain(0..length).collect::<String>().to_string()
+    } else {
+        for _ in 0..length - s.len() {
+            result += " ";
+        }
+        result
+    }
+}
+
 impl Event {
     pub fn get_logo(&self) -> String {
         match self.get_title().as_str() {
@@ -62,10 +74,10 @@ impl Event {
             "HDPLUHD_LOGO_18" => "Sixx UHD Logo".to_string(),
             "HDPLUHD_LOGO_19" => "P7MX_RAN_NHL".to_string(),
             s => {
-                if s.contains("Pro7") {
-                    "Pro7 rechts".to_string()
+                if s.contains("Pro7") || s.contains("Sat1") || s.contains("Kabel") {
+                    take(s, 15)
                 } else {
-                    println!("{}", s);
+                    println!("Logo error: {}", s);
                     "ERROR NO LOGO".to_string()
                 }
             }
@@ -73,9 +85,9 @@ impl Event {
     }
 
     pub fn get_duration(&self) -> i64 {
-	self.duration
+        self.duration
     }
-    
+
     pub fn get_title(&self) -> String {
         self.title.to_string()
     }

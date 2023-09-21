@@ -3,6 +3,8 @@ use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::prelude::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct DataSet {
@@ -19,8 +21,6 @@ pub struct EventCommands {
 }
 
 fn load_file(filename: &str) -> std::io::Result<String> {
-    use std::fs::File;
-    use std::io::Read;
     match File::open(filename) {
         Err(e) => Err(e),
         Ok(mut file) => {
@@ -322,8 +322,6 @@ impl DataSet {
         utc: bool,
     ) -> std::io::Result<()> {
         use std::env;
-        use std::fs::File;
-        use std::io::prelude::*;
 
         let (special_events, _errors) = &self.get_special_events();
         let mut file = File::create(filename)?;
@@ -331,20 +329,18 @@ impl DataSet {
             _ => (),
         }
         special_events.iter().for_each(|special_event| {
-            if env::consts::OS == "windows"
-                || encoding == "windows1252"
-                || encoding.contains("1252")
-                || encoding.contains("win")
-            {
-                let text = special_event.to_string(utc);
-                let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
-
-                match file.write_all(&windows_1252_encoded_string.as_ref()) {
+            if encoding == "windows1252" || encoding.contains("1252") || encoding.contains("win") {
+                match self.write_1252(&mut file, &special_event, utc) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if encoding == "utf-8" || encoding.contains("linux") {
                 match file.write_all(special_event.to_string(utc).as_bytes()) {
+                    Err(e) => println!("{}", e),
+                    Ok(..) => (),
+                }
+            } else if env::consts::OS == "windows" {
+                match self.write_1252(&mut file, &special_event, utc) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
@@ -354,6 +350,18 @@ impl DataSet {
         });
 
         Ok(())
+    }
+
+    fn write_1252(
+        &self,
+        file: &mut File,
+        special_event: &SpecialEvent<'_>,
+        utc: bool,
+    ) -> std::io::Result<()> {
+        let text = special_event.to_string(utc);
+        let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
+
+        file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
     pub fn print_special_events(&self, verbose: bool, utc: bool) {
