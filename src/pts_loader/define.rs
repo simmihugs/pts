@@ -101,6 +101,16 @@ impl Define {
         }
     }
 
+    #[allow(dead_code)]
+    pub fn get_duration(&self) -> i64 {
+        match self {
+            Define::vaEvent(ref event) => event.get_duration(),
+            Define::siEvent(ref event) => event.get_duration(),
+            Define::logoEvent(ref event) => event.get_duration(),
+            Define::layoutEvent(ref event) => event.get_duration(),
+        }
+    }
+
     pub fn get_logo(&self) -> String {
         match self {
             Define::logoEvent(ref event) => event.get_logo(),

@@ -72,6 +72,10 @@ impl Event {
         }
     }
 
+    pub fn get_duration(&self) -> i64 {
+	self.duration
+    }
+    
     pub fn get_title(&self) -> String {
         self.title.to_string()
     }
