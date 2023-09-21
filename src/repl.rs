@@ -17,8 +17,7 @@ impl Repl {
         println!(":p | :special-event --> looking for special events");
         println!(":s | :si-error --> looking for si-errors");
         println!(":u | :utc  --> utc flag");
-        println!(":v | :verbose  --> verbose flag");
-        println!("\nexample: :l C:\\Users\\sgraetz\\Documents\\exportiert__15-09-2023--02-10-2023\\hdplus_20230915_26886.pts");
+        println!(":v | :verbose  --> verbose flag");        
     }
 
     fn utc(user_io: &String) -> bool {
