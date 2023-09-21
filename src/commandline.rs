@@ -29,6 +29,10 @@ struct Args {
 
     #[arg(short, long, default_value_t = String::from("YOU_PICK_A_CSV"))]
     csv: String,
+
+    #[arg(short, long, default_value_t = String::from("utf-8"))]
+    encoding: String,
+
 }
 
 pub struct Commandline {
@@ -58,6 +62,10 @@ impl Commandline {
         self.args.repl
     }
 
+    pub fn encoding(&self) -> &String {
+	&self.args.encoding
+    }
+    
     pub fn sierror(&self) -> bool {
         self.args.sierror
     }

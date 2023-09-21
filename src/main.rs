@@ -23,7 +23,7 @@ fn main() -> std::io::Result<()> {
                 }
 
                 if cmd.write_csv() {
-                    match dataset.write_special_events_csv(cmd.csv(), cmd.utc()) {
+                    match dataset.write_special_events_csv(cmd.csv(), cmd.encoding(), cmd.utc()) {
                         Err(e) => println!("{}", e),
                         Ok(..) => println!("Wrote csv to {}", cmd.csv()),
                     }

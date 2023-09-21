@@ -315,21 +315,41 @@ impl DataSet {
         }
     }
 
-    pub fn write_special_events_csv(&self, filename: &str, utc: bool) -> std::io::Result<()> {
+    pub fn write_special_events_csv(
+        &self,
+        filename: &str,
+        encoding: &String,
+        utc: bool,
+    ) -> std::io::Result<()> {
+        use std::env;
         use std::fs::File;
         use std::io::prelude::*;
+
         let (special_events, _errors) = &self.get_special_events();
-
         let mut file = File::create(filename)?;
-
         match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
             _ => (),
         }
-
         special_events.iter().for_each(|special_event| {
-            match file.write_all(special_event.to_string(utc).as_bytes()) {
-                Err(..) => (),
-                Ok(..) => (),
+            if env::consts::OS == "windows"
+                || encoding == "windows1252"
+                || encoding.contains("1252")
+                || encoding.contains("win")
+            {
+                let text = special_event.to_string(utc);
+                let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
+
+                match file.write_all(&windows_1252_encoded_string.as_ref()) {
+                    Err(e) => println!("{}", e),
+                    Ok(..) => (),
+                }
+            } else if encoding == "utf-8" || encoding.contains("linux") {
+                match file.write_all(special_event.to_string(utc).as_bytes()) {
+                    Err(e) => println!("{}", e),
+                    Ok(..) => (),
+                }
+            } else {
+                println!("only available encodings are utf-8 and windows1252\nNo file written.");
             }
         });
 
