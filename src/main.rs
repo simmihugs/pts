@@ -8,10 +8,8 @@ use repl::Repl;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
-    if cmd.filename() == "YOU_PICK_A_FILE" && cmd.repl() {
+    if cmd.filename() == "YOU_PICK_A_FILE" {
         Repl::start_without_data();
-    } else if cmd.filename() == "YOU_PICK_A_FILE" {
-        Commandline::print_help();
     } else {
         let filename = cmd.filename();
         match DataSet::init(filename) {

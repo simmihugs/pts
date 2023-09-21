@@ -27,6 +27,7 @@ impl Repl {
             .map(|x| user_io.contains(x))
             .any(|x| x == true)
     }
+
     fn verbose(user_io: &String) -> bool {
         strings![":verbose", ":v"]
             .iter()
@@ -43,7 +44,7 @@ impl Repl {
         let utc: bool = Repl::utc(&user_io);
         let verbose: bool = Repl::verbose(&user_io);
         let quit: Vec<String> = strings![":quit", ":q", "-q", "-quit"];
-        let load: Vec<String> = strings![":load", ":l", "-l", ":f", "-f ", "-load"];
+        let load: Vec<String> = strings!["ls", ":load", ":l", "-l", ":f", "-f ", "-load"];
         let all: Vec<String> = strings![":all", ":a", "-a", "-all"];
         let si_errors: Vec<String> = strings![":si", ":s", ":si-error"];
         let special_events: Vec<String> = strings![":special-event", ":p"];
@@ -183,11 +184,11 @@ impl Repl {
         use std::io;
         let mut user_io = String::new();
         let rocket = emojis::get("🚀").unwrap();
+	println!("{}", "Welcome to pts repl! 🚀");
         loop {
             io::stdout()
                 .write_all(b"pts-repl")
                 .expect("Failed to write line");
-            print!("{}> ", rocket);
             io::stdout().flush().expect("flush failed!");
             io::stdin()
                 .read_line(&mut user_io)
