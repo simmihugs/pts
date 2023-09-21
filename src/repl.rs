@@ -1,4 +1,3 @@
-use super::commandline::Commandline;
 use crate::pts_loader::dataset::DataSet;
 use std::io::Write;
 
@@ -13,20 +12,41 @@ impl Repl {
     fn print_help() {
         println!(":h | :help --> print help");
         println!(":q | :quit --> quit");
-        println!(":l | :list --> list loaded files");
-        println!(":f <FILE>| :load <FILE> --> try loading new file");
+        println!(":l | :f <FILE>| :load <FILE> --> list or try loading new file");
+        println!(":a | :all --> looking for all errors");
+        println!(":p | :special-event --> looking for special events");
+        println!(":s | :si-error --> looking for si-errors");
+        println!(":u | :utc  --> utc flag");
+        println!(":v | :verbose  --> verbose flag");
+        println!("\nexample: :l C:\\Users\\sgraetz\\Documents\\exportiert__15-09-2023--02-10-2023\\hdplus_20230915_26886.pts");
     }
 
-    pub fn parse<'a>(
-        cmd: &'a Commandline,
-        user_io: String,
-        files: &mut Vec<DataSet>,
-    ) -> Result<String, ()> {
+    fn utc(user_io: &String) -> bool {
+        strings![":utc", ":u"]
+            .iter()
+            .map(|x| user_io.contains(x))
+            .any(|x| x == true)
+    }
+    fn verbose(user_io: &String) -> bool {
+        strings![":verbose", ":v"]
+            .iter()
+            .map(|x| user_io.contains(x))
+            .any(|x| x == true)
+    }
+
+    fn contains(list: &Vec<String>, user_io: &String) -> bool {
+        list.iter().map(|x| user_io.contains(x)).any(|x| x == true)
+    }
+
+    pub fn parse<'a>(user_io: String, files: &mut Vec<DataSet>) -> Result<String, ()> {
         let help: Vec<String> = strings![":help", ":h", "-h", "-help"];
+        let utc: bool = Repl::utc(&user_io);
+        let verbose: bool = Repl::verbose(&user_io);
         let quit: Vec<String> = strings![":quit", ":q", "-q", "-quit"];
-        let load: Vec<String> = strings![":load", ":f", "-f ", "-load"];
-        let list: Vec<String> = strings![":list", ":l", "-l", "-list"];
+        let load: Vec<String> = strings![":load", ":l", "-l", ":f", "-f ", "-load"];
         let all: Vec<String> = strings![":all", ":a", "-a", "-all"];
+        let si_errors: Vec<String> = strings![":si", ":s", ":si-error"];
+        let special_events: Vec<String> = strings![":special-event", ":p"];
         let user_io_clean = user_io
             .replace("\r", "")
             .replace("\n", "")
@@ -37,15 +57,12 @@ impl Repl {
             .map(|x| String::from(x))
             .collect::<Vec<String>>();
 
-        if help.contains(&user_io_clean) {
+        if Repl::contains(&help, &user_io) {
             Repl::print_help();
             Ok("help".to_string())
-        } else if list.contains(&user_io_clean) {
-            for file in files {
-                println!("{}", file.get_filename());
-            }
-            Ok("listed files".to_string())
-        } else if words.len() > 1 {
+        } else if Repl::contains(&quit, &user_io) {
+            Err(())
+        } else if Repl::contains(&load, &user_io) {
             match words.iter().position(|x| load.contains(x)) {
                 Some(index) => {
                     if words.len() > index + 1 {
@@ -66,50 +83,117 @@ impl Repl {
                         } else {
                             println!("file {} is allready loaded ", new_file);
                         }
+                    } else {
+                        for file in files {
+                            println!("{}", file.get_filename());
+                        }
+                        return Ok("listed files".to_string());
                     }
                 }
                 None => (),
             }
+            Ok("loaded file".to_string())
+        } else if Repl::contains(&all, &user_io) {
             match words.iter().position(|x| all.contains(x)) {
                 Some(index) => {
                     if words.len() > index + 1 {
                         match words[index + 1].parse::<i32>() {
-                            Ok(file_index) => {
-                                let _index: usize = file_index.try_into().unwrap();
-                                if files.len() > _index {
-                                    files[_index].print_si_errors(cmd.verbose(), cmd.utc());
-                                    files[_index].print_special_events(cmd.verbose(), cmd.utc());
-                                } else {
-                                    println!("invalid index {}", file_index);
+                            Ok(file_index) => match file_index.try_into() {
+                                Ok(_index) => {
+                                    if files.len() > _index {
+                                        files[_index].print_si_errors(verbose, utc);
+                                        files[_index].print_special_events(verbose, utc);
+                                    } else {
+                                        println!("invalid index {}", file_index);
+                                    }
                                 }
+                                _ => (),
+                            },
+                            Err(..) => {
+                                files[0].print_si_errors(verbose, utc);
+                                files[0].print_special_events(verbose, utc);
                             }
-                            Err(e) => println!("{}", e),
                         }
+                    } else if files.len() == 1 {
+                        files[0].print_si_errors(verbose, utc);
+                        files[0].print_special_events(verbose, utc);
+                    }
+                }
+                None => (),
+            }
+            Ok("all".to_string())
+        } else if Repl::contains(&si_errors, &user_io) || Repl::contains(&special_events, &user_io)
+        {
+            match words.iter().position(|x| special_events.contains(x)) {
+                Some(index) => {
+                    if words.len() > index + 1 {
+                        match words[index + 1].parse::<i32>() {
+                            Ok(file_index) => match file_index.try_into() {
+                                Ok(_index) => {
+                                    if files.len() > _index {
+                                        files[_index].print_special_events(verbose, utc);
+                                    } else {
+                                        println!("invalid index {}", file_index);
+                                    }
+                                }
+                                _ => (),
+                            },
+                            Err(..) => {
+                                files[0].print_special_events(verbose, utc);
+                            }
+                        }
+                    } else if files.len() == 1 {
+                        files[0].print_special_events(verbose, utc);
+                    }
+                }
+                None => (),
+            }
+            match words.iter().position(|x| si_errors.contains(x)) {
+                Some(index) => {
+                    if words.len() > index + 1 {
+                        match words[index + 1].parse::<i32>() {
+                            Ok(file_index) => match file_index.try_into() {
+                                Ok(_index) => {
+                                    if files.len() > _index {
+                                        files[_index].print_si_errors(verbose, utc);
+                                    } else {
+                                        println!("invalid index {}", file_index);
+                                    }
+                                }
+                                _ => (),
+                            },
+                            Err(..) => {
+                                files[0].print_si_errors(verbose, utc);
+                            }
+                        }
+                    } else if files.len() == 1 {
+                        files[0].print_si_errors(verbose, utc);
                     }
                 }
                 None => (),
             }
             Ok("".to_string())
-        } else if quit.contains(&user_io_clean) {
-            Err(())
         } else {
+            println!("Reache else branch");
             Ok(format!("{}", user_io_clean))
         }
     }
 
-    fn run_repl(cmd: &Commandline, files: &mut Vec<DataSet>) {
+    fn run_repl(files: &mut Vec<DataSet>) {
         use std::io;
         let mut user_io = String::new();
+        let rocket = emojis::get("🚀").unwrap();
         loop {
             io::stdout()
-                .write_all(b"pts-repl> ")
+                .write_all(b"pts-repl")
                 .expect("Failed to write line");
+            print!("{}> ", rocket);
             io::stdout().flush().expect("flush failed!");
             io::stdin()
                 .read_line(&mut user_io)
                 .expect("Failed to read line");
 
-            match Repl::parse(&cmd, user_io, files) {
+            match Repl::parse(user_io, files) {
                 Ok(..) => (),
                 Err(..) => break,
             }
@@ -117,14 +201,13 @@ impl Repl {
         }
     }
 
-    pub fn start_without_data(cmd: &Commandline) {
+    pub fn start_without_data() {
         let mut files = Vec::new();
-        Repl::run_repl(&cmd, &mut files);
+        Repl::run_repl(&mut files);
     }
 
-    pub fn start(cmd: &Commandline, _dataset: &DataSet) {
-        let dataset = _dataset.clone();
-        let mut files = vec![dataset];
-        Repl::run_repl(&cmd, &mut files);
+    pub fn start(dataset: &DataSet) {
+        let mut files = vec![dataset.clone()];
+        Repl::run_repl(&mut files);
     }
 }

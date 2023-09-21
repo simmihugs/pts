@@ -9,7 +9,7 @@ use repl::Repl;
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
     if cmd.filename() == "YOU_PICK_A_FILE" && cmd.repl() {
-        Repl::start_without_data(&cmd);
+        Repl::start_without_data();
     } else if cmd.filename() == "YOU_PICK_A_FILE" {
         Commandline::print_help();
     } else {
@@ -39,7 +39,7 @@ fn main() -> std::io::Result<()> {
                 }
 
                 if cmd.repl() {
-                    Repl::start(&cmd, &dataset);
+                    Repl::start(&dataset);
                 }
 
                 if cmd.no_option() {
