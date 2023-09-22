@@ -74,7 +74,7 @@ impl DataSet {
         self.eventcommands
             .define
             .iter_mut()
-            .for_each(|define| define.calculate_endtime());
+            .for_each(|define| define.get_event_mut().calculate_endtime());
     }
 
     #[allow(unused_variables)]
@@ -174,7 +174,7 @@ impl DataSet {
             .iter()
             .filter(|x| {
                 for illegal in illegals {
-                    if x.get_title().contains(illegal) {
+                    if x.get_event().get_title().contains(illegal) {
                         return true;
                     }
                 }
@@ -236,11 +236,11 @@ impl DataSet {
             .iter()
             .enumerate()
             .filter(|(_, &x)| {
-                x.get_contentid() == "cb7a119f84cb7b117b1b"
-                    || x.get_contentid() == "392654926764849cd5dc"
+                x.get_event().get_contentid() == "cb7a119f84cb7b117b1b"
+                    || x.get_event().get_contentid() == "392654926764849cd5dc"
             })
             .map(|(i, x)| {
-                if x.get_contentid() == "cb7a119f84cb7b117b1b" {
+                if x.get_event().get_contentid() == "cb7a119f84cb7b117b1b" {
                     Block::Begin {
                         index: i as usize,
                         event: x,

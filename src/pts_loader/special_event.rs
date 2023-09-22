@@ -33,16 +33,16 @@ impl<'a> SpecialEvent<'a> {
             .collect();
 
         for layout in &layout_events {
-            if event.get_starttime() == layout.get_starttime() {
-                if event.get_endtime() == layout.get_endtime() {
+            if event.get_starttime() == layout.get_event().get_starttime() {
+                if event.get_endtime() == layout.get_event().get_endtime() {
                     logos.push(**layout);
                 }
             }
         }
 
         for logo in &logo_events {
-            if event.get_starttime() <= logo.get_starttime()
-                && logo.get_starttime() <= event.get_endtime()
+            if event.get_starttime() <= logo.get_event().get_starttime()
+                && logo.get_event().get_starttime() <= event.get_endtime()
             {
                 logos.push(**logo);
             }
@@ -67,7 +67,7 @@ impl<'a> SpecialEvent<'a> {
                         logostr = format!("{}", "");
                     } else {
                         for logo in &logos {
-                            logostr += &format!("{}", logo.get_logo());
+                            logostr += &format!("{}", logo.get_event().get_logo());
                         }
                         if logostr.len() == 0 {
                             logostr = format!("{}", "ERROR_NO_LOGO");
@@ -130,8 +130,8 @@ impl<'a> SpecialEvent<'a> {
                     let mut layouts = Vec::new();
                     let mut logos = Vec::new();
                     for layout in &layout_events {
-                        if event.get_starttime() == layout.get_starttime() {
-                            if event.get_endtime() != layout.get_endtime() {
+                        if event.get_starttime() == layout.get_event().get_starttime() {
+                            if event.get_endtime() != layout.get_event().get_endtime() {
                                 logoerror += 1;
                                 layouts.push((true, layout));
                             } else {
@@ -140,10 +140,10 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
                     for logo in &logo_events {
-                        if event.get_starttime() <= logo.get_starttime()
-                            && logo.get_starttime() <= event.get_endtime()
+                        if event.get_starttime() <= logo.get_event().get_starttime()
+                            && logo.get_event().get_starttime() <= event.get_endtime()
                         {
-                            if event.get_endtime() <= logo.get_endtime() {
+                            if event.get_endtime() <= logo.get_event().get_endtime() {
                                 logoerror += 1;
                                 logos.push((true, logo));
                             } else {
@@ -164,16 +164,16 @@ impl<'a> SpecialEvent<'a> {
                     } else {
                         for (error, logo) in &logos {
                             if *error {
-                                logostr += &format!("ERROR {}", logo.get_logo());
+                                logostr += &format!("ERROR {}", logo.get_event().get_logo());
                             } else {
-                                logostr += &format!(" {}", logo.get_logo());
+                                logostr += &format!(" {}", logo.get_event().get_logo());
                             }
                         }
                         for (error, laoyut) in &layouts {
                             if *error {
-                                logostr += &format!("ERROR {}", laoyut.get_logo());
+                                logostr += &format!("ERROR {}", laoyut.get_event().get_logo());
                             } else {
-                                logostr += &format!(" {}", laoyut.get_logo());
+                                logostr += &format!(" {}", laoyut.get_event().get_logo());
                             }
                         }
 
