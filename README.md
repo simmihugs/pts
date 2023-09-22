@@ -62,3 +62,17 @@ pts-repl🚀> :h
 
 pts-repl🚀>
 ```
+
+### Create csv file and check for errors
+```
+update> pts
+Welcome to pts repl! 🚀
+pts-repl> :f hdplus_20230915_26906.pts :a :e win :c out.csv
+Loaded file: hdplus_20230915_26906.pts
+wrote hdplus_20230915_26906.pts-csv to file out.csv
+0   sierrors
+0   id errors
+0   logo errors
+0   special event block errors
+pts-repl>
+```
