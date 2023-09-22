@@ -94,82 +94,81 @@ impl Define {
 
     pub fn get_title(&self) -> String {
         match self {
-            Define::vaEvent(ref event) => event.get_title(),
-            Define::siEvent(ref event) => event.get_title(),
-            Define::logoEvent(ref event) => event.get_title(),
-            Define::layoutEvent(ref event) => event.get_title(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_title(),
         }
     }
 
     #[allow(dead_code)]
     pub fn get_duration(&self) -> i64 {
         match self {
-            Define::vaEvent(ref event) => event.get_duration(),
-            Define::siEvent(ref event) => event.get_duration(),
-            Define::logoEvent(ref event) => event.get_duration(),
-            Define::layoutEvent(ref event) => event.get_duration(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_duration(),
         }
     }
 
     pub fn get_logo(&self) -> String {
         match self {
-            Define::logoEvent(ref event) => event.get_logo(),
-            Define::layoutEvent(ref event) => event.get_logo(),
+            Define::logoEvent(ref event) | Define::layoutEvent(ref event) => event.get_logo(),
             _ => panic!("No logo"),
         }
     }
 
     pub fn get_contentid(&self) -> String {
         match self {
-            Define::vaEvent(ref event) => event.get_contentid(),
-            Define::siEvent(ref event) => event.get_contentid(),
-            Define::logoEvent(ref event) => event.get_contentid(),
-            Define::layoutEvent(ref event) => event.get_contentid(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_contentid(),
         }
     }
 
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match self {
-            Define::vaEvent(ref event) => event.get_dendtime(),
-            Define::siEvent(ref event) => event.get_dendtime(),
-            Define::logoEvent(ref event) => event.get_dendtime(),
-            Define::layoutEvent(ref event) => event.get_dendtime(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_dendtime(),
         }
     }
 
     pub fn get_dstarttime(&self) -> Option<DateTime<Utc>> {
         match self {
-            Define::vaEvent(ref event) => event.get_dstarttime(),
-            Define::siEvent(ref event) => event.get_dstarttime(),
-            Define::logoEvent(ref event) => event.get_dstarttime(),
-            Define::layoutEvent(ref event) => event.get_dstarttime(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_dstarttime(),
         }
     }
 
     pub fn get_endtime(&self) -> Option<DateTime<Utc>> {
         match self {
-            Define::vaEvent(ref event) => event.get_endtime(),
-            Define::siEvent(ref event) => event.get_endtime(),
-            Define::logoEvent(ref event) => event.get_endtime(),
-            Define::layoutEvent(ref event) => event.get_endtime(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_endtime(),
         }
     }
 
     pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
         match self {
-            Define::vaEvent(ref event) => event.get_starttime(),
-            Define::siEvent(ref event) => event.get_starttime(),
-            Define::logoEvent(ref event) => event.get_starttime(),
-            Define::layoutEvent(ref event) => event.get_starttime(),
+            Define::vaEvent(ref event)
+            | Define::siEvent(ref event)
+            | Define::logoEvent(ref event)
+            | Define::layoutEvent(ref event) => event.get_starttime(),
         }
     }
 
     pub fn calculate_endtime(&mut self) {
         match self {
-            Define::vaEvent(ref mut event) => event.calculate_endtime(),
-            Define::siEvent(ref mut event) => event.calculate_endtime(),
-            Define::logoEvent(ref mut event) => event.calculate_endtime(),
-            Define::layoutEvent(ref mut event) => event.calculate_endtime(),
+            Define::vaEvent(ref mut event)
+            | Define::siEvent(ref mut event)
+            | Define::logoEvent(ref mut event)
+            | Define::layoutEvent(ref mut event) => event.calculate_endtime(),
         }
     }
 }
