@@ -18,6 +18,8 @@ impl Repl {
         println!(":s | :si-error --> looking for si-errors");
         println!(":u | :utc  --> utc flag");
         println!(":v | :verbose  --> verbose flag");
+        println!(":e | :encoding  --> specify encoding for csv export");
+        println!(":c | :csv <OUT> | :csv <FILE> <OUT> --> write to csv");
     }
 
     fn extract(term: &Vec<String>, user_io: &String) -> Result<String, ()> {
