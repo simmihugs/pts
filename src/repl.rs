@@ -38,7 +38,7 @@ impl Repl {
         list.iter().map(|x| user_io.contains(x)).any(|x| x == true)
     }
 
-    pub fn parse<'a>(user_io: String, files: &mut Vec<DataSet>) -> Result<String, ()> {
+    pub fn parse<'a>(user_io: String, files: &mut Vec<DataSet>) -> Result<(), String> {
         let help: Vec<String> = strings![":help", ":h", "-h", "-help"];
         let utc: bool = Repl::utc(&user_io);
         let verbose: bool = Repl::verbose(&user_io);
@@ -59,9 +59,9 @@ impl Repl {
 
         if Repl::contains(&help, &user_io) {
             Repl::print_help();
-            Ok("help".to_string())
+            Ok(())
         } else if Repl::contains(&quit, &user_io) {
-            Err(())
+            Err(String::from("quit"))
         } else if Repl::contains(&load, &user_io) {
             match words.iter().position(|x| load.contains(x)) {
                 Some(index) => {
@@ -87,12 +87,12 @@ impl Repl {
                         for file in files {
                             println!("{}", file.get_filename());
                         }
-                        return Ok("listed files".to_string());
+                        return Ok(());
                     }
                 }
                 None => (),
             }
-            Ok("loaded file".to_string())
+            Ok(())
         } else if Repl::contains(&all, &user_io) {
             match words.iter().position(|x| all.contains(x)) {
                 Some(index) => {
@@ -121,7 +121,7 @@ impl Repl {
                 }
                 None => (),
             }
-            Ok("all".to_string())
+            Ok(())
         } else if Repl::contains(&si_errors, &user_io) || Repl::contains(&special_events, &user_io)
         {
             match words.iter().position(|x| special_events.contains(x)) {
@@ -172,10 +172,10 @@ impl Repl {
                 }
                 None => (),
             }
-            Ok("".to_string())
+            Ok(())
         } else {
             println!("Reache else branch");
-            Ok(format!("{}", user_io_clean))
+            Ok(())
         }
     }
 
