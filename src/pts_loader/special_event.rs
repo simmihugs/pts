@@ -51,7 +51,7 @@ impl<'a> SpecialEvent<'a> {
         logos
     }
 
-    pub fn to_string(&self, utc: bool) -> String {
+    pub fn to_string(&self, utc: bool, fps: Option<i64>) -> String {
         let mut special_event = String::new();
         for s in &self.vec {
             match s {
@@ -88,9 +88,9 @@ impl<'a> SpecialEvent<'a> {
                     special_event += &format!(
                         "{};{};{};{};{};{}\n",
                         title,
-                        event.starttime_to_string(utc),
-                        event.endtime_to_string(utc),
-                        event.duration_to_string(),
+                        event.starttime_to_string(utc, fps),
+                        event.endtime_to_string(utc, fps),
+                        event.duration_to_string(fps),
                         event.get_contentid(),
                         logostr,
                     );
@@ -103,7 +103,7 @@ impl<'a> SpecialEvent<'a> {
         special_event
     }
 
-    pub fn print_table(&self, verbose: bool, utc: bool) -> (i64, i64) {
+    pub fn print_table(&self, verbose: bool, utc: bool, fps: Option<i64>) -> (i64, i64) {
         let mut logoerror = 0;
         let mut iderror = 0;
         let layout_events: Vec<_> = self
@@ -226,15 +226,15 @@ impl<'a> SpecialEvent<'a> {
                             title,
                             event.programid_to_string(),
                             if title == "Dranbleiben" {
-                                event.starttime_to_string(utc).cyan()
+                                event.starttime_to_string(utc, fps).cyan()
                             } else {
-                                event.starttime_to_string(utc).cyan().clear()
+                                event.starttime_to_string(utc, fps).cyan().clear()
                             },
-                            event.endtime_to_string(utc),
+                            event.endtime_to_string(utc, fps),
                             if title == "Werbung" {
-                                event.duration_to_string().yellow()
+                                event.duration_to_string(fps).yellow()
                             } else {
-                                event.duration_to_string().yellow().clear()
+                                event.duration_to_string(fps).yellow().clear()
                             },
                             if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                                 contentid.red()

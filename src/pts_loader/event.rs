@@ -59,7 +59,7 @@ impl Take for String {
 
 impl Event {
     pub fn get_logo(&self) -> String {
-	let mut title = self.get_title();
+        let mut title = self.get_title();
         match title.as_str() {
             "HDPLUHD_LOGO_1" => "Astra links".to_string(),
             "HDPLUHD_LOGO_2" => "Astra rechts".to_string(),
@@ -81,7 +81,7 @@ impl Event {
             "HDPLUHD_LOGO_19" => "P7MX_RAN_NHL".to_string(),
             s => {
                 if s.contains("Pro7") || s.contains("Sat1") || s.contains("Kabel") {
-		    title.take(15)
+                    title.take(15)
                 } else {
                     println!("Logo error: {}", s);
                     "ERROR NO LOGO".to_string()
@@ -262,7 +262,7 @@ impl Event {
         }
     }
 
-    pub fn duration_to_string(&self) -> String {
+    pub fn duration_to_string(&self, fps: Option<i64>) -> String {
         let mut milliseconds = self.duration;
         let hours = milliseconds / 3600_000;
         milliseconds -= hours * 3600_000;
@@ -272,6 +272,25 @@ impl Event {
 
         let seconds = milliseconds / 1000;
         milliseconds -= seconds * 1000;
+        let milliseconds = match fps {
+            None => {
+                if milliseconds < 10 {
+                    format!("00{milliseconds}")
+                } else if milliseconds < 100 {
+                    format!("0{milliseconds}")
+                } else {
+                    format!("{milliseconds}")
+                }
+            }
+            Some(fps_number) => {
+                let frames_per_second = milliseconds / (1000 / fps_number);
+                if frames_per_second < 10 {
+                    format!("0{}", frames_per_second)
+                } else {
+                    format!("{}", frames_per_second)
+                }
+            }
+        };
 
         format!(
             "{}:{}:{}.{}",
@@ -290,36 +309,50 @@ impl Event {
             } else {
                 format!("{seconds}")
             },
-            if milliseconds < 10 {
-                format!("00{milliseconds}")
-            } else if milliseconds < 100 {
-                format!("0{milliseconds}")
-            } else {
-                format!("{milliseconds}")
-            }
+            milliseconds
         )
     }
 
-    pub fn starttime_to_string(&self, utc: bool) -> String {
+    fn time_to_string(&self, time: DateTime<Utc>, utc: bool, fps: Option<i64>) -> String {
+        let fps_str = format!("{}", time.format("%.3f")).replace(".", "");
+        let fps_str = match fps {
+            Some(fps_number) => match fps_str.parse::<i64>() {
+                Ok(number) => {
+                    let frames_per_second = number / (1000 / fps_number);
+                    if frames_per_second < 10 {
+                        format!("0{}", frames_per_second)
+                    } else {
+                        format!("{}", frames_per_second)
+                    }
+                }
+                Err(..) => fps_str,
+            },
+            None => fps_str,
+        };
+        let time_str = format!("{}", time.format("%d.%m.%Y %H:%M:%S"));
+
         if utc {
-            format!("{}", self.starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
+            format!("{}.{}", time_str, fps_str)
         } else {
-            let starttime: DateTime<Local> = DateTime::from(self.starttime);
-            format!("{}", starttime.format("%d.%m.%Y %H:%M:%S%.3f"))
+            let time: DateTime<Local> = DateTime::from(time);
+            let time_str = format!("{}", time.format("%d.%m.%Y %H:%M:%S"));
+            format!("{}.{}", time_str, fps_str)
+        }
+    }
+
+    pub fn starttime_to_string(&self, utc: bool, fps: Option<i64>) -> String {
+        self.time_to_string(self.starttime, utc, fps)
+    }
+
+    pub fn endtime_to_string(&self, utc: bool, fps: Option<i64>) -> String {
+        match self.endtime {
+            None => String::from("No endtime"),
+            Some(time) => self.time_to_string(time, utc, fps),
         }
     }
 
     pub fn programid_to_string(&self) -> String {
         format!("{}", self.programid)
-    }
-
-    pub fn endtime_to_string(&self, utc: bool) -> String {
-        if utc {
-            format!("{}", self.endtime.unwrap().format("%d.%m.%Y %H:%M:%S%.3f"))
-        } else {
-            let endtime: DateTime<Local> = DateTime::from(self.endtime.unwrap());
-            format!("{}", endtime.format("%d.%m.%Y %H:%M:%S%.3f"))
-        }
     }
 
     pub fn title_to_string(&self) -> String {

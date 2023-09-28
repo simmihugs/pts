@@ -320,6 +320,7 @@ impl DataSet {
         filename: &str,
         encoding: &String,
         utc: bool,
+        fps: Option<i64>,
     ) -> std::io::Result<()> {
         use std::env;
 
@@ -330,17 +331,17 @@ impl DataSet {
         }
         special_events.iter().for_each(|special_event| {
             if encoding == "windows1252" || encoding.contains("1252") || encoding.contains("win") {
-                match self.write_1252(&mut file, &special_event, utc) {
+                match self.write_1252(&mut file, &special_event, utc, fps) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if encoding == "utf-8" || encoding.contains("linux") {
-                match file.write_all(special_event.to_string(utc).as_bytes()) {
+                match file.write_all(special_event.to_string(utc, fps).as_bytes()) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if env::consts::OS == "windows" {
-                match self.write_1252(&mut file, &special_event, utc) {
+                match self.write_1252(&mut file, &special_event, utc, fps) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
@@ -357,14 +358,15 @@ impl DataSet {
         file: &mut File,
         special_event: &SpecialEvent<'_>,
         utc: bool,
+        fps: Option<i64>,
     ) -> std::io::Result<()> {
-        let text = special_event.to_string(utc);
+        let text = special_event.to_string(utc, fps);
         let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
 
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    pub fn print_special_events(&self, verbose: bool, utc: bool) {
+    pub fn print_special_events(&self, verbose: bool, utc: bool, fps: Option<i64>) {
         let (special_events, errors) = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
@@ -372,7 +374,7 @@ impl DataSet {
         self.print_head(verbose && special_events.len() > 0);
         self.print_line_cross(verbose);
         special_events.iter().for_each(|special_event| {
-            let (lerrors, ierrors) = special_event.print_table(verbose, utc);
+            let (lerrors, ierrors) = special_event.print_table(verbose, utc, fps);
             self.print_line_cross(verbose);
             id_errors += ierrors;
             logo_errors += lerrors;

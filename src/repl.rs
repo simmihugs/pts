@@ -46,6 +46,16 @@ impl Repl {
             .any(|x| x == true)
     }
 
+    fn fps(user_io: &String) -> Option<i64> {
+        match Repl::extract(&(strings![":fps"]), user_io) {
+            Ok(value) => match value.parse::<i64>() {
+                Ok(number) => Some(number),
+                Err(..) => None,
+            },
+            Err(()) => None,
+        }
+    }
+
     fn verbose(user_io: &String) -> bool {
         strings![":verbose", ":v"]
             .iter()
@@ -62,6 +72,7 @@ impl Repl {
         let enc: Vec<String> = strings![":e", ":encoding"];
         let csv: Vec<String> = strings![":c", ":csv"];
         let utc: bool = Repl::utc(&user_io);
+        let fps: Option<i64> = Repl::fps(&user_io);
         let verbose: bool = Repl::verbose(&user_io);
         let quit: Vec<String> = strings![":quit", ":q"];
         let load: Vec<String> = strings!["ls", ":load", ":l", ":f"];
@@ -125,7 +136,9 @@ impl Repl {
                         if words.len() > index + 1 {
                             let csv_file = &words[index + 1];
                             if files.len() > 0 {
-                                match files[0].write_special_events_csv(&csv_file, &encoding, utc) {
+                                match files[0]
+                                    .write_special_events_csv(&csv_file, &encoding, utc, fps)
+                                {
                                     Err(e) => println!("{}", e),
                                     _ => println!(
                                         "wrote {}-csv to file {}",
@@ -140,9 +153,9 @@ impl Repl {
                                     Ok(_index) => {
                                         if files.len() > _index {
                                             let csv_file = &words[index + 2];
-                                            match files[_index]
-                                                .write_special_events_csv(&csv_file, &encoding, utc)
-                                            {
+                                            match files[_index].write_special_events_csv(
+                                                &csv_file, &encoding, utc, fps,
+                                            ) {
                                                 Err(e) => println!("{}", e),
                                                 _ => println!(
                                                     "wrote {}-csv to file {}",
@@ -170,7 +183,7 @@ impl Repl {
                                     Ok(_index) => {
                                         if files.len() > _index {
                                             files[_index].print_si_errors(verbose, utc);
-                                            files[_index].print_special_events(verbose, utc);
+                                            files[_index].print_special_events(verbose, utc, fps);
                                         } else {
                                             println!("invalid index {}", file_index);
                                         }
@@ -179,12 +192,12 @@ impl Repl {
                                 },
                                 Err(..) => {
                                     files[0].print_si_errors(verbose, utc);
-                                    files[0].print_special_events(verbose, utc);
+                                    files[0].print_special_events(verbose, utc, fps);
                                 }
                             }
                         } else if files.len() == 1 {
                             files[0].print_si_errors(verbose, utc);
-                            files[0].print_special_events(verbose, utc);
+                            files[0].print_special_events(verbose, utc, fps);
                         }
                     }
                     None => (),
@@ -199,7 +212,7 @@ impl Repl {
                                 Ok(file_index) => match file_index.try_into() {
                                     Ok(_index) => {
                                         if files.len() > _index {
-                                            files[_index].print_special_events(verbose, utc);
+                                            files[_index].print_special_events(verbose, utc, fps);
                                         } else {
                                             println!("invalid index {}", file_index);
                                         }
@@ -207,11 +220,11 @@ impl Repl {
                                     _ => (),
                                 },
                                 Err(..) => {
-                                    files[0].print_special_events(verbose, utc);
+                                    files[0].print_special_events(verbose, utc, fps);
                                 }
                             }
                         } else if files.len() == 1 {
-                            files[0].print_special_events(verbose, utc);
+                            files[0].print_special_events(verbose, utc, fps);
                         }
                     }
                     None => (),
