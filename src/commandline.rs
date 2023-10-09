@@ -33,8 +33,8 @@ struct Args {
     #[arg(short, long, default_value_t = String::from("utf-8"))]
     encoding: String,
 
-    #[arg(short, long, default_value_t = -1)]
-    bps: i64,
+    #[arg(long, default_value_t = -1)]
+    fps: i64,
 }
 
 pub struct Commandline {
@@ -86,7 +86,7 @@ impl Commandline {
     }
 
     pub fn fps(&self) -> i64 {
-        self.args.bps
+        self.args.fps
     }
 
     pub fn csv(&self) -> &String {
