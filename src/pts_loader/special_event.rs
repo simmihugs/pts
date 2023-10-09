@@ -124,6 +124,8 @@ impl<'a> SpecialEvent<'a> {
             })
             .collect();
 
+        let mut found_first_event: bool = false;
+        let mut found_dran_bleiben: bool = false;
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
@@ -220,12 +222,23 @@ impl<'a> SpecialEvent<'a> {
                     }
                     logostr = logostr.drain(0..14).collect::<String>();
 
+                    if title == "Dranbleiben" {
+                        //Init starttime coloring with dranbleiben
+                        found_dran_bleiben = true;
+                    } else if found_dran_bleiben && event.get_duration() >= 60000 {
+                        //Found first event after dranbleiben with length in minutes
+                        found_first_event = true;
+                    }
+
                     if verbose {
                         println!(
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
                             event.programid_to_string(),
-                            if title == "Dranbleiben" {
+                            if found_first_event {
+                                //If first element is found, color time, unset conditions
+                                found_first_event = false;
+                                found_dran_bleiben = false;
                                 event.starttime_to_string(utc, fps).cyan()
                             } else {
                                 event.starttime_to_string(utc, fps).cyan().clear()
