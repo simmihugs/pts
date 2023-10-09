@@ -1,6 +1,6 @@
 use crate::pts_loader::define::Define;
 use crate::pts_loader::event::Event;
-use colored::Colorize;
+use colored::{ColoredString, Colorize};
 
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
@@ -101,6 +101,22 @@ impl<'a> SpecialEvent<'a> {
         special_event += &format!(";;;;;\n");
 
         special_event
+    }
+
+    fn color_title(
+        event: &Event,
+        found_first_event: &mut bool,
+        found_dran_bleiben: &mut bool,
+        utc: bool,
+        fps: Option<i64>,
+    ) -> ColoredString {
+        if *found_first_event {
+            *found_first_event = false;
+            *found_dran_bleiben = false;
+            event.starttime_to_string(utc, fps).cyan()
+        } else {
+            event.starttime_to_string(utc, fps).cyan().clear()
+        }
     }
 
     pub fn print_table(&self, verbose: bool, utc: bool, fps: Option<i64>) -> (i64, i64) {
@@ -235,14 +251,13 @@ impl<'a> SpecialEvent<'a> {
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
                             event.programid_to_string(),
-                            if found_first_event {
-                                //If first element is found, color time, unset conditions
-                                found_first_event = false;
-                                found_dran_bleiben = false;
-                                event.starttime_to_string(utc, fps).cyan()
-                            } else {
-                                event.starttime_to_string(utc, fps).cyan().clear()
-                            },
+                            SpecialEvent::color_title(
+                                event,
+                                &mut found_first_event,
+                                &mut found_dran_bleiben,
+                                utc,
+                                fps
+                            ),
                             event.endtime_to_string(utc, fps),
                             if title == "Werbung" {
                                 event.duration_to_string(fps).yellow()
