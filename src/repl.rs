@@ -1,4 +1,4 @@
-use crate::pts_loader::dataset::DataSet;
+use crate::{commandline::Commandline, pts_loader::dataset::DataSet};
 use std::io::Write;
 
 #[derive(Clone)]
@@ -183,7 +183,13 @@ impl Repl {
                                     Ok(_index) => {
                                         if files.len() > _index {
                                             files[_index].print_si_errors(verbose, utc);
-                                            files[_index].print_special_events(verbose, utc, fps);
+                                            //files[_index].print_special_events(verbose, utc, false, fps);
+                                            files[_index].print_special_events(&Commandline::new(
+                                                verbose,
+                                                utc,
+                                                false,
+                                                fps.unwrap(),
+                                            ));
                                         } else {
                                             println!("invalid index {}", file_index);
                                         }
@@ -192,12 +198,24 @@ impl Repl {
                                 },
                                 Err(..) => {
                                     files[0].print_si_errors(verbose, utc);
-                                    files[0].print_special_events(verbose, utc, fps);
+                                    //files[0].print_special_events(verbose, utc, false, fps);
+                                    files[0].print_special_events(&Commandline::new(
+                                        verbose,
+                                        utc,
+                                        false,
+                                        fps.unwrap(),
+                                    ));
                                 }
                             }
                         } else if files.len() == 1 {
                             files[0].print_si_errors(verbose, utc);
-                            files[0].print_special_events(verbose, utc, fps);
+                            //files[0].print_special_events(verbose, utc, false, fps);
+                            files[0].print_special_events(&Commandline::new(
+                                verbose,
+                                utc,
+                                false,
+                                fps.unwrap(),
+                            ));
                         }
                     }
                     None => (),
@@ -212,7 +230,14 @@ impl Repl {
                                 Ok(file_index) => match file_index.try_into() {
                                     Ok(_index) => {
                                         if files.len() > _index {
-                                            files[_index].print_special_events(verbose, utc, fps);
+                                            /*                                             files[_index]
+                                            .print_special_events(verbose, utc, false, fps);*/
+                                            files[_index].print_special_events(&Commandline::new(
+                                                verbose,
+                                                utc,
+                                                false,
+                                                fps.unwrap(),
+                                            ));
                                         } else {
                                             println!("invalid index {}", file_index);
                                         }
@@ -220,11 +245,23 @@ impl Repl {
                                     _ => (),
                                 },
                                 Err(..) => {
-                                    files[0].print_special_events(verbose, utc, fps);
+                                    //files[0].print_special_events(verbose, utc, false, fps);
+                                    files[0].print_special_events(&Commandline::new(
+                                        verbose,
+                                        utc,
+                                        false,
+                                        fps.unwrap(),
+                                    ));
                                 }
                             }
                         } else if files.len() == 1 {
-                            files[0].print_special_events(verbose, utc, fps);
+                            //files[0].print_special_events(verbose, utc, false, fps);
+                            files[0].print_special_events(&Commandline::new(
+                                verbose,
+                                utc,
+                                false,
+                                fps.unwrap(),
+                            ));
                         }
                     }
                     None => (),

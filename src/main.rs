@@ -14,17 +14,12 @@ fn main() -> std::io::Result<()> {
         let filename = cmd.filename();
         match DataSet::init(filename) {
             Ok(mut dataset) => {
-                let fps: Option<i64> = if cmd.fps() == -1 {
-                    None
-                } else {
-                    Some(cmd.fps())
-                };
                 if cmd.all() || cmd.sierror() {
                     dataset.print_si_errors(cmd.verbose(), cmd.utc());
                 }
 
                 if cmd.all() || cmd.ps_event() {
-                    dataset.print_special_events(cmd.verbose(), cmd.utc(), fps);
+                    dataset.print_special_events(&cmd);
                 }
 
                 if cmd.write_csv() {
@@ -32,7 +27,7 @@ fn main() -> std::io::Result<()> {
                         cmd.csv(),
                         cmd.encoding(),
                         cmd.utc(),
-                        fps,
+                        cmd.fps(),
                     ) {
                         Err(e) => println!("{}", e),
                         Ok(..) => println!("Wrote csv to {}", cmd.csv()),

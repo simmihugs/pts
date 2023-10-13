@@ -27,6 +27,9 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     all: bool,
 
+    #[arg(short, long, default_value_t = false)]
+    only_errors: bool,
+
     #[arg(short, long, default_value_t = String::from("YOU_PICK_A_CSV"))]
     csv: String,
 
@@ -42,10 +45,33 @@ pub struct Commandline {
 }
 
 impl Commandline {
+    pub fn new(verbose: bool, utc: bool, only_errors: bool, fps: i64) -> Self {
+        Self {
+            args: Args {
+                filename: String::from(""),
+                repl: false,
+                verbose,
+                ps_event: false,
+                utc,
+                sierror: false,
+                illegalevents: String::from(""),
+                all: false,
+                only_errors,
+                csv: String::from(""),
+                encoding: String::from(""),
+                fps,
+            },
+        }
+    }
+
     pub fn parse() -> Self {
         Self {
             args: Args::parse(),
         }
+    }
+
+    pub fn only_errors(&self) -> bool {
+        self.args.only_errors
     }
 
     pub fn ps_event(&self) -> bool {
@@ -85,8 +111,16 @@ impl Commandline {
         &self.args.filename
     }
 
-    pub fn fps(&self) -> i64 {
-        self.args.fps
+    /*     pub fn fps(&self) -> i64 {
+           self.args.fps
+       }
+    */
+    pub fn fps(&self) -> Option<i64> {
+        if self.args.fps == -1 {
+            None
+        } else {
+            Some(self.args.fps)
+        }
     }
 
     pub fn csv(&self) -> &String {

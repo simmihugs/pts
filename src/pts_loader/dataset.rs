@@ -1,4 +1,5 @@
 use super::define::*;
+use crate::commandline::Commandline;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
 use colored::Colorize;
@@ -366,21 +367,45 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    pub fn print_special_events(&self, verbose: bool, utc: bool, fps: Option<i64>) {
+    pub fn print_special_events(
+        &self,
+        //verbose: bool,
+        //utc: bool,
+        //only_errors: bool,
+        //fps: Option<i64>,
+        cmd: &Commandline,
+    ) {
         let (special_events, errors) = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
-        self.print_line(verbose);
-        self.print_head(verbose && special_events.len() > 0);
-        self.print_line_cross(verbose);
-        special_events.iter().for_each(|special_event| {
-            let (lerrors, ierrors) = special_event.print_table(verbose, utc, fps);
-            self.print_line_cross(verbose);
-            id_errors += ierrors;
-            logo_errors += lerrors;
-        });
-        self.print_head(verbose && special_events.len() > 0);
-        self.print_line(verbose);
+
+        let mut new_special_events = Vec::new();
+        if cmd.only_errors() {
+            special_events.iter().for_each(|special_event| {
+                if special_event.has_id_errors() {
+                    let event = special_event.clone();
+                    new_special_events.push(event);
+                }
+            });
+        } else {
+            new_special_events = special_events.to_vec();
+        }
+        let special_events = new_special_events;
+
+        if special_events.len() > 0 {
+            self.print_line(cmd.verbose());
+            self.print_head(cmd.verbose() && special_events.len() > 0);
+            self.print_line_cross(cmd.verbose());
+            special_events.iter().for_each(|special_event| {
+                let (lerrors, ierrors) =
+                    special_event.print_table(cmd.verbose(), cmd.utc(), cmd.fps());
+                self.print_line_cross(cmd.verbose());
+                id_errors += ierrors;
+                logo_errors += lerrors;
+            });
+            self.print_head(cmd.verbose() && special_events.len() > 0);
+            self.print_line(cmd.verbose());
+        }
 
         println!(
             "{:3} id errors",
@@ -406,7 +431,7 @@ impl DataSet {
                 format!("{}", errors.len()).red()
             }
         );
-        if verbose {
+        if cmd.verbose() {
             for block in errors {
                 if block.is_begin() {
                     println!("{}", "missing end to event:".red());

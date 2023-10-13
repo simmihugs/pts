@@ -2,6 +2,7 @@ use crate::pts_loader::define::Define;
 use crate::pts_loader::event::Event;
 use colored::{ColoredString, Colorize};
 
+#[derive(Clone)]
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
 }
@@ -9,6 +10,22 @@ pub struct SpecialEvent<'a> {
 impl<'a> SpecialEvent<'a> {
     pub fn new(vec: Vec<&'a Define>) -> Self {
         Self { vec }
+    }
+
+    pub fn has_id_errors(&self) -> bool {
+        let mut found_error = false;
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    let contentid = event.get_contentid();
+                    if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
+                        found_error = true;
+                    }
+                }
+                _ => (),
+            }
+        }
+        found_error
     }
 
     fn find_logo(&self, event: &Event) -> Vec<&Define> {
@@ -63,6 +80,7 @@ impl<'a> SpecialEvent<'a> {
                         || event.get_contentid() == "e90dfb84e30edf611e32"
                         || event.get_contentid() == "b1735b7c5101727b3c6c"
                         || event.get_contentid().contains("WERBUNG")
+                        || event.get_duration() < 60_0000
                     {
                         logostr = format!("{}", "");
                     } else {
