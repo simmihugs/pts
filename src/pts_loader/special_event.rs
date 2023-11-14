@@ -47,23 +47,34 @@ impl<'a> SpecialEvent<'a> {
             })
             .collect();
 
+        let mut result = false;
+
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
+                    let mut logos = Vec::new();
+
                     for layout in &layout_events {
                         if event.get_starttime() == layout.get_event().get_starttime() {
-                            if event.get_endtime() != layout.get_event().get_endtime() {
-                                return true;
-                            }
+                            logos.push(layout);
                         }
                     }
 
                     for logo in &logo_events {
                         if event.get_starttime() <= logo.get_event().get_starttime()
                             && logo.get_event().get_starttime() <= event.get_endtime()
-                            && logo.get_event().get_endtime() > event.get_endtime()
                         {
-                            return true;
+                            logos.push(logo);
+                        }
+                    }
+
+                    if logos.len() > 0 {
+                        for logo in &logos {
+                            if logo.get_event().get_logo().contains("ERROR") {
+                                result = true;
+                            } else if logo.get_event().get_endtime() > event.get_endtime() {
+                                result = true;
+                            }
                         }
                     }
                 }
@@ -71,7 +82,7 @@ impl<'a> SpecialEvent<'a> {
             }
         }
 
-        false
+        result
     }
 
     fn find_logo(&self, event: &Event) -> Vec<&Define> {

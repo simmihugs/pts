@@ -61,8 +61,10 @@ impl Event {
     pub fn get_logo(&self) -> String {
         let mut title = self.get_title();
         match title.as_str() {
-            "HDPLUHD_LOGO_1" => "Astra links".to_string(),
-            "HDPLUHD_LOGO_2" => "Astra rechts".to_string(),
+            //"HDPLUHD_LOGO_1" => "Astra links".to_string(),
+            //"HDPLUHD_LOGO_2" => "Astra rechts".to_string(),
+            "HDPLUHD_LOGO_1" => "ERROR Astra links".to_string(),
+            "HDPLUHD_LOGO_2" => "ERROR Astra rechts".to_string(),
             "HDPLUHD_LOGO_3" => "HD Plus links".to_string(),
             "HDPLUHD_LOGO_4" => "HD Plus rechts".to_string(),
             "HDPLUHD_LOGO_5" => "Ran Live".to_string(),
