@@ -205,11 +205,11 @@ impl<'a> SpecialEvent<'a> {
                                 logostr += &format!(" {}", logo.get_event().get_logo());
                             }
                         }
-                        for (error, laoyut) in &layouts {
+                        for (error, layout) in &layouts {
                             if *error {
-                                logostr += &format!("ERROR {}", laoyut.get_event().get_logo());
+                                logostr += &format!("ERROR {}", layout.get_event().get_logo());
                             } else {
-                                logostr += &format!(" {}", laoyut.get_event().get_logo());
+                                logostr += &format!(" {}", layout.get_event().get_logo());
                             }
                         }
 
