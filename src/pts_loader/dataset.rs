@@ -375,7 +375,7 @@ impl DataSet {
         let mut new_special_events = Vec::new();
         if cmd.only_errors() {
             special_events.iter().for_each(|special_event| {
-                if special_event.has_id_errors() {
+                if special_event.has_id_errors() || special_event.has_logo_errors() {
                     let event = special_event.clone();
                     new_special_events.push(event);
                 }

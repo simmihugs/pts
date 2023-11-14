@@ -28,6 +28,52 @@ impl<'a> SpecialEvent<'a> {
         found_error
     }
 
+    pub fn has_logo_errors(&self) -> bool {
+        let layout_events: Vec<_> = self
+            .vec
+            .iter()
+            .filter(|x| match x {
+                Define::layoutEvent(..) => true,
+                _ => false,
+            })
+            .collect();
+
+        let logo_events: Vec<_> = self
+            .vec
+            .iter()
+            .filter(|x| match x {
+                Define::logoEvent(..) => true,
+                _ => false,
+            })
+            .collect();
+
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    for layout in &layout_events {
+                        if event.get_starttime() == layout.get_event().get_starttime() {
+                            if event.get_endtime() != layout.get_event().get_endtime() {
+                                return true;
+                            }
+                        }
+                    }
+
+                    for logo in &logo_events {
+                        if event.get_starttime() <= logo.get_event().get_starttime()
+                            && logo.get_event().get_starttime() <= event.get_endtime()
+                            && logo.get_event().get_endtime() > event.get_endtime()
+                        {
+                            return true;
+                        }
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        false
+    }
+
     fn find_logo(&self, event: &Event) -> Vec<&Define> {
         let mut logos = Vec::new();
 
