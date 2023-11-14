@@ -367,14 +367,7 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    pub fn print_special_events(
-        &self,
-        //verbose: bool,
-        //utc: bool,
-        //only_errors: bool,
-        //fps: Option<i64>,
-        cmd: &Commandline,
-    ) {
+    pub fn print_special_events(&self, cmd: &Commandline) {
         let (special_events, errors) = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
