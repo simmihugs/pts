@@ -197,19 +197,36 @@ impl<'a> SpecialEvent<'a> {
                         || event.get_duration() < 60_0000
                     {
                         logostr = format!("{}", "");
+                    } else if event.get_contentid().contains("UHD_IN2") {
+                        for (_error, logo) in &logos {
+                            if logo.get_event().get_logo().contains("NO LOGO") {
+                                logostr = format!("{}", "");
+                            } else {
+                                logostr += &format!("ERROR {}", logo.get_event().get_logo());
+                            }
+                        }
+                        if logostr.is_empty() {
+                            for (_error, layout) in &layouts {
+                                if layout.get_event().get_logo().contains("NO LOGO") {
+                                    logostr = format!("{}", "");
+                                } else {
+                                    logostr += &format!("ERROR {}", layout.get_event().get_logo());
+                                }
+                            }
+                        }
                     } else {
                         for (error, logo) in &logos {
                             if *error {
                                 logostr += &format!("ERROR {}", logo.get_event().get_logo());
                             } else {
-                                logostr += &format!(" {}", logo.get_event().get_logo());
+                                logostr += &format!("{}", logo.get_event().get_logo());
                             }
                         }
                         for (error, layout) in &layouts {
                             if *error {
                                 logostr += &format!("ERROR {}", layout.get_event().get_logo());
                             } else {
-                                logostr += &format!(" {}", layout.get_event().get_logo());
+                                logostr += &format!("{}", layout.get_event().get_logo());
                             }
                         }
 
