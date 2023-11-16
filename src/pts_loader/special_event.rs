@@ -29,26 +29,47 @@ impl<'a> SpecialEvent<'a> {
     }
 
     pub fn has_logo_errors(&self) -> bool {
-        let layout_events: Vec<_> = self
-            .vec
-            .iter()
-            .filter(|x| match x {
-                Define::layoutEvent(..) => true,
-                _ => false,
-            })
-            .collect();
+        /*
+               let layout_events: Vec<_> = self
+                   .vec
+                   .iter()
+                   .filter(|x| match x {
+                       Define::layoutEvent(..) => true,
+                       _ => false,
+                   })
+                   .collect();
 
-        let logo_events: Vec<_> = self
-            .vec
-            .iter()
-            .filter(|x| match x {
-                Define::logoEvent(..) => true,
-                _ => false,
-            })
-            .collect();
-
+               let logo_events: Vec<_> = self
+                   .vec
+                   .iter()
+                   .filter(|x| match x {
+                       Define::logoEvent(..) => true,
+                       _ => false,
+                   })
+                   .collect();
+        */
         let mut result = false;
 
+        //let mut logo_str: String;
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    //let (logos, logo_str) = self.find_logo_str(event);
+                    let (logos, logostr) = self.find_logo_str(event);
+
+                    if logostr.contains("ERROR") {
+                        result = true;
+                    } else if logos.len() != 0
+                        && logos[0].get_event().get_endtime() > event.get_endtime()
+                    {
+                        result = true;
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        /*
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
@@ -81,6 +102,7 @@ impl<'a> SpecialEvent<'a> {
                 _ => (),
             }
         }
+         */
 
         result
     }
@@ -125,12 +147,41 @@ impl<'a> SpecialEvent<'a> {
         logos
     }
 
+    fn find_logo_str(&self, event: &Event) -> (Vec<&Define>, String) {
+        let logos = self.find_logo(event);
+        let mut answer: String = String::new();
+        if event.get_contentid() == "cb7a119f84cb7b117b1b"
+            || event.get_contentid() == "392654926764849cd5dc"
+            || event.get_contentid() == "e90dfb84e30edf611e32"
+            || event.get_contentid() == "b1735b7c5101727b3c6c"
+            || event.get_contentid().contains("WERBUNG")
+            || event.get_duration() < 60_0000
+            || event.get_contentid() == "UHD_IN2"
+        {
+            if logos.len() != 0 {
+                println!("Should not have logos, has: {:?}", logos);
+                answer = String::from("ERROR_LOGO_FOUND");
+            }
+        } else {
+            if logos.len() > 1 {
+                println!("Should have 1 logos, has: {:?}", logos);
+                answer = String::from("ERROR_MORE_THAN_ONE_LOGO");
+            } else if logos.len() == 0 {
+                println!("Should have logos, has 0");
+                answer = String::from("ERROR_NO_LOGO_FOUND");
+            } else {
+                answer = format!("{}", logos[0].get_event().get_logo());
+            }
+        }
+        return (logos, answer);
+    }
+
     pub fn to_string(&self, utc: bool, fps: Option<i64>) -> String {
         let mut special_event = String::new();
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let logos = self.find_logo(event);
+                    /*let logos = self.find_logo(event);
                     let mut logostr = String::new();
                     if event.get_contentid() == "cb7a119f84cb7b117b1b"
                         || event.get_contentid() == "392654926764849cd5dc"
@@ -148,6 +199,8 @@ impl<'a> SpecialEvent<'a> {
                             logostr = format!("{}", "ERROR_NO_LOGO");
                         }
                     }
+                    */
+                    let (_, logostr): (Vec<_>, String) = self.find_logo_str(event);
 
                     let mut title = event.get_title();
                     if title == " -  UHD1_WERBUNG-01" {
