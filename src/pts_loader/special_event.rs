@@ -218,6 +218,13 @@ impl<'a> SpecialEvent<'a> {
                         found_first_event = true;
                     }
 
+                    if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
+                        if debug_me {
+                            println!("{}", "found error");
+                        }
+                        logoerror += 1;
+                    }
+
                     if verbose {
                         println!(
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
@@ -242,10 +249,6 @@ impl<'a> SpecialEvent<'a> {
                                 contentid.red().clear()
                             },
                             if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                                if debug_me {
-                                    println!("{}", "found error");
-                                }
-                                logoerror += 1;
                                 logostr.red()
                             } else {
                                 logostr.red().clear()
