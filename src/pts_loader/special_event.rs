@@ -113,7 +113,7 @@ impl<'a> SpecialEvent<'a> {
     }
 
     fn find_logo_str(&self, event: &Event) -> (Vec<&Define>, String) {
-        let debug_me = true;
+        let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
         if event.get_contentid() == "cb7a119f84cb7b117b1b"

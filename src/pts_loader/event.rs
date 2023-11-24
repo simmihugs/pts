@@ -138,7 +138,7 @@ impl Event {
         }
     }
 
-    pub fn print_vaevent_verbose(&self, utc: bool, fps: Option<i64>) {
+    pub fn print_vaevent_verbose(&self, time_error: &bool, utc: bool, fps: Option<i64>) {
         let contentid = self.get_contentid();
         let mut title = self.title_to_string();
         if title == " -  UHD1_WERBUNG-01" {
@@ -152,14 +152,18 @@ impl Event {
             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} |",
             title,
             self.programid_to_string(),
-            self.starttime_to_string(utc, fps).red(),
+            if *time_error {
+                self.starttime_to_string(utc, fps).red()
+            } else {
+                self.starttime_to_string(utc, fps).red().clear()
+            },
             self.endtime_to_string(utc, fps),
             if title == "Werbung" {
                 self.duration_to_string(fps).yellow()
             } else {
                 self.duration_to_string(fps).yellow().clear()
             },
-            if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
+            if contentid.contains("-") && !contentid.contains("WERB") {
                 contentid.red()
             } else {
                 contentid.red().clear()

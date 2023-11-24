@@ -91,10 +91,10 @@ impl Define {
         }
     }
 
-    pub fn print_va_event_verbose(&self, utc: bool, fps: Option<i64>) {
+    pub fn print_va_event_verbose(&self, time_error: &bool, utc: bool, fps: Option<i64>) {
         match self {
             Define::vaEvent(event) => {
-                event.print_vaevent_verbose(utc, fps);
+                event.print_vaevent_verbose(time_error, utc, fps);
             }
             _ => (),
         }

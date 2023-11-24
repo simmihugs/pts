@@ -220,7 +220,7 @@ impl DataSet {
             .collect::<Vec<&Define>>()
     }
 
-    fn get_va_events_with_errors(&self) -> Vec<&Define> {
+    fn get_va_events_with_errors(&self) -> Vec<(bool, &Define)> {
         let mut va_events = self
             .eventcommands
             .define
@@ -239,17 +239,17 @@ impl DataSet {
             let head = va_events[0];
             va_events.drain(1..).into_iter().fold(head, |acc, value| {
                 if acc.get_event().get_endtime() != value.get_event().get_starttime() {
-                    va_errors.push(value);
+                    va_errors.push((true, value));
                 } else if acc.get_event().get_contentid().contains("-")
                     && !acc.get_event().get_contentid().contains("WERBUNG")
                 {
-                    va_errors.push(acc);
+                    va_errors.push((false, acc));
                 }
                 value
             });
             va_errors
         } else {
-            va_events
+            Vec::new()
         }
     }
 
@@ -409,14 +409,12 @@ impl DataSet {
 
     pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
         let va_events = &self.get_va_events_with_errors();
-
         summary.va_errors = va_events.len() as i64;
-
         if summary.va_errors != 0 && cmd.verbose() {
             println!("VaEvent errors:");
             self.print_header_short();
-            for event in va_events {
-                event.print_va_event_verbose(cmd.utc(), cmd.fps());
+            for (time_error, event) in va_events {
+                event.print_va_event_verbose(time_error, cmd.utc(), cmd.fps());
             }
             self.print_header_short();
         }
