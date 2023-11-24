@@ -42,9 +42,7 @@ fn main() -> std::io::Result<()> {
 
                 match cmd.illegalevents() {
                     None => (),
-                    Some(illegals) => {
-                        dataset.look_for_illegals(&illegals, cmd.verbose(), cmd.utc())
-                    }
+                    Some(illegals) => dataset.look_for_illegals(&illegals, &cmd),
                 }
 
                 if cmd.no_option() {

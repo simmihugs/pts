@@ -80,7 +80,7 @@ impl DataSet {
     }
 
     #[allow(unused_variables)]
-    fn look_for_illegals_va_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    fn look_for_illegals_va_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let va_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -99,13 +99,13 @@ impl DataSet {
                 format!("{}", length).red()
             }
         );
-        if verbose {
+        if cmd.verbose() {
             va_events.iter().for_each(|x| println!("{:?}", x));
         }
     }
 
     #[allow(unused_variables)]
-    fn look_for_illegals_si_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    fn look_for_illegals_si_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let si_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -124,14 +124,14 @@ impl DataSet {
                     format!("{}", si_events.len()).red()
                 }
             );
-            if verbose {
+            if cmd.verbose() {
                 si_events.iter().for_each(|x| println!("{:?}", x));
             }
         }
     }
 
     #[allow(unused_variables)]
-    fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let logo_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -143,14 +143,14 @@ impl DataSet {
             .collect();
         if logo_events.len() > 0 {
             println!("{} illegal logoEvents found", logo_events.len());
-            if verbose {
+            if cmd.verbose() {
                 logo_events.iter().for_each(|x| println!("{:?}", x));
             }
         }
     }
 
     #[allow(unused_variables)]
-    fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, verbose: bool, utc: bool) {
+    fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let layout_events: Vec<_> = events
             .iter()
             .filter(|x| {
@@ -162,14 +162,14 @@ impl DataSet {
             .collect();
         if layout_events.len() > 0 {
             println!("{} illegal layoutEvents found", layout_events.len());
-            if verbose {
+            if cmd.verbose() {
                 layout_events.iter().for_each(|x| println!("{:?}", x));
             }
         }
     }
 
     #[allow(dead_code)]
-    pub fn look_for_illegals(&self, illegals: &Vec<String>, verbose: bool, utc: bool) {
+    pub fn look_for_illegals(&self, illegals: &Vec<String>, cmd: &Commandline) {
         let events: &Vec<&Define> = &self
             .eventcommands
             .define
@@ -187,10 +187,10 @@ impl DataSet {
         if events.len() == 0 {
             println!("{:3} illegal events found.", format!("0").green());
         } else {
-            self.look_for_illegals_si_events(events, verbose, utc);
-            self.look_for_illegals_va_events(events, verbose, utc);
-            self.look_for_illegals_logo_events(events, verbose, utc);
-            self.look_for_illegals_layout_events(events, verbose, utc);
+            self.look_for_illegals_si_events(events, cmd);
+            self.look_for_illegals_va_events(events, cmd);
+            self.look_for_illegals_logo_events(events, cmd);
+            self.look_for_illegals_layout_events(events, cmd);
         }
     }
 
