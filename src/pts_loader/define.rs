@@ -91,6 +91,15 @@ impl Define {
         }
     }
 
+    pub fn print_va_event_verbose(&self, utc: bool, fps: Option<i64>) {
+        match self {
+            Define::vaEvent(event) => {
+                event.print_vaevent_verbose(utc, fps);
+            }
+            _ => (),
+        }
+    }
+
     pub fn get_event(&self) -> &Event {
         match self {
             Define::vaEvent(ref event)
@@ -99,7 +108,7 @@ impl Define {
             | Define::layoutEvent(ref event) => event,
         }
     }
-    
+
     pub fn get_event_mut(&mut self) -> &mut Event {
         match self {
             Define::vaEvent(ref mut event)
@@ -108,5 +117,4 @@ impl Define {
             | Define::layoutEvent(ref mut event) => event,
         }
     }
-    
 }

@@ -14,12 +14,16 @@ fn main() -> std::io::Result<()> {
         let filename = cmd.filename();
         match DataSet::init(filename) {
             Ok(mut dataset) => {
-                if cmd.all() || cmd.sierror() {
-                    dataset.print_si_errors(cmd.verbose(), cmd.utc());
-                }
-
                 if cmd.all() || cmd.ps_event() {
                     dataset.print_special_events(&cmd);
+                }
+
+                if cmd.all() || cmd.vaerrors() {
+                    dataset.print_va_errors(&cmd);
+                }
+
+                if cmd.all() || cmd.sierrors() {
+                    dataset.print_si_errors(cmd.verbose(), cmd.utc());
                 }
 
                 if cmd.write_csv() {

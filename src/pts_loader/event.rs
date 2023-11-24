@@ -104,6 +104,10 @@ impl Event {
         self.contentid.clone().unwrap()
     }
 
+    pub fn get_programid(&self) -> String {
+        self.programid.clone()
+    }
+
     pub fn get_starttime(&self) -> Option<DateTime<Utc>> {
         Some(self.starttime)
     }
@@ -132,6 +136,35 @@ impl Event {
             None => (),
             Some(ref mut sistandard) => sistandard.calculate_endtime(),
         }
+    }
+
+    pub fn print_vaevent_verbose(&self, utc: bool, fps: Option<i64>) {
+        let contentid = self.get_contentid();
+        let mut title = self.title_to_string();
+        if title == " -  UHD1_WERBUNG-01" {
+            title = "Werbung".to_string();
+        } else if self.get_contentid() == "cb7a119f84cb7b117b1b" {
+            title = "Dranbleiben".to_string();
+        } else if self.get_contentid() == "392654926764849cd5dc" {
+            title = "Pausentafel ".to_string();
+        }
+        println!(
+            "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} |",
+            title,
+            self.programid_to_string(),
+            self.starttime_to_string(utc, fps).red(),
+            self.endtime_to_string(utc, fps),
+            if title == "Werbung" {
+                self.duration_to_string(fps).yellow()
+            } else {
+                self.duration_to_string(fps).yellow().clear()
+            },
+            if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
+                contentid.red()
+            } else {
+                contentid.red().clear()
+            },
+        );
     }
 
     pub fn fmt_event_verbose(&self, f: &mut fmt::Formatter<'_>, kind: &str) -> fmt::Result {

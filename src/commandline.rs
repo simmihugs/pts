@@ -19,7 +19,7 @@ struct Args {
     utc: bool,
 
     #[arg(short, long, default_value_t = false)]
-    sierror: bool,
+    sierrors: bool,
 
     #[arg(short, long, default_value_t = String::from("YOU_PICK_ILLEGAL_EVENTS"))]
     illegalevents: String,
@@ -38,6 +38,9 @@ struct Args {
 
     #[arg(long, default_value_t = -1)]
     fps: i64,
+
+    #[arg(long, default_value_t = false)]
+    vaerrors: bool,
 }
 
 pub struct Commandline {
@@ -53,13 +56,14 @@ impl Commandline {
                 verbose,
                 ps_event: false,
                 utc,
-                sierror: false,
+                sierrors: false,
                 illegalevents: String::from(""),
                 all: false,
                 only_errors,
                 csv: String::from(""),
                 encoding: String::from(""),
                 fps,
+                vaerrors: false,
             },
         }
     }
@@ -94,8 +98,12 @@ impl Commandline {
         &self.args.encoding
     }
 
-    pub fn sierror(&self) -> bool {
-        self.args.sierror
+    pub fn sierrors(&self) -> bool {
+        self.args.sierrors
+    }
+
+    pub fn vaerrors(&self) -> bool {
+        self.args.vaerrors
     }
 
     pub fn all(&self) -> bool {
@@ -143,7 +151,8 @@ impl Commandline {
             || self.all()
             || self.write_csv()
             || self.ps_event()
-            || self.sierror())
+            || self.sierrors()
+            || self.vaerrors())
     }
 
     pub fn illegalevents(&self) -> Option<Vec<String>> {

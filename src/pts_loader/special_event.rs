@@ -12,20 +12,43 @@ impl<'a> SpecialEvent<'a> {
         Self { vec }
     }
 
+    pub fn get_time_errors(&self) -> Vec<String> {
+        let mut events: Vec<_> = self
+            .vec
+            .iter()
+            .filter(|x| match x {
+                Define::vaEvent(..) => true,
+                _ => false,
+            })
+            .collect();
+        if events.len() == 0 {
+            Vec::new()
+        } else {
+            let mut errors = Vec::new();
+            let head = events[0];
+            events.drain(1..).into_iter().fold(head, |acc, value| {
+                if acc.get_event().get_endtime() != value.get_event().get_starttime() {
+                    errors.push(value.get_event().get_programid());
+                }
+                value
+            });
+            errors
+        }
+    }
+
     pub fn has_id_errors(&self) -> bool {
-        let mut found_error = false;
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
-                        found_error = true;
+                        return true;
                     }
                 }
                 _ => (),
             }
         }
-        found_error
+        false
     }
 
     pub fn has_logo_errors(&self) -> bool {
@@ -90,7 +113,7 @@ impl<'a> SpecialEvent<'a> {
     }
 
     fn find_logo_str(&self, event: &Event) -> (Vec<&Define>, String) {
-        let debug_me = false;
+        let debug_me = true;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
         if event.get_contentid() == "cb7a119f84cb7b117b1b"
@@ -98,11 +121,12 @@ impl<'a> SpecialEvent<'a> {
             || event.get_contentid() == "e90dfb84e30edf611e32"
             || event.get_contentid() == "b1735b7c5101727b3c6c"
             || event.get_contentid().contains("WERBUNG")
-            || event.get_duration() < 60_0000
+            || event.get_duration() < 60_000
             || event.get_contentid() == "UHD_IN2"
         {
             if logos.len() != 0 {
                 if debug_me {
+                    println!("{:?}", event);
                     println!("Should not have logos, has: {:?}", logos);
                 }
                 answer = String::from("ERROR_LOGO_FOUND");
@@ -161,23 +185,45 @@ impl<'a> SpecialEvent<'a> {
         special_event
     }
 
-    fn color_title(
+    fn color_starttime(
+        time_errors: &Vec<String>,
         event: &Event,
         found_first_event: &mut bool,
         found_dran_bleiben: &mut bool,
         utc: bool,
         fps: Option<i64>,
     ) -> ColoredString {
+        let mut time_error = false;
+        for id in time_errors {
+            if event.get_programid().contains(&*id) {
+                time_error = true;
+            }
+        }
+
         if *found_first_event {
             *found_first_event = false;
             *found_dran_bleiben = false;
-            event.starttime_to_string(utc, fps).cyan()
+            if time_error {
+                event.starttime_to_string(utc, fps).red()
+            } else {
+                event.starttime_to_string(utc, fps).cyan()
+            }
         } else {
-            event.starttime_to_string(utc, fps).cyan().clear()
+            if time_error {
+                event.starttime_to_string(utc, fps).red()
+            } else {
+                event.starttime_to_string(utc, fps).cyan().clear()
+            }
         }
     }
 
-    pub fn print_table(&self, verbose: bool, utc: bool, fps: Option<i64>) -> (i64, i64) {
+    pub fn print_table(
+        &self,
+        time_errors: &Vec<String>,
+        verbose: bool,
+        utc: bool,
+        fps: Option<i64>,
+    ) -> (i64, i64) {
         let mut logoerror = 0;
         let mut iderror = 0;
 
@@ -188,6 +234,17 @@ impl<'a> SpecialEvent<'a> {
             match s {
                 Define::vaEvent(event) => {
                     let (_, mut logostr) = self.find_logo_str(event);
+
+                    if debug_me {
+                        println!("{}", logostr);
+                        if logostr.is_empty()
+                            && event
+                                .get_title()
+                                .contains("Abenteuer Leben am Sonntag: Cornel")
+                        {
+                            println!("{:?}", event);
+                        }
+                    }
 
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
@@ -230,7 +287,8 @@ impl<'a> SpecialEvent<'a> {
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
                             event.programid_to_string(),
-                            SpecialEvent::color_title(
+                            SpecialEvent::color_starttime(
+                                time_errors,
                                 event,
                                 &mut found_first_event,
                                 &mut found_dran_bleiben,

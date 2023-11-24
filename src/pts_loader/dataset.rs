@@ -205,7 +205,7 @@ impl DataSet {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose, utc);
     }
 
-    pub fn get_si_events(&self) -> Vec<&Define> {
+    fn get_si_events(&self) -> Vec<&Define> {
         self.eventcommands
             .define
             .iter()
@@ -217,6 +217,39 @@ impl DataSet {
                 }
             })
             .collect::<Vec<&Define>>()
+    }
+
+    fn get_va_events_with_errors(&self) -> Vec<&Define> {
+        let mut va_events = self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::vaEvent(..) = x {
+                    true
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<&Define>>();
+
+        if va_events.len() >= 1 {
+            let mut va_errors = Vec::new();
+            let head = va_events[0];
+            va_events.drain(1..).into_iter().fold(head, |acc, value| {
+                if acc.get_event().get_endtime() != value.get_event().get_starttime() {
+                    va_errors.push(value);
+                } else if acc.get_event().get_contentid().contains("-")
+                    && !acc.get_event().get_contentid().contains("WERBUNG")
+                {
+                    va_errors.push(acc);
+                }
+                value
+            });
+            va_errors
+        } else {
+            va_events
+        }
     }
 
     fn get_special_events(&self) -> (Vec<SpecialEvent>, Vec<Block<'_>>) {
@@ -254,15 +287,15 @@ impl DataSet {
                 }
             })
             .collect::<Vec<Block<'_>>>();
-        let mut errors = Vec::new();
+        let mut special_event_errors = Vec::new();
         let mut pairs = Vec::new();
         for (i, block) in blocks.iter().enumerate() {
             if block.is_begin() && i + 1 < blocks.len() && blocks[i + 1].is_end() {
                 pairs.push((block, &blocks[i + 1]));
             } else if block.is_begin() {
-                errors.push(block.clone());
+                special_event_errors.push(block.clone());
             } else if block.is_end() && i == 0 {
-                errors.push(block.clone());
+                special_event_errors.push(block.clone());
             }
         }
 
@@ -274,7 +307,7 @@ impl DataSet {
             ));
         }
 
-        (result, errors)
+        (result, special_event_errors)
     }
 
     fn print_line(&self, verbose: bool) {
@@ -367,10 +400,34 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
+    fn print_header_short(&self) {
+        println!("|--------------------------------+-----------------+-------------------------+-------------------------+--------------+----------------------|");
+        println!("| title                          | programid       | start                   | end                     | duration     | contentid            |");
+        println!("|--------------------------------+-----------------+-------------------------+-------------------------+--------------+----------------------|");
+    }
+
+    pub fn print_va_errors(&self, cmd: &Commandline) {
+        let va_events = &self.get_va_events_with_errors();
+
+        if va_events.len() == 0 {
+            println!("{:3} vaerrors", format!("{}", va_events.len()).green());
+        } else {
+            if cmd.verbose() {
+                self.print_header_short();
+                for event in va_events {
+                    event.print_va_event_verbose(cmd.utc(), cmd.fps());
+                }
+                self.print_header_short();
+            }
+            println!("{:3} vaerrors", format!("{}", va_events.len()).red());
+        }
+    }
+
     pub fn print_special_events(&self, cmd: &Commandline) {
-        let (special_events, errors) = &self.get_special_events();
+        let (special_events, special_event_errors) = &self.get_special_events();
         let mut id_errors = 0;
         let mut logo_errors = 0;
+        let mut time_errors = 0;
 
         let mut new_special_events = Vec::new();
         if cmd.only_errors() {
@@ -390,16 +447,26 @@ impl DataSet {
             self.print_head(cmd.verbose() && special_events.len() > 0);
             self.print_line_cross(cmd.verbose());
             special_events.iter().for_each(|special_event| {
+                let terrors = special_event.get_time_errors();
                 let (lerrors, ierrors) =
-                    special_event.print_table(cmd.verbose(), cmd.utc(), cmd.fps());
+                    special_event.print_table(&terrors, cmd.verbose(), cmd.utc(), cmd.fps());
                 self.print_line_cross(cmd.verbose());
                 id_errors += ierrors;
                 logo_errors += lerrors;
+                time_errors += terrors.len();
             });
             self.print_head(cmd.verbose() && special_events.len() > 0);
             self.print_line(cmd.verbose());
         }
 
+        println!(
+            "{:3} time errors",
+            if time_errors > 0 {
+                format!("{}", time_errors).red()
+            } else {
+                format!("{}", time_errors).green()
+            }
+        );
         println!(
             "{:3} id errors",
             if id_errors > 0 {
@@ -417,15 +484,15 @@ impl DataSet {
             }
         );
         println!(
-            "{:3} special event block errors",
-            if errors.len() == 0 {
+            "{:3} special event errors",
+            if special_event_errors.len() == 0 {
                 format!("{}", 0).green()
             } else {
-                format!("{}", errors.len()).red()
+                format!("{}", special_event_errors.len()).red()
             }
         );
         if cmd.verbose() {
-            for block in errors {
+            for block in special_event_errors {
                 if block.is_begin() {
                     println!("{}", "missing end to event:".red());
                     println!("{:?}", block.event());
