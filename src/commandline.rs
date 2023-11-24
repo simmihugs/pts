@@ -48,26 +48,26 @@ pub struct Commandline {
 }
 
 impl Commandline {
-    pub fn new(verbose: bool, utc: bool, only_errors: bool, fps: i64) -> Self {
-        Self {
-            args: Args {
-                filename: String::from(""),
-                repl: false,
-                verbose,
-                ps_event: false,
-                utc,
-                sierrors: false,
-                illegalevents: String::from(""),
-                all: false,
-                only_errors,
-                csv: String::from(""),
-                encoding: String::from(""),
-                fps,
-                vaerrors: false,
-            },
-        }
-    }
-
+    /*     pub fn new(verbose: bool, utc: bool, only_errors: bool, fps: i64) -> Self {
+           Self {
+               args: Args {
+                   filename: String::from(""),
+                   repl: false,
+                   verbose,
+                   ps_event: false,
+                   utc,
+                   sierrors: false,
+                   illegalevents: String::from(""),
+                   all: false,
+                   only_errors,
+                   csv: String::from(""),
+                   encoding: String::from(""),
+                   fps,
+                   vaerrors: false,
+               },
+           }
+       }
+    */
     pub fn parse() -> Self {
         Self {
             args: Args::parse(),
@@ -88,10 +88,6 @@ impl Commandline {
 
     pub fn utc(&self) -> bool {
         self.args.utc
-    }
-
-    pub fn repl(&self) -> bool {
-        self.args.repl
     }
 
     pub fn encoding(&self) -> &String {

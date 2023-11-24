@@ -2,6 +2,7 @@ use super::define::*;
 use crate::commandline::Commandline;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
+use crate::summary::Summary;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -406,29 +407,25 @@ impl DataSet {
         println!("|--------------------------------+-----------------+-------------------------+-------------------------+--------------+----------------------|");
     }
 
-    pub fn print_va_errors(&self, cmd: &Commandline) {
+    pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
         let va_events = &self.get_va_events_with_errors();
 
-        if va_events.len() == 0 {
-            println!("{:3} vaerrors", format!("{}", va_events.len()).green());
-        } else {
-            if cmd.verbose() {
-                self.print_header_short();
-                for event in va_events {
-                    event.print_va_event_verbose(cmd.utc(), cmd.fps());
-                }
-                self.print_header_short();
+        summary.va_errors = va_events.len() as i64;
+
+        if summary.va_errors != 0 && cmd.verbose() {
+            println!("VaEvent errors:");
+            self.print_header_short();
+            for event in va_events {
+                event.print_va_event_verbose(cmd.utc(), cmd.fps());
             }
-            println!("{:3} vaerrors", format!("{}", va_events.len()).red());
+            self.print_header_short();
         }
     }
 
-    pub fn print_special_events(&self, cmd: &Commandline) {
+    pub fn print_special_events(&self, summary: &mut Summary, cmd: &Commandline) {
         let (special_events, special_event_errors) = &self.get_special_events();
-        let mut id_errors = 0;
-        let mut logo_errors = 0;
-        let mut time_errors = 0;
 
+        summary.special_event_errors = special_event_errors.len() as i64;
         let mut new_special_events = Vec::new();
         if cmd.only_errors() {
             special_events.iter().for_each(|special_event| {
@@ -443,6 +440,7 @@ impl DataSet {
         let special_events = new_special_events;
 
         if special_events.len() > 0 {
+            println!("Special events:");
             self.print_line(cmd.verbose());
             self.print_head(cmd.verbose() && special_events.len() > 0);
             self.print_line_cross(cmd.verbose());
@@ -451,46 +449,14 @@ impl DataSet {
                 let (lerrors, ierrors) =
                     special_event.print_table(&terrors, cmd.verbose(), cmd.utc(), cmd.fps());
                 self.print_line_cross(cmd.verbose());
-                id_errors += ierrors;
-                logo_errors += lerrors;
-                time_errors += terrors.len();
+                summary.id_errors += ierrors;
+                summary.logo_errors += lerrors;
+                summary.time_errors += terrors.len() as i64;
             });
             self.print_head(cmd.verbose() && special_events.len() > 0);
             self.print_line(cmd.verbose());
         }
 
-        println!(
-            "{:3} time errors",
-            if time_errors > 0 {
-                format!("{}", time_errors).red()
-            } else {
-                format!("{}", time_errors).green()
-            }
-        );
-        println!(
-            "{:3} id errors",
-            if id_errors > 0 {
-                format!("{}", id_errors).red()
-            } else {
-                format!("{}", id_errors).green()
-            }
-        );
-        println!(
-            "{:3} logo errors",
-            if logo_errors > 0 {
-                format!("{}", logo_errors).red()
-            } else {
-                format!("{}", logo_errors).green()
-            }
-        );
-        println!(
-            "{:3} special event errors",
-            if special_event_errors.len() == 0 {
-                format!("{}", 0).green()
-            } else {
-                format!("{}", special_event_errors.len()).red()
-            }
-        );
         if cmd.verbose() {
             for block in special_event_errors {
                 if block.is_begin() {
@@ -505,7 +471,7 @@ impl DataSet {
     }
 
     #[allow(dead_code)]
-    pub fn print_si_errors(&mut self, verbose: bool, utc: bool) {
+    pub fn print_si_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
         let mut si_events: Vec<&Define> = self.get_si_events();
 
         if si_events.len() > 1 {
@@ -521,37 +487,37 @@ impl DataSet {
                 }
             });
 
-            let nerrors = format!(
-                "{}",
-                &si_errors.iter().fold(0, |mut acc, value| {
-                    let (err, display_err, _, _) = value;
+            summary.si_errors = si_errors.iter().fold(0, |mut acc, value| {
+                let (err, display_err, _, _) = value;
 
-                    if let SiError::Overlap = **err {
-                        acc += 1;
-                    } else if let SiError::Gap = **err {
-                        acc += 1;
-                    }
-
-                    if let SiError::Gap = **display_err {
-                        acc += 1;
-                    } else if let SiError::Overlap = **display_err {
-                        acc += 1;
-                    }
-
-                    acc
-                })
-            );
-
-            println!(
-                "{:3} sierrors",
-                if 0 == si_errors.len() {
-                    nerrors.green()
-                } else {
-                    nerrors.red()
+                if let SiError::Overlap = **err {
+                    acc += 1;
+                } else if let SiError::Gap = **err {
+                    acc += 1;
                 }
-            );
+
+                if let SiError::Gap = **display_err {
+                    acc += 1;
+                } else if let SiError::Overlap = **display_err {
+                    acc += 1;
+                }
+
+                acc
+            });
+
+            if summary.si_errors > 0 {
+                println!("SiEvent errors:");
+            }
+
             for (err, display_err, event, next_event) in si_errors {
-                self.print_si_error_verbose(err, display_err, event, next_event, verbose, utc);
+                self.print_si_error_verbose(
+                    err,
+                    display_err,
+                    event,
+                    next_event,
+                    cmd.verbose(),
+                    cmd.utc(),
+                );
             }
         }
     }
