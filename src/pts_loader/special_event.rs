@@ -94,17 +94,13 @@ impl<'a> SpecialEvent<'a> {
             .collect();
 
         for layout in &layout_events {
-            if event.get_starttime() == layout.get_event().get_starttime() {
-                if event.get_endtime() == layout.get_event().get_endtime() {
-                    logos.push(**layout);
-                }
+            if layout.get_event().get_programid() == event.get_programid() {
+                logos.push(**layout);
             }
         }
 
         for logo in &logo_events {
-            if event.get_starttime() <= logo.get_event().get_starttime()
-                && logo.get_event().get_starttime() <= event.get_endtime()
-            {
+            if logo.get_event().get_programid() == event.get_programid() {
                 logos.push(**logo);
             }
         }
@@ -154,16 +150,17 @@ impl<'a> SpecialEvent<'a> {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let (_, logostr): (Vec<_>, String) = self.find_logo_str(event);
+                    let (logos, logostr): (Vec<_>, String) = self.find_logo_str(event);
 
                     let mut title = event.get_title();
-                    if title == " -  UHD1_WERBUNG-01" {
+                    let contentid = event.get_contentid();
+                    if contentid == "UHD1_WERBUNG-01" {
                         title = String::from("Werbung");
                     } else if title.contains(",") {
                         title = title.replace(",", "-");
-                    } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
+                    } else if contentid == "cb7a119f84cb7b117b1b" {
                         title += " - Dranbleiben";
-                    } else if event.get_contentid() == "392654926764849cd5dc" {
+                    } else if contentid == "392654926764849cd5dc" {
                         title += " - Pausetafel";
                     }
 
@@ -176,6 +173,17 @@ impl<'a> SpecialEvent<'a> {
                         event.get_contentid(),
                         logostr,
                     );
+                    for logo in &logos {
+                        special_event += &format!(
+                            "{};{};{};{};{};{}\n",
+                            "",
+                            logo.get_event().starttime_to_string(utc, fps),
+                            logo.get_event().endtime_to_string(utc, fps),
+                            logo.get_event().duration_to_string(fps),
+                            logo.get_event().get_contentid(),
+                            logo.get_event().get_logo(),
+                        );
+                    }
                 }
                 _ => (),
             }
@@ -233,7 +241,7 @@ impl<'a> SpecialEvent<'a> {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let (_, mut logostr) = self.find_logo_str(event);
+                    let (logos, mut logostr) = self.find_logo_str(event);
 
                     if debug_me {
                         println!("{}", logostr);
@@ -312,6 +320,23 @@ impl<'a> SpecialEvent<'a> {
                                 logostr.red().clear()
                             },
                         );
+                        for logo in &logos {
+                            let mut logostr = logo.get_event().get_logo();
+                            if logostr.len() > 14 {
+                                logostr = logostr.drain(0..14).collect::<String>();
+                            }
+
+                            println!(
+                                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                                " ",
+                                logo.get_event().programid_to_string().green(),
+                                logo.get_event().starttime_to_string(utc, fps).green(),
+                                logo.get_event().endtime_to_string(utc, fps).green(),
+                                logo.get_event().duration_to_string(fps).green(),
+                                logo.get_event().get_contentid().green(),
+                                logostr.green(),
+                            );
+                        }
                     }
                 }
                 _ => (),
