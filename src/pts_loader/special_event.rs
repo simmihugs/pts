@@ -193,6 +193,7 @@ impl<'a> SpecialEvent<'a> {
             }
         }
         special_event += &format!(";;;;;\n");
+        special_event += &format!(";;;;;\n");
 
         special_event
     }
