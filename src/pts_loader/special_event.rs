@@ -129,17 +129,21 @@ impl<'a> SpecialEvent<'a> {
             }
         } else {
             if logos.len() > 1 {
-                if debug_me {
-                    println!("Should have 1 logos, has: {:?}", logos);
+                if event.get_contentid() == "UHD_LIVE" {
+                    //answer = String::from("UHD_LIVE_LOGOS");
+                } else {
+                    if debug_me {
+                        println!("Should have 1 logos, has: {:?}", logos);
+                    }
+                    answer = String::from("ERROR_MORE_THAN_ONE_LOGO");
                 }
-                answer = String::from("ERROR_MORE_THAN_ONE_LOGO");
             } else if logos.len() == 0 {
                 if debug_me {
                     println!("Should have logos, has 0");
                 }
                 answer = String::from("ERROR_NO_LOGO_FOUND");
             } else {
-                answer = format!("{}", logos[0].get_event().get_logo());
+                //answer = format!("{}", logos[0].get_event().get_logo());
             }
         }
         return (logos, answer);
