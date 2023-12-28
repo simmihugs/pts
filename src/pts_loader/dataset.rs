@@ -313,7 +313,7 @@ impl DataSet {
 
     fn print_line(&self, verbose: bool) {
         if verbose {
-            println!("|{}|", self.line(158));
+            println!("|{}|", self.line(166));
         }
     }
 
@@ -329,8 +329,9 @@ impl DataSet {
     fn print_line_cross(&self, verbose: bool) {
         if verbose {
             println!(
-                "|{}+{}+{}+{}+{}+{}+{}|",
+                "|{}+{}+{}+{}+{}+{}+{}+{}|",
                 self.line(32),
+                self.line(7),
                 self.line(17),
                 self.line(25),
                 self.line(25),
@@ -344,8 +345,8 @@ impl DataSet {
     fn print_head(&self, verbose: bool) {
         if verbose {
             println!(
-                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-                "title", "programid", "start", "end", "duration", "contentid", "logo",
+                "| {:30} | {:5} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                "title", "text", "programid", "start", "end", "duration", "contentid", "logo",
             );
         }
     }
