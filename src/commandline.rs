@@ -1,6 +1,7 @@
 use clap::{CommandFactory, Parser};
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 //use serde_json::json;
 use crate::pts_loader::sistandard::*;
 use chrono::{DateTime, Utc};
@@ -69,8 +70,6 @@ struct Args {
 
     #[arg(long, default_value_t = String::from(""))]
     valid_range: String,
-    // #[arg(long)]
-    // valid_range: Option<Range>,
 }
 
 pub struct Commandline {
@@ -85,16 +84,69 @@ impl Commandline {
     }
 
     pub fn valid_range(&self) -> Option<Range> {
+        let is_debug = false;
         match serde_json::from_str::<Range>(&self.args.valid_range) {
             Err(error) => {
-                println!("{:?}", error);
-                None
+                if error.is_eof() {
+                    None
+                } else if error.is_syntax() {
+                    if is_debug {
+                        println!("{}", "error is syntax");
+                    }
+
+                    let range_parts: Vec<Vec<String>> = self
+                        .args
+                        .valid_range
+                        .to_string()
+                        .split(";")
+                        .map(|x| x.to_string().split("=").map(|y| y.to_string()).collect())
+                        .collect();
+
+                    if range_parts.len() == 2 {
+                        if range_parts[0].len() == 2 && range_parts[1].len() == 2 {
+                            let json = json!({
+                                "startTime": format!("{}", range_parts[0][1]),
+                                "endTime": format!("{}", range_parts[1][1])
+                            });
+
+                            match serde_json::from_value::<Range>(json) {
+                                Err(err) => {
+                                    if is_debug {
+                                        println!("{:?}", err);
+                                    }
+                                    None
+                                }
+                                Ok(json) => {
+                                    if is_debug {
+                                        println!("{:?}", json);
+                                    }
+                                    if json.start_time < json.end_time {
+                                        Some(json)
+                                    } else {
+                                        if is_debug {
+                                            println!("Invalid range: {:?}", json);
+                                        }
+                                        None
+                                    }
+                                }
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
             }
             Ok(range) => {
                 if range.start_time < range.end_time {
                     Some(range)
                 } else {
-                    println!("Invalid range: {:?}", range);
+                    if is_debug {
+                        println!("Invalid range: {:?}", range);
+                    }
                     None
                 }
             }
