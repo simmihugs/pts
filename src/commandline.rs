@@ -1,6 +1,28 @@
 use clap::{CommandFactory, Parser};
 
-#[derive(Parser, Debug)]
+use serde::{Deserialize, Serialize};
+//use serde_json::json;
+use crate::pts_loader::sistandard::*;
+use chrono::{DateTime, Utc};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Range {
+    #[serde(rename = "startTime")]
+    #[serde(deserialize_with = "starttime_from_str")]
+    pub start_time: DateTime<Utc>,
+
+    #[serde(rename = "endTime")]
+    #[serde(deserialize_with = "starttime_from_str")]
+    pub end_time: DateTime<Utc>,
+}
+
+impl std::fmt::Display for Range {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.start_time, self.end_time)
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize, Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     #[arg(short, long, default_value_t = String::from("YOU_PICK_A_FILE"))]
@@ -44,6 +66,11 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     missing_texts: bool,
+
+    #[arg(long, default_value_t = String::from(""))]
+    valid_range: String,
+    // #[arg(long)]
+    // valid_range: Option<Range>,
 }
 
 pub struct Commandline {
@@ -54,6 +81,23 @@ impl Commandline {
     pub fn parse() -> Self {
         Self {
             args: Args::parse(),
+        }
+    }
+
+    pub fn valid_range(&self) -> Option<Range> {
+        match serde_json::from_str::<Range>(&self.args.valid_range) {
+            Err(error) => {
+                println!("{:?}", error);
+                None
+            }
+            Ok(range) => {
+                if range.start_time < range.end_time {
+                    Some(range)
+                } else {
+                    println!("Invalid range: {:?}", range);
+                    None
+                }
+            }
         }
     }
 

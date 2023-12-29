@@ -5,6 +5,7 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct Event {
     #[serde(rename = "eventId")]

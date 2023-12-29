@@ -1,5 +1,5 @@
 use super::define::*;
-use crate::commandline::Commandline;
+use crate::commandline::{Commandline, Range};
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
 use crate::summary::Summary;
@@ -576,6 +576,18 @@ impl DataSet {
             if cmd.verbose() {
                 println!("{:?}\n", s);
             }
+        }
+    }
+
+    pub fn print_range(&mut self, range: &Range) {
+        for s in self.get_si_events().iter().filter(|event| {
+            let e = event.get_event();
+            match e.get_starttime() {
+                Some(start) => range.start_time < start && start <= range.end_time,
+                _ => false,
+            }
+        }) {
+            println!("{:?}\n", s);
         }
     }
 

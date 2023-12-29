@@ -6,6 +6,7 @@ use commandline::Commandline;
 use pts_loader::dataset::DataSet;
 use summary::Summary;
 
+
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
     if cmd.filename() == "YOU_PICK_A_FILE" {
@@ -30,6 +31,13 @@ fn main() -> std::io::Result<()> {
                 if cmd.all() || cmd.missing_texts() {
                     dataset.print_missing_text_errors(&mut summary, &cmd);
                 }
+
+		match cmd.valid_range() {
+		    None => (),
+		    Some(range) => {
+			dataset.print_range(&range);
+		    },
+		}
 
                 summary.print(&cmd);
 
