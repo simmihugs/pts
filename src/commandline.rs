@@ -42,7 +42,7 @@ struct Args {
     #[arg(long, default_value_t = false)]
     vaerrors: bool,
 
-    #[arg(long, default_value_t = true)]
+    #[arg(short, long, default_value_t = false)]
     missing_texts: bool,
 }
 
@@ -131,7 +131,8 @@ impl Commandline {
             || self.write_csv()
             || self.ps_event()
             || self.sierrors()
-            || self.vaerrors())
+            || self.vaerrors()
+            || self.missing_texts())
     }
 
     pub fn illegalevents(&self) -> Option<Vec<String>> {
