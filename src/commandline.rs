@@ -41,6 +41,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     vaerrors: bool,
+
+    #[arg(long, default_value_t = true)]
+    missing_texts: bool,
 }
 
 pub struct Commandline {
@@ -48,26 +51,6 @@ pub struct Commandline {
 }
 
 impl Commandline {
-    /*     pub fn new(verbose: bool, utc: bool, only_errors: bool, fps: i64) -> Self {
-           Self {
-               args: Args {
-                   filename: String::from(""),
-                   repl: false,
-                   verbose,
-                   ps_event: false,
-                   utc,
-                   sierrors: false,
-                   illegalevents: String::from(""),
-                   all: false,
-                   only_errors,
-                   csv: String::from(""),
-                   encoding: String::from(""),
-                   fps,
-                   vaerrors: false,
-               },
-           }
-       }
-    */
     pub fn parse() -> Self {
         Self {
             args: Args::parse(),
@@ -102,6 +85,10 @@ impl Commandline {
         self.args.vaerrors
     }
 
+    pub fn missing_texts(&self) -> bool {
+        self.args.missing_texts
+    }
+
     pub fn all(&self) -> bool {
         self.args.all
     }
@@ -115,10 +102,6 @@ impl Commandline {
         &self.args.filename
     }
 
-    /*     pub fn fps(&self) -> i64 {
-           self.args.fps
-       }
-    */
     pub fn fps(&self) -> Option<i64> {
         if self.args.fps == -1 {
             None

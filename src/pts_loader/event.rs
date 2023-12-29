@@ -128,6 +128,13 @@ impl Event {
         }
     }
 
+    pub fn get_text(&self) -> Option<String> {
+        match &self.sistandard {
+            None => None,
+            Some(sistandard) => Some(sistandard.get_text()),
+        }
+    }
+
     pub fn get_dendtime(&self) -> Option<DateTime<Utc>> {
         match &self.sistandard {
             None => None,

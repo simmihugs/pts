@@ -313,7 +313,7 @@ impl DataSet {
 
     fn print_line(&self, verbose: bool) {
         if verbose {
-            println!("|{}|", self.line(166));
+            println!("|{}|", self.line(158));
         }
     }
 
@@ -329,9 +329,8 @@ impl DataSet {
     fn print_line_cross(&self, verbose: bool) {
         if verbose {
             println!(
-                "|{}+{}+{}+{}+{}+{}+{}+{}|",
+                "|{}+{}+{}+{}+{}+{}+{}|",
                 self.line(32),
-                self.line(7),
                 self.line(17),
                 self.line(25),
                 self.line(25),
@@ -345,8 +344,8 @@ impl DataSet {
     fn print_head(&self, verbose: bool) {
         if verbose {
             println!(
-                "| {:30} | {:5} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-                "title", "text", "programid", "start", "end", "duration", "contentid", "logo",
+                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                "title", "programid", "start", "end", "duration", "contentid", "logo",
             );
         }
     }
@@ -517,6 +516,65 @@ impl DataSet {
                     cmd.verbose(),
                     cmd.utc(),
                 );
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
+        for s in self.get_si_events().iter().filter(|event| {
+            !(vec![
+                "Derzeit keine UHD-Sendung im Programm",
+                "Derzeit kein UHD Event",
+                "Majestic Nature",
+                "Free Fenster",
+                "Nachtschleife",
+                "Costa Rica",
+                "Moglis Jungle Teil 3",
+                "Sendepause",
+                "Tomorrowland Movie",
+                "Tomorrowland 2018 Aftermovie_1",
+                "Red Bull Flying Bach",
+                "Moglis Jungle Teil 1",
+                "Moglis Jungle Teil 2",
+                "Der Weg nach oben",
+                "The Shot",
+                "Schlagerkreuzfahrt",
+                "Marco Polo Reisereportage",
+                "Marco Polo Reisereportage: Mumbai",
+                "African Animals",
+                "Makerspace - Paradies der Prototypen",
+                "DEMO-HLG-ARTE-2018 v2",
+                "Nasa Highlights",
+                "Kajaking im Fluss",
+                "Autonotizen.de",
+                "Ferrari - The Big 5",
+                "Daytona",
+                "DLXM Session: Madeleine Juno",
+                "DLXM Session: Michael Schulte",
+                "DXLM Session: Elif",
+                "DLXM Session: Tim Bendzko",
+                "DLXM Session: Max Giesinger",
+                "DLXM Session: Lea",
+                "DLXM Session: Bausa",
+                "DLXM Session: Wincent Weis",
+                "DXLM Session: Clueso",
+                "DLXM Session: James Blunt",
+                "DLXM Session: Sportfreunde Stiller",
+                "DLXM Session: Malik Harris",
+                "DLXM Session: Freya Ridings",
+            ]
+            .iter()
+            .map(|x| x.to_string() == event.get_event().get_title())
+            .fold(false, |acc, value| acc || value))
+                && (match event.get_event().get_text() {
+                    None => false,
+                    Some(text) => text == "",
+                })
+        }) {
+            summary.text_error += 1;
+            if cmd.verbose() {
+                println!("{:?}\n", s);
             }
         }
     }

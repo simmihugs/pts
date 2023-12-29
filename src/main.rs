@@ -26,6 +26,11 @@ fn main() -> std::io::Result<()> {
                 if cmd.all() || cmd.sierrors() {
                     dataset.print_si_errors(&mut summary, &cmd);
                 }
+
+                if cmd.all() || cmd.missing_texts() {
+                    dataset.print_missing_text_errors(&mut summary, &cmd);
+                }
+
                 summary.print(&cmd);
 
                 if cmd.write_csv() {

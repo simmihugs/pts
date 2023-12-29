@@ -297,9 +297,8 @@ impl<'a> SpecialEvent<'a> {
 
                     if verbose {
                         println!(
-                            "| {:30} | {:5} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                            "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
-                            "x",
                             event.programid_to_string(),
                             SpecialEvent::color_starttime(
                                 time_errors,
@@ -333,8 +332,7 @@ impl<'a> SpecialEvent<'a> {
                             }
 
                             println!(
-                                "| {:30} | {:5} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-                                " ",
+                                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                                 " ",
                                 logo.get_event().programid_to_string().green(),
                                 logo.get_event().starttime_to_string(utc, fps).green(),

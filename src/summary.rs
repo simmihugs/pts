@@ -8,6 +8,7 @@ pub struct Summary {
     pub special_event_errors: i64,
     pub va_errors: i64,
     pub si_errors: i64,
+    pub text_error: i64,
 }
 
 impl Summary {
@@ -19,6 +20,7 @@ impl Summary {
             special_event_errors: 0,
             va_errors: 0,
             si_errors: 0,
+            text_error: 0,
         }
     }
 
@@ -80,6 +82,17 @@ impl Summary {
                     format!("{}", self.si_errors).green()
                 } else {
                     format!("{}", self.si_errors).red()
+                }
+            );
+        }
+
+        if cmd.all() || cmd.missing_texts() {
+            println!(
+                "{:3} missing_texts",
+                if self.text_error == 0 {
+                    format!("{}", self.text_error).green()
+                } else {
+                    format!("{}", self.text_error).red()
                 }
             );
         }

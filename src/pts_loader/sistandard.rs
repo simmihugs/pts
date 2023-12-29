@@ -5,6 +5,26 @@ use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub struct Description {
+    #[serde(rename = "languageCode")]
+    languagecode: String,
+
+    #[serde(rename = "eventName")]
+    eventname: String,
+
+    #[serde(rename = "shortDescription")]
+    shortdescription: String,
+
+    #[serde(rename = "longDescription")]
+    longdescription: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
+pub struct SiDescriptions {
+    description: Description,
+}
+
+#[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct SiStandard {
     #[serde(rename = "displayedStart")]
     #[serde(deserialize_with = "starttime_from_str")]
@@ -15,6 +35,9 @@ pub struct SiStandard {
     duration: i64,
 
     endtime: Option<DateTime<Utc>>,
+
+    #[serde(rename = "siDescriptions")]
+    sidescriptions: SiDescriptions,
 }
 
 impl fmt::Debug for SiStandard {
@@ -24,6 +47,10 @@ impl fmt::Debug for SiStandard {
 }
 
 impl SiStandard {
+    pub fn get_text(&self) -> String {
+        self.sidescriptions.description.longdescription.to_string()
+    }
+
     #[allow(dead_code)]
     pub fn calculate_endtime(&mut self) {
         self.endtime = Some(self.starttime + Duration::milliseconds(self.duration));
@@ -43,17 +70,24 @@ impl SiStandard {
             "starttime:",
             self.starttime.format("%Y-%m-%dT%H:%M:%S%.3fZ")
         );
+
         let endtime = match &self.endtime {
             None => "None".to_string(),
             Some(endtime) => {
                 format!(
-                    "\n\t\t{:10} {}\n\t",
+                    "\n\t\t{:10} {}\t",
                     "endtime:",
                     endtime.format("%Y-%m-%dT%H:%M:%S%.3fZ")
                 )
             }
         };
-        write!(f, "SiStandard: {{{startime}{endtime}}}",)
+
+        let text = format!(
+            "\n\t\t{:10} {}\n\t",
+            "longDescription:", &self.sidescriptions.description.longdescription
+        );
+
+        write!(f, "SiStandard: {{{startime}{endtime}{text}}}",)
     }
 
     #[allow(dead_code, unused_variables)]
