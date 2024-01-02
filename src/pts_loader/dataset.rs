@@ -350,33 +350,30 @@ impl DataSet {
         }
     }
 
-    pub fn write_special_events_csv(
-        &self,
-        filename: &str,
-        encoding: &String,
-        utc: bool,
-        fps: Option<i64>,
-    ) -> std::io::Result<()> {
+    pub fn write_special_events_csv(&self, cmd: &Commandline) -> std::io::Result<()> {
         use std::env;
 
         let (special_events, _errors) = &self.get_special_events();
-        let mut file = File::create(filename)?;
+        let mut file = File::create(cmd.filename())?;
         match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
             _ => (),
         }
         special_events.iter().for_each(|special_event| {
-            if encoding == "windows1252" || encoding.contains("1252") || encoding.contains("win") {
-                match self.write_1252(&mut file, &special_event, utc, fps) {
+            if cmd.encoding() == "windows1252"
+                || cmd.encoding().contains("1252")
+                || cmd.encoding().contains("win")
+            {
+                match self.write_1252(&mut file, &special_event, cmd) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
-            } else if encoding == "utf-8" || encoding.contains("linux") {
-                match file.write_all(special_event.to_string(utc, fps).as_bytes()) {
+            } else if cmd.encoding() == "utf-8" || cmd.encoding().contains("linux") {
+                match file.write_all(special_event.to_string(cmd).as_bytes()) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if env::consts::OS == "windows" {
-                match self.write_1252(&mut file, &special_event, utc, fps) {
+                match self.write_1252(&mut file, &special_event, cmd) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
@@ -392,10 +389,9 @@ impl DataSet {
         &self,
         file: &mut File,
         special_event: &SpecialEvent<'_>,
-        utc: bool,
-        fps: Option<i64>,
+        cmd: &Commandline,
     ) -> std::io::Result<()> {
-        let text = special_event.to_string(utc, fps);
+        let text = special_event.to_string(cmd);
         let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
 
         file.write_all(&windows_1252_encoded_string.as_ref())
@@ -427,7 +423,7 @@ impl DataSet {
         let mut new_special_events = Vec::new();
         if cmd.only_errors() {
             special_events.iter().for_each(|special_event| {
-                if special_event.has_id_errors() || special_event.has_logo_errors() {
+                if special_event.has_id_errors() || special_event.has_logo_errors(cmd) {
                     let event = special_event.clone();
                     new_special_events.push(event);
                 }
@@ -444,8 +440,7 @@ impl DataSet {
             self.print_line_cross(cmd.verbose());
             special_events.iter().for_each(|special_event| {
                 let terrors = special_event.get_time_errors();
-                let (lerrors, ierrors) =
-                    special_event.print_table(&terrors, cmd.verbose(), cmd.utc(), cmd.fps());
+                let (lerrors, ierrors) = special_event.print_table(&terrors, cmd);
                 self.print_line_cross(cmd.verbose());
                 summary.id_errors += ierrors;
                 summary.logo_errors += lerrors;

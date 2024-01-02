@@ -1,5 +1,5 @@
-use crate::pts_loader::define::Define;
 use crate::pts_loader::event::Event;
+use crate::{commandline::Commandline, pts_loader::define::Define};
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
@@ -51,11 +51,11 @@ impl<'a> SpecialEvent<'a> {
         false
     }
 
-    pub fn has_logo_errors(&self) -> bool {
+    pub fn has_logo_errors(&self, cmd: &Commandline) -> bool {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let (logos, logostr) = self.find_logo_str(event);
+                    let (logos, logostr) = self.find_logo_str(event, cmd);
 
                     if logostr.contains("ERROR") {
                         return true;
@@ -108,7 +108,7 @@ impl<'a> SpecialEvent<'a> {
         logos
     }
 
-    fn find_logo_str(&self, event: &Event) -> (Vec<&Define>, String) {
+    fn find_logo_str(&self, event: &Event, cmd: &Commandline) -> (Vec<&Define>, String) {
         let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
@@ -143,18 +143,35 @@ impl<'a> SpecialEvent<'a> {
                 }
                 answer = String::from("ERROR_NO_LOGO_FOUND");
             } else {
+                for logo in &logos {
+                    match logo {
+                        Define::layoutEvent(levent) => {
+                            if levent.get_starttime() != event.get_starttime()
+                                || levent.get_endtime() != event.get_endtime()
+                            {
+                                answer = String::from("ERROR_TIME_LOGO");
+                            } else {
+                                if cmd.debug() {
+                                    println!("{:?}", event);
+                                    println!("{:?}", levent);
+                                }
+                            }
+                        }
+                        _ => (),
+                    }
+                }
                 //answer = format!("{}", logos[0].get_event().get_logo());
             }
         }
         return (logos, answer);
     }
 
-    pub fn to_string(&self, utc: bool, fps: Option<i64>) -> String {
+    pub fn to_string(&self, cmd: &Commandline) -> String {
         let mut special_event = String::new();
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let (logos, logostr): (Vec<_>, String) = self.find_logo_str(event);
+                    let (logos, logostr): (Vec<_>, String) = self.find_logo_str(event, cmd);
 
                     let mut title = event.get_title();
                     let contentid = event.get_contentid();
@@ -171,9 +188,9 @@ impl<'a> SpecialEvent<'a> {
                     special_event += &format!(
                         "{};{};{};{};{};{}\n",
                         title,
-                        event.starttime_to_string(utc, fps),
-                        event.endtime_to_string(utc, fps),
-                        event.duration_to_string(fps),
+                        event.starttime_to_string(cmd.utc(), cmd.fps()),
+                        event.endtime_to_string(cmd.utc(), cmd.fps()),
+                        event.duration_to_string(cmd.fps()),
                         event.get_contentid(),
                         logostr,
                     );
@@ -181,9 +198,9 @@ impl<'a> SpecialEvent<'a> {
                         special_event += &format!(
                             "{};{};{};{};{};{}\n",
                             "",
-                            logo.get_event().starttime_to_string(utc, fps),
-                            logo.get_event().endtime_to_string(utc, fps),
-                            logo.get_event().duration_to_string(fps),
+                            logo.get_event().starttime_to_string(cmd.utc(), cmd.fps()),
+                            logo.get_event().endtime_to_string(cmd.utc(), cmd.fps()),
+                            logo.get_event().duration_to_string(cmd.fps()),
                             logo.get_event().get_contentid(),
                             logo.get_event().get_logo(),
                         );
@@ -230,13 +247,7 @@ impl<'a> SpecialEvent<'a> {
         }
     }
 
-    pub fn print_table(
-        &self,
-        time_errors: &Vec<String>,
-        verbose: bool,
-        utc: bool,
-        fps: Option<i64>,
-    ) -> (i64, i64) {
+    pub fn print_table(&self, time_errors: &Vec<String>, cmd: &Commandline) -> (i64, i64) {
         let mut logoerror = 0;
         let mut iderror = 0;
 
@@ -246,7 +257,7 @@ impl<'a> SpecialEvent<'a> {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let (logos, mut logostr) = self.find_logo_str(event);
+                    let (logos, mut logostr) = self.find_logo_str(event, cmd);
 
                     if debug_me {
                         println!("{}", logostr);
@@ -295,7 +306,7 @@ impl<'a> SpecialEvent<'a> {
                         logoerror += 1;
                     }
 
-                    if verbose {
+                    if cmd.verbose() {
                         println!(
                             "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
@@ -305,14 +316,14 @@ impl<'a> SpecialEvent<'a> {
                                 event,
                                 &mut found_first_event,
                                 &mut found_dran_bleiben,
-                                utc,
-                                fps
+                                cmd.utc(),
+                                cmd.fps()
                             ),
-                            event.endtime_to_string(utc, fps),
+                            event.endtime_to_string(cmd.utc(), cmd.fps()),
                             if title == "Werbung" {
-                                event.duration_to_string(fps).yellow()
+                                event.duration_to_string(cmd.fps()).yellow()
                             } else {
-                                event.duration_to_string(fps).yellow().clear()
+                                event.duration_to_string(cmd.fps()).yellow().clear()
                             },
                             if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                                 contentid.red()
@@ -335,9 +346,13 @@ impl<'a> SpecialEvent<'a> {
                                 "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                                 " ",
                                 logo.get_event().programid_to_string().green(),
-                                logo.get_event().starttime_to_string(utc, fps).green(),
-                                logo.get_event().endtime_to_string(utc, fps).green(),
-                                logo.get_event().duration_to_string(fps).green(),
+                                logo.get_event()
+                                    .starttime_to_string(cmd.utc(), cmd.fps())
+                                    .green(),
+                                logo.get_event()
+                                    .endtime_to_string(cmd.utc(), cmd.fps())
+                                    .green(),
+                                logo.get_event().duration_to_string(cmd.fps()).green(),
                                 logo.get_event().get_contentid().green(),
                                 logostr.green(),
                             );

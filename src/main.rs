@@ -6,7 +6,6 @@ use commandline::Commandline;
 use pts_loader::dataset::DataSet;
 use summary::Summary;
 
-
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
     if cmd.filename() == "YOU_PICK_A_FILE" {
@@ -32,22 +31,17 @@ fn main() -> std::io::Result<()> {
                     dataset.print_missing_text_errors(&mut summary, &cmd);
                 }
 
-		match cmd.valid_range() {
-		    None => (),
-		    Some(range) => {
-			dataset.print_range(&range);
-		    },
-		}
+                match cmd.valid_range() {
+                    None => (),
+                    Some(range) => {
+                        dataset.print_range(&range);
+                    }
+                }
 
                 summary.print(&cmd);
 
                 if cmd.write_csv() {
-                    match dataset.write_special_events_csv(
-                        cmd.csv(),
-                        cmd.encoding(),
-                        cmd.utc(),
-                        cmd.fps(),
-                    ) {
+                    match dataset.write_special_events_csv(&cmd) {
                         Err(e) => println!("{}", e),
                         Ok(..) => println!("Wrote csv to {}", cmd.csv()),
                     }
