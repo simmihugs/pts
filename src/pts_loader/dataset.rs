@@ -354,7 +354,7 @@ impl DataSet {
         use std::env;
 
         let (special_events, _errors) = &self.get_special_events();
-        let mut file = File::create(cmd.filename())?;
+        let mut file = File::create(cmd.csv())?;
         match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
             _ => (),
         }
