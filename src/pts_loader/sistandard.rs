@@ -56,6 +56,10 @@ impl SiStandard {
         self.endtime = Some(self.starttime + Duration::milliseconds(self.duration));
     }
 
+    pub fn get_duration(&self) -> i64 {
+        self.duration
+    }
+
     pub fn get_endtime(&self) -> Option<DateTime<Utc>> {
         self.endtime
     }

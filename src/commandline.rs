@@ -75,6 +75,9 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     debug: bool,
+
+    #[arg(long, default_value_t = 5 * 60 * 1000)]
+    minimum: i64,
 }
 
 pub struct Commandline {
@@ -86,6 +89,10 @@ impl Commandline {
         Self {
             args: Args::parse(),
         }
+    }
+
+    pub fn minimum(&self) -> i64 {
+        self.args.minimum
     }
 
     pub fn debug(&self) -> bool {

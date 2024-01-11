@@ -10,6 +10,7 @@ pub struct Summary {
     pub si_errors: i64,
     pub text_error: i64,
     pub length_error: i64,
+    pub si_length_error: i64,
 }
 
 impl Summary {
@@ -23,6 +24,7 @@ impl Summary {
             si_errors: 0,
             text_error: 0,
             length_error: 0,
+            si_length_error: 0,
         }
     }
 
@@ -71,6 +73,15 @@ impl Summary {
                     format!("{}", 0).green()
                 } else {
                     format!("{}", self.length_error).red()
+                }
+            );
+
+            println!(
+                "{:3} si length errors",
+                if self.si_length_error == 0 {
+                    format!("{}", 0).green()
+                } else {
+                    format!("{}", self.si_length_error).red()
                 }
             );
         }

@@ -1,10 +1,11 @@
+use crate::commandline::Commandline;
+
 use super::define::SiError;
 use super::sistandard::*;
 use chrono::{DateTime, Duration, Local, Utc};
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
 
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 pub struct Event {
@@ -140,6 +141,13 @@ impl Event {
         match &self.sistandard {
             None => None,
             Some(sistandard) => sistandard.get_endtime(),
+        }
+    }
+
+    pub fn get_displayed_duration(&self, cmd: &Commandline) -> i64 {
+        match &self.sistandard {
+            None => cmd.minimum(),
+            Some(s) => s.get_duration(),
         }
     }
 

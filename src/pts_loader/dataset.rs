@@ -469,12 +469,17 @@ impl DataSet {
         let mut si_events: Vec<&Define> = self.get_si_events();
 
         if si_events.len() > 1 {
+            let mut length_errors = Vec::new();
             let mut si_errors = Vec::new();
             let head = si_events[0];
             si_events.drain(1..).into_iter().fold(head, |acc, value| {
-                match acc.get_si_error(value) {
+                match acc.get_si_error(value, cmd) {
                     SiError::SomeError(err, display_err) => {
                         si_errors.push((err, display_err, acc, value));
+                        value
+                    }
+                    SiError::Under5 => {
+                        length_errors.push(acc);
                         value
                     }
                     _ => value,
@@ -499,20 +504,26 @@ impl DataSet {
                 acc
             });
 
-            if summary.si_errors > 0 {
-                println!("SiEvent errors:");
+            if cmd.verbose() {
+                for (err, display_err, event, next_event) in si_errors {
+                    self.print_si_error_verbose(
+                        err,
+                        display_err,
+                        event,
+                        next_event,
+                        cmd.verbose(),
+                        cmd.utc(),
+                    );
+                }
             }
 
-            for (err, display_err, event, next_event) in si_errors {
-                self.print_si_error_verbose(
-                    err,
-                    display_err,
-                    event,
-                    next_event,
-                    cmd.verbose(),
-                    cmd.utc(),
-                );
+            if cmd.verbose() {
+                for err in &length_errors {
+                    println!("{:?}", err);
+                }
             }
+
+            summary.si_length_error = length_errors.len() as i64;
         }
     }
 

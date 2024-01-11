@@ -1,3 +1,5 @@
+use crate::commandline::Commandline;
+use chrono::{DateTime, LocalResult, NaiveDateTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -28,17 +30,48 @@ pub enum SiError {
     NoError,
     Overlap,
     Gap,
+    Under5,
     SomeError(Box<SiError>, Box<SiError>),
 }
 
+pub fn create_time(s: &str) -> Option<DateTime<Utc>> {
+    let dt = NaiveDateTime::parse_from_str(s, "%Y-%m-%dT%H:%M:%S%.3fZ");
+    match dt {
+        Ok(dtt) => {
+            let dt2: LocalResult<DateTime<Utc>> = Utc.from_local_datetime(&dtt);
+            Some(dt2.unwrap())
+        }
+        Err(_e) => None,
+    }
+}
+
+fn si_time_error(first: &Define) -> Option<SiError> {
+    let datetime = first.get_event().get_starttime()?;
+    let date = format!("{}", datetime.date_naive().format("%Y-%m-%d"));
+    let begin = create_time(format! {"{}T08:00:00.000Z", date}.as_str())?;
+    let end = create_time(format! {"{}T20:00:00.000Z", date}.as_str())?;
+    if !(begin <= datetime && datetime <= end) {
+        Some(SiError::Under5)
+    } else {
+        None
+    }
+}
+
 impl SiError {
-    pub fn determine(first: &Define, second: &Define) -> Self {
+    pub fn determine(first: &Define, second: &Define, cmd: &Commandline) -> Self {
         let endtime = first.get_event().get_endtime();
         let starttime = second.get_event().get_starttime();
         let dendtime = first.get_event().get_dendtime();
         let dstarttime = second.get_event().get_dstarttime();
 
-        if dendtime == dstarttime && endtime == starttime {
+        if first.get_event().get_duration() < cmd.minimum()
+            && first.get_event().get_displayed_duration(cmd) < cmd.minimum()
+        {
+            match si_time_error(first) {
+                Some(err) => return err,
+                None => return SiError::NoError,
+            }
+        } else if dendtime == dstarttime && endtime == starttime {
             return SiError::NoError;
         } else {
             return SiError::SomeError(
@@ -62,10 +95,10 @@ impl SiError {
 }
 
 impl Define {
-    pub fn get_si_error(&self, next: &Define) -> SiError {
+    pub fn get_si_error(&self, next: &Define, cmd: &Commandline) -> SiError {
         match self {
             Define::siEvent(..) => match next {
-                Define::siEvent(..) => SiError::determine(self, &next),
+                Define::siEvent(..) => SiError::determine(self, &next, cmd),
                 _ => SiError::NoError,
             },
             _ => SiError::NoError,
