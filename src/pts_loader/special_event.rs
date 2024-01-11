@@ -3,6 +3,13 @@ use crate::{commandline::Commandline, pts_loader::define::Define};
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
+enum LengthError {
+    Trailer,
+    LengthError,
+    NoError,
+}
+
+#[derive(Clone)]
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
 }
@@ -247,20 +254,69 @@ impl<'a> SpecialEvent<'a> {
         }
     }
 
-    pub fn print_table(&self, time_errors: &Vec<String>, cmd: &Commandline) -> (i64, i64) {
-        let mut logoerror = 0;
-        let mut iderror = 0;
+    pub fn print_table(&self, time_errors: &Vec<String>, cmd: &Commandline) -> (i64, i64, i64) {
+        let mut logoerrors = 0;
+        let mut iderrors = 0;
+        let mut length_errors: i64 = 0;
 
-        let debug_me = false;
         let mut found_first_event: bool = false;
         let mut found_dran_bleiben: bool = false;
+
+        let _1min = 60 * 1000;
+        let _30sec = _1min / 2;
+        let _5min = 5 * _1min;
+        let _15min = 15 * _1min;
+
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
+                    let event_length_error: LengthError = {
+                        match event.get_contentid().as_str() {
+                            "392654926764849cd5dc" => {
+                                if !(_5min <= event.get_duration()
+                                    && event.get_duration() <= _15min)
+                                {
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
+                            "cb7a119f84cb7b117b1b" => {
+                                if !(_5min <= event.get_duration()
+                                    && event.get_duration() <= _15min)
+                                {
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
+                            "e90dfb84e30edf611e32" => {
+                                if !(event.get_duration() <= _30sec) {
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
+                            _ => {
+                                if event.get_duration() <= _1min {
+                                    LengthError::Trailer
+                                } else if event.get_duration() <= _5min {
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
+                        }
+                    };
+
                     let (logos, mut logostr) = self.find_logo_str(event, cmd);
 
-                    if debug_me {
-                        println!("{}", logostr);
+                    if cmd.debug() {
+                        println!("Logo: {}", logostr);
                         if logostr.is_empty()
                             && event
                                 .get_title()
@@ -272,7 +328,7 @@ impl<'a> SpecialEvent<'a> {
 
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
-                        iderror += 1;
+                        iderrors += 1;
                     }
 
                     let mut title = event.title_to_string();
@@ -300,10 +356,10 @@ impl<'a> SpecialEvent<'a> {
                     }
 
                     if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                        if debug_me {
+                        if cmd.debug() {
                             println!("{}", "found error");
                         }
-                        logoerror += 1;
+                        logoerrors += 1;
                     }
 
                     if cmd.verbose() {
@@ -320,10 +376,18 @@ impl<'a> SpecialEvent<'a> {
                                 cmd.fps()
                             ),
                             event.endtime_to_string(cmd.utc(), cmd.fps()),
-                            if title == "Werbung" {
-                                event.duration_to_string(cmd.fps()).yellow()
-                            } else {
-                                event.duration_to_string(cmd.fps()).yellow().clear()
+                            //Duration
+                            match event_length_error {
+                                LengthError::Trailer =>
+                                    event.duration_to_string(cmd.fps()).purple(),
+                                LengthError::LengthError =>
+                                    event.duration_to_string(cmd.fps()).red(),
+                                LengthError::NoError =>
+                                    if title == "Werbung" {
+                                        event.duration_to_string(cmd.fps()).yellow()
+                                    } else {
+                                        event.duration_to_string(cmd.fps()).yellow().clear()
+                                    },
                             },
                             if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                                 contentid.red()
@@ -363,6 +427,6 @@ impl<'a> SpecialEvent<'a> {
             }
         }
 
-        (logoerror, iderror)
+        (logoerrors, iderrors, length_errors)
     }
 }

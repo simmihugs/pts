@@ -440,11 +440,12 @@ impl DataSet {
             self.print_line_cross(cmd.verbose());
             special_events.iter().for_each(|special_event| {
                 let terrors = special_event.get_time_errors();
-                let (lerrors, ierrors) = special_event.print_table(&terrors, cmd);
+                let (lerrors, ierrors, length_errors) = special_event.print_table(&terrors, cmd);
                 self.print_line_cross(cmd.verbose());
                 summary.id_errors += ierrors;
                 summary.logo_errors += lerrors;
                 summary.time_errors += terrors.len() as i64;
+                summary.length_error += length_errors;
             });
             self.print_head(cmd.verbose() && special_events.len() > 0);
             self.print_line(cmd.verbose());
