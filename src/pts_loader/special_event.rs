@@ -303,10 +303,14 @@ impl<'a> SpecialEvent<'a> {
                             _ => {
                                 if event.get_duration() <= _1min {
                                     LengthError::Trailer
-                                } else if event.get_duration() <= _5min {
+                                }
+                                /*
+                                else if event.get_duration() <= _5min {
                                     length_errors += 1;
                                     LengthError::LengthError
-                                } else {
+                                }
+                                */
+                                else {
                                     LengthError::NoError
                                 }
                             }
