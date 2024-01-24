@@ -46,15 +46,25 @@ trait Take {
     fn take(&mut self, length: usize) -> String;
 }
 
+fn utf8_slice(s: &str, start: usize, end: usize) -> Option<&str> {
+    let mut iter = s
+        .char_indices()
+        .map(|(pos, _)| pos)
+        .chain(Some(s.len()))
+        .skip(start)
+        .peekable();
+    let start_pos = *iter.peek()?;
+    for _ in start..end {
+        iter.next();
+    }
+    Some(&s[start_pos..*iter.peek()?])
+}
+
 impl Take for String {
     fn take(&mut self, length: usize) -> String {
-        if self.len() >= length {
-            self.drain(0..length).collect::<String>().to_string()
-        } else {
-            for _ in 0..length - self.len() {
-                *self += " ";
-            }
-            self.to_string()
+        match utf8_slice(self.as_str(), 0, length) {
+            Some(string) => String::from(string),
+            None => String::from(""),
         }
     }
 }
@@ -416,12 +426,7 @@ impl Event {
     }
 
     pub fn title_to_string(&self) -> String {
-        let title = &self.title;
-        if title.len() < 30 {
-            format!("{}", title)
-        } else {
-            format!("{}", &title[..30])
-        }
+        format!("{}", &self.title).take(30)
     }
 
     pub fn print_si_event_verbose(
