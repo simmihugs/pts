@@ -182,9 +182,7 @@ impl<'a> SpecialEvent<'a> {
 
                     let mut title = event.get_title();
                     let contentid = event.get_contentid();
-                    if contentid == "UHD1_WERBUNG-01" {
-                        title = String::from("Werbung");
-                    } else if title.contains(",") {
+                    if title.contains(",") {
                         title = title.replace(",", "-");
                     } else if contentid == "cb7a119f84cb7b117b1b" {
                         title += " - Dranbleiben";
@@ -330,14 +328,13 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
+                    let mut title = String::from("");
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderrors += 1;
                     }
-
-                    let mut title = event.title_to_string();
-                    if title == " -  UHD1_WERBUNG-01" {
-                        title = "Werbung".to_string();
+                    if contentid == "UHD1_WERBUNG-01" {
+                        title = event.get_title();
                     } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
                         title = "Dranbleiben".to_string();
                     } else if event.get_contentid() == "392654926764849cd5dc" {
