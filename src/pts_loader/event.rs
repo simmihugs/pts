@@ -73,42 +73,43 @@ impl Take for String {
 
 impl Event {
     pub fn get_logo(&self) -> String {
-        match self.get_contentid().as_str() {
+        String::from(match self.get_contentid().as_str() {
             //Layouts
-            "HDPLUHD_LAY_1" => "Kabel1 rechts".to_string(),
-            "HDPLUHD_LAY_2" => "Pro7 rechts".to_string(),
-            "HDPLUHD_LAY_3" => "Sat1 rechts".to_string(),
-            "HDPLUHD_LAY_4" => "Dauerwerbesendung".to_string(),
-            "HDPLUHD_LAY_5" => "Produktplatzierung".to_string(),
-            "HDPLUHD_LAY_6" => "Crawl".to_string(),
-            "HDPLUHD_LAY_7" => "ZDF 4k links".to_string(),
-            "HDPLUHD_LAY_8" => "Flag UHD Highlights".to_string(),
-            "HDPLUHD_LAY_9" => "Flag Promo-Elemente für HD+".to_string(),
-            "HDPLUHD_LAY_10" => "L-Shape".to_string(),
-            "HDPLUHD_LAY_11" => "Bauchbinde".to_string(),
-            "HDPLUHD_LAY_12" => "Dolby Atoms".to_string(),
+            "HDPLUHD_LAY_1" => "Kabel1 rechts",
+            "HDPLUHD_LAY_2" => "Pro7 rechts",
+            "HDPLUHD_LAY_3" => "Sat1 rechts",
+            "HDPLUHD_LAY_4" => "Dauerwerbesendung",
+            "HDPLUHD_LAY_5" => "Produktplatzierung",
+            "HDPLUHD_LAY_6" => "Crawl",
+            "HDPLUHD_LAY_7" => "ZDF 4k links",
+            "HDPLUHD_LAY_8" => "Flag UHD Highlights",
+            "HDPLUHD_LAY_9" => "Flag Promo-Elemente für HD+",
+            "HDPLUHD_LAY_10" => "L-Shape",
+            "HDPLUHD_LAY_11" => "Bauchbinde",
+            "HDPLUHD_LAY_12" => "Dolby Atoms",
             //Logos
-            "HDPLUHD_LOGO_1" => "ERROR Astra links".to_string(),
-            "HDPLUHD_LOGO_2" => "ERROR Astra rechts".to_string(),
-            "HDPLUHD_LOGO_3" => "HD Plus links".to_string(),
-            "HDPLUHD_LOGO_4" => "HD Plus rechts".to_string(),
-            "HDPLUHD_LOGO_5" => "Ran Live".to_string(),
-            "HDPLUHD_LOGO_6" => "Ran Fighting".to_string(),
-            "HDPLUHD_LOGO_7" => "K1_RUN".to_string(),
-            "HDPLUHD_LOGO_8" => "P7_RUN".to_string(),
-            "HDPLUHD_LOGO_9" => "HR Menorca".to_string(),
-            "HDPLUHD_LOGO_10" => "Pro7 Ran Clean".to_string(),
-            "HDPLUHD_LOGO_11" => "RTLZWEI_UHD".to_string(),
-            "HDPLUHD_LOGO_13" => "P7_MAXX_UHD".to_string(),
-            "HDPLUHD_LOGO_14" => "K1_DOKU_UHD".to_string(),
-            "HDPLUHD_LOGO_15" => "P7_MAXX_RAN_UHD".to_string(),
-            "HDPLUHD_LOGO_16" => "Sat.1 UHD ranBUNDESLIGA LIVE".to_string(),
-            "HDPLUHD_LOGO_17" => "SAT.1 - Gold UHD".to_string(),
-            "HDPLUHD_LOGO_18" => "Sixx UHD Logo".to_string(),
-            "HDPLUHD_LOGO_19" => "P7MX_RAN_NHL".to_string(),
+            "HDPLUHD_LOGO_1" => "ERROR Astra links",
+            "HDPLUHD_LOGO_2" => "ERROR Astra rechts",
+            "HDPLUHD_LOGO_3" => "HD Plus links",
+            "HDPLUHD_LOGO_4" => "HD Plus rechts",
+            "HDPLUHD_LOGO_5" => "Ran Live",
+            "HDPLUHD_LOGO_6" => "Ran Fighting",
+            "HDPLUHD_LOGO_7" => "K1_RUN",
+            "HDPLUHD_LOGO_8" => "P7_RUN",
+            "HDPLUHD_LOGO_9" => "HR Menorca",
+            "HDPLUHD_LOGO_10" => "Pro7 Ran Clean",
+            "HDPLUHD_LOGO_11" => "RTLZWEI_UHD",
+            "HDPLUHD_LOGO_13" => "P7_MAXX_UHD",
+            "HDPLUHD_LOGO_14" => "K1_DOKU_UHD",
+            "HDPLUHD_LOGO_15" => "P7_MAXX_RAN_UHD",
+            "HDPLUHD_LOGO_16" => "Sat.1 UHD ranBUNDESLIGA LIVE",
+            "HDPLUHD_LOGO_17" => "SAT.1 - Gold UHD",
+            "HDPLUHD_LOGO_18" => "Sixx UHD Logo",
+            "HDPLUHD_LOGO_19" => "P7MX_RAN_NHL",
             //Unknown id
-            _ => "ERROR NO LOGO".to_string(),
-        }
+            _ => "ERROR NO LOGO",
+        })
+
     }
 
     pub fn get_duration(&self) -> i64 {
