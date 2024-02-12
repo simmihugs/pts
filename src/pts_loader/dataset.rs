@@ -350,6 +350,33 @@ impl DataSet {
         }
     }
 
+    pub fn update_werbungen(&self, cmd: &Commandline) -> std::io::Result<String> {
+        let new_filename = format!("update_{}", cmd.filename().replace(".\\", ""));
+        let (special_events, _) = &self.get_special_events();
+        let werbungen_liste: Vec<_> = special_events.iter().map(|e| e.get_werbungen()).collect();
+        if !werbungen_liste.is_empty() {
+            let mut source = File::open(cmd.filename())?;
+            let mut data = String::new();
+            source.read_to_string(&mut data)?;
+            drop(source);
+
+            for werbungen in werbungen_liste {
+                if !werbungen.is_empty() {
+                    for werbung in werbungen {
+                        let new_werbung =
+                            werbung.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+                        data = data.replace(&*werbung, &*new_werbung);
+                    }
+                }
+            }
+            let mut dest = File::create(&new_filename)?;
+            dest.write(data.as_bytes())?;
+            drop(dest);
+        }
+
+        Ok(new_filename)
+    }
+
     pub fn write_special_events_csv(&self, cmd: &Commandline) -> std::io::Result<()> {
         use std::env;
 

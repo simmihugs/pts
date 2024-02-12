@@ -43,6 +43,25 @@ impl<'a> SpecialEvent<'a> {
         }
     }
 
+    pub fn get_werbungen(&self) -> Vec<String> {
+        let mut store = Vec::new();
+
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    let id = event.get_contentid();
+                    let title = event.get_title();
+                    if id == "UHD1_WERBUNG-01" && title != " -  UHD1_WERBUNG-01" {
+                        store.push(format!("{}", title));
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        store
+    }
+
     pub fn has_id_errors(&self) -> bool {
         for s in &self.vec {
             match s {
@@ -188,6 +207,20 @@ impl<'a> SpecialEvent<'a> {
                         title += " - Dranbleiben";
                     } else if contentid == "392654926764849cd5dc" {
                         title += " - Pausetafel";
+                    } else if contentid == "UHD1_WERBUNG-01" {
+                        title = event.get_title();
+                        if title == " -  UHD1_WERBUNG-01" {
+                            title = "UHD1_WERBUNG-01".to_string();
+                        } else {
+                            let new_title =
+                                title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+
+                            //print!("sed 'sQ{}Q", title);
+                            //title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+                            //println!("{}Qg", title);
+
+                            title = new_title;
+                        }
                     }
 
                     special_event += &format!(
@@ -335,6 +368,13 @@ impl<'a> SpecialEvent<'a> {
                     }
                     if contentid == "UHD1_WERBUNG-01" {
                         title = event.get_title();
+                        if title == " -  UHD1_WERBUNG-01" {
+                            title = "UHD1_WERBUNG-01".to_string();
+                        } else {
+                            //print!("sed 'sQ{}Q", title);
+                            title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+                            //println!("{}Qg", title);
+                        }
                     } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
                         title = "Dranbleiben".to_string();
                     } else if event.get_contentid() == "392654926764849cd5dc" {

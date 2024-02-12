@@ -78,6 +78,9 @@ struct Args {
 
     #[arg(long, default_value_t = 5 * 60 * 1000)]
     minimum: i64,
+
+    #[arg(long, default_value_t = false)]
+    update_werbungen: bool,
 }
 
 pub struct Commandline {
@@ -89,6 +92,10 @@ impl Commandline {
         Self {
             args: Args::parse(),
         }
+    }
+
+    pub fn update_werbungen(&self) -> bool {
+        self.args.update_werbungen
     }
 
     pub fn minimum(&self) -> i64 {

@@ -47,6 +47,13 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
+                if cmd.update_werbungen() {
+                    match dataset.update_werbungen(&cmd) {
+                        Err(e) => println!("{}", e),
+                        Ok(file) => println!("updated pts file: {}", file),
+                    }
+                }
+
                 match cmd.illegalevents() {
                     None => (),
                     Some(illegals) => dataset.look_for_illegals(&illegals, &cmd),
