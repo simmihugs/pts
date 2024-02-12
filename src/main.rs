@@ -33,16 +33,18 @@ fn main() -> std::io::Result<()> {
 
                 match cmd.valid_range() {
                     None => (),
-                    Some(range) => {
-                        dataset.print_range(&range);
-                    }
+                    Some(range) => dataset.print_range(&range),
                 }
 
                 summary.print(&cmd);
 
                 if cmd.write_csv() {
                     match dataset.write_special_events_csv(&cmd) {
-                        Err(e) => println!("{}", e),
+                        Err(e) => {
+                            if cmd.debug() {
+                                println!("{}", e);
+                            }
+                        }
                         Ok(..) => println!("Wrote csv to {}", cmd.csv()),
                     }
                 }
@@ -64,10 +66,13 @@ fn main() -> std::io::Result<()> {
                 }
             }
             Err(e) => {
-                println!("{}", e);
+                if cmd.debug() {
+                    println!("{}", e);
+                }
                 Commandline::print_help()
             }
         }
     }
+
     Ok(())
 }
