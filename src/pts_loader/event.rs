@@ -1,4 +1,5 @@
 use crate::commandline::Commandline;
+use crate::take::Take;
 
 use super::define::SiError;
 use super::sistandard::*;
@@ -42,35 +43,6 @@ impl fmt::Debug for Event {
     }
 }
 
-trait Take {
-    fn take(&mut self, length: usize) -> String;
-    fn take_slice(&self, start: usize, end: usize) -> Option<&str>;
-}
-
-impl Take for String {
-    fn take_slice(&self, start: usize, end: usize) -> Option<&str> {
-        let s: &str = self.as_str();
-        let mut iter = s
-            .char_indices()
-            .map(|(pos, _)| pos)
-            .chain(Some(s.len()))
-            .skip(start)
-            .peekable();
-        let start_pos = *iter.peek()?;
-        for _ in start..end {
-            iter.next();
-        }
-        Some(&s[start_pos..*iter.peek()?])
-    }
-
-    fn take(&mut self, length: usize) -> String {
-        match self.take_slice(0, length) {
-            Some(string) => String::from(string),
-            None => String::from(""),
-        }
-    }
-}
-
 impl Event {
     pub fn get_logo(&self) -> String {
         String::from(match self.get_contentid().as_str() {
@@ -109,7 +81,6 @@ impl Event {
             //Unknown id
             _ => "ERROR NO LOGO",
         })
-
     }
 
     pub fn get_duration(&self) -> i64 {

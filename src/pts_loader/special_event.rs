@@ -1,4 +1,5 @@
 use crate::pts_loader::event::Event;
+use crate::take::Take;
 use crate::{commandline::Commandline, pts_loader::define::Define};
 use colored::{ColoredString, Colorize};
 
@@ -200,6 +201,7 @@ impl<'a> SpecialEvent<'a> {
                     let (logos, logostr): (Vec<_>, String) = self.find_logo_str(event, cmd);
 
                     let mut title = event.get_title();
+
                     let contentid = event.get_contentid();
                     if title.contains(",") {
                         title = title.replace(",", "-");
@@ -361,24 +363,23 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
-                    let mut title = String::from("");
+                    let mut title = event.get_title();
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderrors += 1;
                     }
                     if contentid == "UHD1_WERBUNG-01" {
-                        title = event.get_title();
                         if title == " -  UHD1_WERBUNG-01" {
                             title = "UHD1_WERBUNG-01".to_string();
                         } else {
-                            //print!("sed 'sQ{}Q", title);
                             title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
-                            //println!("{}Qg", title);
                         }
                     } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
                         title = "Dranbleiben".to_string();
                     } else if event.get_contentid() == "392654926764849cd5dc" {
                         title = "Pausentafel ".to_string();
+                    } else {
+                        title = title.take(30)
                     }
 
                     if logostr.len() < 15 {

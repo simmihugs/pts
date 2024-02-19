@@ -1,6 +1,7 @@
 mod commandline;
 mod pts_loader;
 mod summary;
+mod take;
 
 use commandline::Commandline;
 use pts_loader::dataset::DataSet;
