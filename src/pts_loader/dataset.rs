@@ -351,7 +351,7 @@ impl DataSet {
     }
 
     pub fn update_werbungen(&self, cmd: &Commandline) -> std::io::Result<String> {
-        let new_filename = format!("update_{}", cmd.filename().replace(".\\", ""));
+        let new_filename = format!("{}", cmd.filename().replace(".\\", ""));
         let (special_events, _) = &self.get_special_events();
         let werbungen_liste: Vec<_> = special_events.iter().map(|e| e.get_werbungen()).collect();
         if !werbungen_liste.is_empty() {
