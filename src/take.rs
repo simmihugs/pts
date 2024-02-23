@@ -6,23 +6,30 @@ pub trait Take {
 impl Take for String {
     fn take_slice(&self, start: usize, end: usize) -> Option<&str> {
         let s: &str = self.as_str();
-        let mut iter = s
-            .char_indices()
-            .map(|(pos, _)| pos)
-            .chain(Some(s.len()))
-            .skip(start)
-            .peekable();
-        let start_pos = *iter.peek()?;
-        for _ in start..end {
-            iter.next();
+
+        if end <= s.len() {
+            let mut iter = s
+                .char_indices()
+                .map(|(pos, _)| pos)
+                .chain(Some(s.len()))
+                .skip(start)
+                .peekable();
+            let start_pos = *iter.peek()?;
+
+            for _ in start..end {
+                iter.next();
+            }
+
+            Some(&s[start_pos..*iter.peek()?])
+        } else {
+            Some(&s)
         }
-        Some(&s[start_pos..*iter.peek()?])
     }
 
     fn take(&mut self, length: usize) -> String {
         match self.take_slice(0, length) {
             Some(string) => String::from(string),
-            None => String::from(""),
+            None => String::from("TAKEERROR"),
         }
     }
 }

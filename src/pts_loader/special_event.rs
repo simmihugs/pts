@@ -363,7 +363,7 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
-                    let mut title = event.get_title();
+                    let mut title = event.get_title();                    
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderrors += 1;
@@ -380,7 +380,7 @@ impl<'a> SpecialEvent<'a> {
                         title = "Pausentafel ".to_string();
                     } else {
                         title = title.take(30)
-                    }
+                    }                    
 
                     if logostr.len() < 15 {
                         for _ in 0..15 - logostr.len() {
