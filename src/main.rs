@@ -7,9 +7,7 @@ use commandline::Commandline;
 use pts_loader::dataset::DataSet;
 use summary::Summary;
 
-/*
-I'm not sure if i like rust
-*/
+
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
     if cmd.filename() == "YOU_PICK_A_FILE" {
