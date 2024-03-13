@@ -53,7 +53,11 @@ impl SiStandard {
 
     #[allow(dead_code)]
     pub fn calculate_endtime(&mut self) {
-        self.endtime = Some(self.starttime + Duration::milliseconds(self.duration));
+        let duration: Duration = match chrono::TimeDelta::try_milliseconds(self.duration) {
+            Some(duration) => duration,
+            None => Duration::new(0, 0).unwrap(),
+        };
+        self.endtime = Some(self.starttime + duration)
     }
 
     pub fn get_duration(&self) -> i64 {

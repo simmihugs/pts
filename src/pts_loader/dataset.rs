@@ -363,9 +363,14 @@ impl DataSet {
             for werbungen in werbungen_liste {
                 if !werbungen.is_empty() {
                     for werbung in werbungen {
-                        let new_werbung =
-                            werbung.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
-                        data = data.replace(&*werbung, &*new_werbung);
+                        let contentid = "UHD1_WERBUNG-01";
+                        let newtitle = werbung
+                            .replace(contentid, "")
+                            .replace(" ", "")
+                            .replace("-", "");
+                        let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"\r\n\t\t\t\tcomment=\"\"\r\n\t\t\t\ttriggerType=\"TIMED\"\r\n\t\t\t\tcontentId=\"{}\"", werbung, contentid);
+                        let newstr = format!("\r\n\t\t\t\ttitle=\"{}\"\r\n\t\t\t\tcomment=\"\"\r\n\t\t\t\ttriggerType=\"TIMED\"\r\n\t\t\t\tcontentId=\"{}\"", newtitle, newtitle);
+                        data = data.replace(&*oldstr, &*newstr);
                     }
                 }
             }

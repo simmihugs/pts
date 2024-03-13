@@ -86,8 +86,8 @@ impl<'a> SpecialEvent<'a> {
 
                     if logostr.contains("ERROR") {
                         return true;
-                    } else if logos.len() != 0
-                        && logos[0].get_event().get_endtime() > event.get_endtime()
+                    }
+                    if logos.len() != 0 && logos[0].get_event().get_endtime() > event.get_endtime()
                     {
                         return true;
                     }
@@ -95,7 +95,6 @@ impl<'a> SpecialEvent<'a> {
                 _ => (),
             }
         }
-
         false
     }
 
@@ -187,10 +186,9 @@ impl<'a> SpecialEvent<'a> {
                         _ => (),
                     }
                 }
-                //answer = format!("{}", logos[0].get_event().get_logo());
             }
         }
-        return (logos, answer);
+        (logos, answer)
     }
 
     pub fn to_string(&self, cmd: &Commandline) -> String {
@@ -216,14 +214,13 @@ impl<'a> SpecialEvent<'a> {
                         } else {
                             let new_title =
                                 title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
-
-                            //print!("sed 'sQ{}Q", title);
-                            //title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
-                            //println!("{}Qg", title);
-
                             title = new_title;
                         }
                     }
+                    let mut contentid = event.get_contentid();
+                    if contentid == "UHD1_WERBUNG-01" {
+                        contentid = title.clone();
+                    };
 
                     special_event += &format!(
                         "{};{};{};{};{};{}\n",
@@ -231,7 +228,7 @@ impl<'a> SpecialEvent<'a> {
                         event.starttime_to_string(cmd.utc(), cmd.fps()),
                         event.endtime_to_string(cmd.utc(), cmd.fps()),
                         event.duration_to_string(cmd.fps()),
-                        event.get_contentid(),
+                        contentid,
                         logostr,
                     );
                     for logo in &logos {
@@ -336,14 +333,7 @@ impl<'a> SpecialEvent<'a> {
                             _ => {
                                 if event.get_duration() <= _1min {
                                     LengthError::Trailer
-                                }
-                                /*
-                                else if event.get_duration() <= _5min {
-                                    length_errors += 1;
-                                    LengthError::LengthError
-                                }
-                                */
-                                else {
+                                } else {
                                     LengthError::NoError
                                 }
                             }
@@ -363,7 +353,7 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
-                    let mut title = event.get_title();                    
+                    let mut title = event.get_title();
                     let contentid = event.get_contentid();
                     if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
                         iderrors += 1;
@@ -380,7 +370,7 @@ impl<'a> SpecialEvent<'a> {
                         title = "Pausentafel ".to_string();
                     } else {
                         title = title.take(30)
-                    }                    
+                    }
 
                     if logostr.len() < 15 {
                         for _ in 0..15 - logostr.len() {
@@ -431,7 +421,9 @@ impl<'a> SpecialEvent<'a> {
                                         event.duration_to_string(cmd.fps()).yellow().clear()
                                     },
                             },
-                            if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
+                            if contentid == "UHD1_WERBUNG-01" {
+                                title.red().clear()
+                            } else if contentid.contains("-") {
                                 contentid.red()
                             } else {
                                 contentid.red().clear()

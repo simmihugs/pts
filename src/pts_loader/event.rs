@@ -136,7 +136,11 @@ impl Event {
     }
 
     pub fn calculate_endtime(&mut self) {
-        self.endtime = Some(self.starttime + Duration::milliseconds(self.duration));
+        let duration = match chrono::TimeDelta::try_milliseconds(self.duration) {
+            Some(duration) => duration,
+            None => Duration::new(0, 0).unwrap(),
+        };
+        self.endtime = Some(self.starttime + duration);
         match &mut self.sistandard {
             None => (),
             Some(ref mut sistandard) => sistandard.calculate_endtime(),
