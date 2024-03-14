@@ -217,10 +217,7 @@ impl<'a> SpecialEvent<'a> {
                             title = new_title;
                         }
                     }
-                    let mut contentid = event.get_contentid();
-                    if contentid == "UHD1_WERBUNG-01" {
-                        contentid = title.clone();
-                    };
+                    let contentid = event.get_contentid();
 
                     special_event += &format!(
                         "{};{};{};{};{};{}\n",
@@ -422,7 +419,7 @@ impl<'a> SpecialEvent<'a> {
                                     },
                             },
                             if contentid == "UHD1_WERBUNG-01" {
-                                title.red().clear()
+                                contentid.yellow()
                             } else if contentid.contains("-") {
                                 contentid.red()
                             } else {

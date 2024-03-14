@@ -368,8 +368,9 @@ impl DataSet {
                             .replace(contentid, "")
                             .replace(" ", "")
                             .replace("-", "");
-                        let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"\r\n\t\t\t\tcomment=\"\"\r\n\t\t\t\ttriggerType=\"TIMED\"\r\n\t\t\t\tcontentId=\"{}\"", werbung, contentid);
-                        let newstr = format!("\r\n\t\t\t\ttitle=\"{}\"\r\n\t\t\t\tcomment=\"\"\r\n\t\t\t\ttriggerType=\"TIMED\"\r\n\t\t\t\tcontentId=\"{}\"", newtitle, newtitle);
+                        let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"", werbung);
+                        let newstr = format!("\r\n\t\t\t\ttitle=\"{}\"", newtitle);
+
                         data = data.replace(&*oldstr, &*newstr);
                     }
                 }
