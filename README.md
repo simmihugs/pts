@@ -1,4 +1,4 @@
-# pts
+# Pts
 A pts file parser
 
 ## install 
