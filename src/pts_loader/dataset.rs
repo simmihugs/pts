@@ -100,6 +100,7 @@ impl DataSet {
             }
         );
         if cmd.verbose() {
+            println!("{}", "Illegal events:");
             va_events.iter().for_each(|x| println!("{:?}", x));
         } else {
             va_events.iter().for_each(|x| println!("{}", x));
@@ -569,6 +570,10 @@ impl DataSet {
 
     #[allow(dead_code)]
     pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
+        // if cmd.verbose() {
+        //     println!("{}", "Missings texts:");
+        // }
+        let mut store = Vec::new();
         for s in self.get_si_events().iter().filter(|event| {
             !(vec![
                 "Derzeit keine UHD-Sendung im Programm",
@@ -621,8 +626,13 @@ impl DataSet {
         }) {
             summary.text_error += 1;
             if cmd.verbose() {
-                println!("{:?}\n", s);
+                //println!("{:?}\n", s);
+                store.push(format!("{:?}", s));
             }
+        }
+        if store.len() > 0 {
+            println!("{}", "Missings texts:");
+            store.iter().for_each(|x| println!("{}", x));
         }
     }
 
