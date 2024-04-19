@@ -79,7 +79,7 @@ impl DataSet {
             .for_each(|define| define.get_event_mut().calculate_endtime());
     }
 
-    #[allow(unused_variables)]
+    #[allow(unused_variables, dead_code)]
     fn look_for_illegals_va_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let va_events: Vec<_> = events
             .iter()
@@ -101,10 +101,12 @@ impl DataSet {
         );
         if cmd.verbose() {
             va_events.iter().for_each(|x| println!("{:?}", x));
+        } else {
+            va_events.iter().for_each(|x| println!("{}", x));
         }
     }
 
-    #[allow(unused_variables)]
+    #[allow(unused_variables, dead_code)]
     fn look_for_illegals_si_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let si_events: Vec<_> = events
             .iter()
@@ -126,11 +128,13 @@ impl DataSet {
             );
             if cmd.verbose() {
                 si_events.iter().for_each(|x| println!("{:?}", x));
+            } else {
+                si_events.iter().for_each(|x| println!("{}", x));
             }
         }
     }
 
-    #[allow(unused_variables)]
+    #[allow(unused_variables, dead_code)]
     fn look_for_illegals_logo_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let logo_events: Vec<_> = events
             .iter()
@@ -145,11 +149,13 @@ impl DataSet {
             println!("{} illegal logoEvents found", logo_events.len());
             if cmd.verbose() {
                 logo_events.iter().for_each(|x| println!("{:?}", x));
+            } else {
+                logo_events.iter().for_each(|x| println!("{}", x));
             }
         }
     }
 
-    #[allow(unused_variables)]
+    #[allow(unused_variables, dead_code)]
     fn look_for_illegals_layout_events(&self, events: &Vec<&Define>, cmd: &Commandline) {
         let layout_events: Vec<_> = events
             .iter()
@@ -164,6 +170,8 @@ impl DataSet {
             println!("{} illegal layoutEvents found", layout_events.len());
             if cmd.verbose() {
                 layout_events.iter().for_each(|x| println!("{:?}", x));
+            } else {
+                layout_events.iter().for_each(|x| println!("{}", x));
             }
         }
     }
@@ -187,7 +195,6 @@ impl DataSet {
         if events.len() == 0 {
             println!("{:3} illegal events found.", format!("0").green());
         } else {
-            self.look_for_illegals_si_events(events, cmd);
             self.look_for_illegals_va_events(events, cmd);
             self.look_for_illegals_logo_events(events, cmd);
             self.look_for_illegals_layout_events(events, cmd);

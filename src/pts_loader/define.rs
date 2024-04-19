@@ -25,6 +25,17 @@ impl fmt::Debug for Define {
     }
 }
 
+impl fmt::Display for Define {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Define::vaEvent(event) => event.fmt_event(f),
+            Define::siEvent(event) => event.fmt_event(f),
+            Define::logoEvent(event) => event.fmt_event(f),
+            Define::layoutEvent(event) => event.fmt_event(f),
+        }
+    }
+}
+
 #[derive(PartialEq)]
 pub enum SiError {
     NoError,

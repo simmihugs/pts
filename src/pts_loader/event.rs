@@ -42,6 +42,11 @@ impl fmt::Debug for Event {
         self.fmt_event_verbose(f, "Event")
     }
 }
+impl fmt::Display for Event {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fmt_event(f)
+    }
+}
 
 impl Event {
     pub fn get_logo(&self) -> String {
@@ -210,6 +215,16 @@ impl Event {
             f,
             "{kind}: {{{title}{eventid}{serviceid}{programid}{starttime}{endtime}{contentid}{sistandard}\n}}"
         )
+    }
+
+    pub fn fmt_event(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let endtime = match &self.endtime {
+            None => "".to_string().take(25),
+            Some(endtime) => format!("{}", endtime.format("%Y-%m-%dT%H:%M:%S%.3fZ")).take(25),
+        };
+        let starttime = format!("{}", self.starttime.format("%Y-%m-%dT%H:%M:%S%.3fZ")).take(25);
+        let title = format!("{}", &self.title).take(25);
+        write!(f, "{title:25} {starttime:25} {endtime:25}",)
     }
 
     pub fn print_si_events_verbose(
