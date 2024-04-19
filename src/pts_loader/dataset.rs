@@ -570,9 +570,6 @@ impl DataSet {
 
     #[allow(dead_code)]
     pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
-        // if cmd.verbose() {
-        //     println!("{}", "Missings texts:");
-        // }
         let mut store = Vec::new();
         for s in self.get_si_events().iter().filter(|event| {
             !(vec![
@@ -626,7 +623,6 @@ impl DataSet {
         }) {
             summary.text_error += 1;
             if cmd.verbose() {
-                //println!("{:?}\n", s);
                 store.push(format!("{:?}", s));
             }
         }
