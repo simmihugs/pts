@@ -1,6 +1,7 @@
 use crate::pts_loader::event::Event;
-use crate::take::Take;
-use crate::{commandline::Commandline, pts_loader::define::Define};
+use crate::utils::take::Take;
+use crate::Fluid;
+use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
@@ -191,7 +192,7 @@ impl<'a> SpecialEvent<'a> {
         (logos, answer)
     }
 
-    pub fn to_string(&self, cmd: &Commandline) -> String {
+    pub fn to_string(&self, cmd: &Commandline, fluid_data_set: &Fluid) -> String {
         let mut special_event = String::new();
         for s in &self.vec {
             match s {
@@ -220,8 +221,19 @@ impl<'a> SpecialEvent<'a> {
                     let contentid = event.get_contentid();
 
                     special_event += &format!(
-                        "{};{};{};{};{};{}\n",
+                        "{};{};{};{};{};{};{}\n",
                         title,
+                        if event.get_duration() > 30 * 1000
+                            && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                            && event.get_contentid() != "392654926764849cd5dc"
+                        {
+                            match fluid_data_set.query(&contentid) {
+                                None => "".to_string(),
+                                Some(s) => s.to_string().take(50),
+                            }
+                        } else {
+                            "".to_string()
+                        },
                         event.starttime_to_string(cmd.utc(), cmd.fps()),
                         event.endtime_to_string(cmd.utc(), cmd.fps()),
                         event.duration_to_string(cmd.fps()),
@@ -230,7 +242,8 @@ impl<'a> SpecialEvent<'a> {
                     );
                     for logo in &logos {
                         special_event += &format!(
-                            "{};{};{};{};{};{}\n",
+                            "{};{};{};{};{};{};{}\n",
+                            "",
                             "",
                             logo.get_event().starttime_to_string(cmd.utc(), cmd.fps()),
                             logo.get_event().endtime_to_string(cmd.utc(), cmd.fps()),
@@ -281,7 +294,12 @@ impl<'a> SpecialEvent<'a> {
         }
     }
 
-    pub fn print_table(&self, time_errors: &Vec<String>, cmd: &Commandline) -> (i64, i64, i64) {
+    pub fn print_table(
+        &self,
+        time_errors: &Vec<String>,
+        cmd: &Commandline,
+        fluid_data_set: &Fluid,
+    ) -> (i64, i64, i64) {
         let mut logoerrors = 0;
         let mut iderrors = 0;
         let mut length_errors: i64 = 0;
@@ -393,8 +411,19 @@ impl<'a> SpecialEvent<'a> {
 
                     if cmd.verbose() {
                         println!(
-                            "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                            "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
                             title,
+                            if event.get_duration() > 30 * 1000
+                                && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                                && event.get_contentid() != "392654926764849cd5dc"
+                            {
+                                match fluid_data_set.query(&contentid) {
+                                    None => "".to_string(),
+                                    Some(s) => s.to_string().take(50),
+                                }
+                            } else {
+                                "".to_string()
+                            },
                             event.programid_to_string(),
                             SpecialEvent::color_starttime(
                                 time_errors,
@@ -438,7 +467,8 @@ impl<'a> SpecialEvent<'a> {
                             }
 
                             println!(
-                                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                                " ",
                                 " ",
                                 logo.get_event().programid_to_string().green(),
                                 logo.get_event()

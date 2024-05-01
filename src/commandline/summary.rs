@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use crate::commandline::Commandline;
+use crate::commandline::commandline::Commandline;
 pub struct Summary {
     pub time_errors: i64,
     pub id_errors: i64,

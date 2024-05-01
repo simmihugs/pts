@@ -25,6 +25,8 @@ impl std::fmt::Display for Range {
 const DEFAULT_VALID_RANGE: &str =
     "startTime = YYYY-MM-DDTHH:mm:ss.mssZ; endTime = YYYY-MM-DDTHH:mm:ss.mssZ";
 
+const DEFAULT_FLUID_DATABASE: &str = "DEFAULT_FLUID_DATABASE";
+
 #[derive(Clone, Serialize, Deserialize, Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -81,6 +83,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     update_werbungen: bool,
+
+    #[arg(long, default_value_t = String::from(DEFAULT_FLUID_DATABASE))]
+    fluid: String,
 }
 
 pub struct Commandline {
@@ -104,6 +109,13 @@ impl Commandline {
 
     pub fn debug(&self) -> bool {
         self.args.debug
+    }
+
+    pub fn fluid_csv(&self) -> Option<String> {
+        if self.args.fluid != DEFAULT_FLUID_DATABASE {
+            return Some(self.args.fluid.to_string());
+        }
+        None
     }
 
     pub fn valid_range(&self) -> Option<Range> {

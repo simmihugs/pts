@@ -1,12 +1,11 @@
 mod commandline;
 mod pts_loader;
-mod summary;
-mod take;
+mod utils;
 
-use commandline::Commandline;
+use crate::utils::fluid::Fluid;
+use commandline::commandline::Commandline;
+use commandline::summary::Summary;
 use pts_loader::dataset::DataSet;
-use summary::Summary;
-
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
@@ -17,8 +16,16 @@ fn main() -> std::io::Result<()> {
         match DataSet::init(filename) {
             Ok(mut dataset) => {
                 let mut summary = Summary::new();
+
+                let mut fluid_data_base = Fluid::init();
+
+                match cmd.fluid_csv() {
+                    None => (),
+                    Some(path) => fluid_data_base.load(path),
+                }
+
                 if cmd.all() || cmd.ps_event() {
-                    dataset.print_special_events(&mut summary, &cmd);
+                    dataset.print_special_events(&mut summary, &cmd, &fluid_data_base);
                 }
 
                 if cmd.all() || cmd.vaerrors() {
@@ -41,7 +48,7 @@ fn main() -> std::io::Result<()> {
                 summary.print(&cmd);
 
                 if cmd.write_csv() {
-                    match dataset.write_special_events_csv(&cmd) {
+                    match dataset.write_special_events_csv(&cmd, &fluid_data_base) {
                         Err(e) => {
                             if cmd.debug() {
                                 println!("{}", e);

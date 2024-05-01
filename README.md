@@ -29,3 +29,7 @@ Options:
   -V, --version                        Print version
 pts>
 ```
+
+```
+cargo run -- -avf "hdplus_20240501_30866.pts" --fluid "uhd_fluid_database.csv" -c out.csv
+```

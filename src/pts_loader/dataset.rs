@@ -1,8 +1,9 @@
 use super::define::*;
-use crate::commandline::{Commandline, Range};
+use crate::commandline::commandline::{Commandline, Range};
+use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
-use crate::summary::Summary;
+use crate::Fluid;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
@@ -321,7 +322,7 @@ impl DataSet {
 
     fn print_line(&self, verbose: bool) {
         if verbose {
-            println!("|{}|", self.line(158));
+            println!("|{}|", self.line(158 + 53));
         }
     }
 
@@ -337,8 +338,9 @@ impl DataSet {
     fn print_line_cross(&self, verbose: bool) {
         if verbose {
             println!(
-                "|{}+{}+{}+{}+{}+{}+{}|",
+                "|{}+{}+{}+{}+{}+{}+{}+{}|",
                 self.line(32),
+                self.line(52),
                 self.line(17),
                 self.line(25),
                 self.line(25),
@@ -352,8 +354,8 @@ impl DataSet {
     fn print_head(&self, verbose: bool) {
         if verbose {
             println!(
-                "| {:30} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-                "title", "programid", "start", "end", "duration", "contentid", "logo",
+                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                "title", "filename", "programid", "start", "end", "duration", "contentid", "logo",
             );
         }
     }
@@ -391,12 +393,16 @@ impl DataSet {
         Ok(new_filename)
     }
 
-    pub fn write_special_events_csv(&self, cmd: &Commandline) -> std::io::Result<()> {
+    pub fn write_special_events_csv(
+        &self,
+        cmd: &Commandline,
+        fluid_data_set: &Fluid,
+    ) -> std::io::Result<()> {
         use std::env;
 
         let (special_events, _errors) = &self.get_special_events();
         let mut file = File::create(cmd.csv())?;
-        match file.write_all(b"title;start;end;duration;contentid;logo;\n") {
+        match file.write_all(b"title;filename;start;end;duration;contentid;logo;\n") {
             _ => (),
         }
         special_events.iter().for_each(|special_event| {
@@ -404,17 +410,17 @@ impl DataSet {
                 || cmd.encoding().contains("1252")
                 || cmd.encoding().contains("win")
             {
-                match self.write_1252(&mut file, &special_event, cmd) {
+                match self.write_1252(&mut file, &special_event, cmd, fluid_data_set) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if cmd.encoding() == "utf-8" || cmd.encoding().contains("linux") {
-                match file.write_all(special_event.to_string(cmd).as_bytes()) {
+                match file.write_all(special_event.to_string(cmd, fluid_data_set).as_bytes()) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
             } else if env::consts::OS == "windows" {
-                match self.write_1252(&mut file, &special_event, cmd) {
+                match self.write_1252(&mut file, &special_event, cmd, fluid_data_set) {
                     Err(e) => println!("{}", e),
                     Ok(..) => (),
                 }
@@ -431,8 +437,9 @@ impl DataSet {
         file: &mut File,
         special_event: &SpecialEvent<'_>,
         cmd: &Commandline,
+        fluid_data_set: &Fluid,
     ) -> std::io::Result<()> {
-        let text = special_event.to_string(cmd);
+        let text = special_event.to_string(cmd, fluid_data_set);
         let (windows_1252_encoded_string, _, _) = encoding_rs::WINDOWS_1252.encode(&text);
 
         file.write_all(&windows_1252_encoded_string.as_ref())
@@ -457,7 +464,12 @@ impl DataSet {
         }
     }
 
-    pub fn print_special_events(&self, summary: &mut Summary, cmd: &Commandline) {
+    pub fn print_special_events(
+        &self,
+        summary: &mut Summary,
+        cmd: &Commandline,
+        fluid_data_set: &Fluid,
+    ) {
         let (special_events, special_event_errors) = &self.get_special_events();
 
         summary.special_event_errors = special_event_errors.len() as i64;
@@ -481,7 +493,8 @@ impl DataSet {
             self.print_line_cross(cmd.verbose());
             special_events.iter().for_each(|special_event| {
                 let terrors = special_event.get_time_errors();
-                let (lerrors, ierrors, length_errors) = special_event.print_table(&terrors, cmd);
+                let (lerrors, ierrors, length_errors) =
+                    special_event.print_table(&terrors, cmd, fluid_data_set);
                 self.print_line_cross(cmd.verbose());
                 summary.id_errors += ierrors;
                 summary.logo_errors += lerrors;
