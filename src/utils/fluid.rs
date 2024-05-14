@@ -1,17 +1,37 @@
+use csv::Reader;
 use csv::ReaderBuilder;
 use std::collections::HashMap;
+use std::fs::File;
 
-fn load_database(path: String) -> Vec<HashMap<String, String>> {
+fn read_csv(path: &String) -> Option<Reader<File>> {
+    let mut result = None;
+    for delimiter in vec![b';', b',', b'\t'] {
+        let rdr = ReaderBuilder::new().delimiter(delimiter).from_path(path);
+        match rdr {
+            Err(err) => {
+                println!("{}: {}", "Error occured", err);
+                break;
+            }
+            Ok(mut rdr) => {
+                let headers = rdr.headers().ok()?;
+                if headers.get(0)? == "Title" {
+                    result = Some(rdr);
+                    break;
+                }
+            }
+        }
+    }
+
+    result
+}
+
+fn load_database(path: &String) -> Vec<HashMap<String, String>> {
     let mut vec = Vec::new();
-    let rdr = ReaderBuilder::new()
-        .delimiter(b';')
-        //.from_path("../robby/uhd_fluid_database.csv");
-        .from_path(path);
+    let rdr = read_csv(&path);
 
     match rdr {
-        Err(..) => (),
-        Ok(mut rdr2) => {
-            for result in rdr2.deserialize() {
+        Some(mut rdr) => {
+            for result in rdr.deserialize() {
                 match result {
                     Err(..) => (),
                     Ok(result) => {
@@ -21,7 +41,9 @@ fn load_database(path: String) -> Vec<HashMap<String, String>> {
                 }
             }
         }
+        _ => (),
     }
+
     vec
 }
 
@@ -35,7 +57,7 @@ impl Fluid {
     }
 
     pub fn load(&mut self, path: String) {
-        self.database = load_database(path);
+        self.database = load_database(&path);
     }
 
     #[allow(dead_code)]
@@ -44,6 +66,8 @@ impl Fluid {
             for e in &self.database[0..3] {
                 println!("{:?}", e);
             }
+        } else {
+            println!("Error: Database has length {}", *&self.database.len());
         }
     }
 

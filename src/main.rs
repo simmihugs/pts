@@ -21,7 +21,9 @@ fn main() -> std::io::Result<()> {
 
                 match cmd.fluid_csv() {
                     None => (),
-                    Some(path) => fluid_data_base.load(path),
+                    Some(path) => {
+                        fluid_data_base.load(path);
+                    }
                 }
 
                 if cmd.all() || cmd.ps_event() {

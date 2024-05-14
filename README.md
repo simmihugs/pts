@@ -33,3 +33,11 @@ pts>
 ```
 cargo run -- -avf "hdplus_20240501_30866.pts" --fluid "uhd_fluid_database.csv" -c out.csv
 ```
+
+```
+pts -avf .\hdplus_20240514_31166.pts \
+    -c out.csv \
+    --fps 25 \
+    --update-werbungen 
+    --fluid 'C:\Users\sgraetz\OneDrive - CreateCtrl AG\uhd1-plannung\uhd_fluid_database.csv'
+```
