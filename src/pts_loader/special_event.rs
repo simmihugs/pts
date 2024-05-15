@@ -229,7 +229,7 @@ impl<'a> SpecialEvent<'a> {
                         {
                             match fluid_data_set.query(&contentid) {
                                 None => "".to_string(),
-                                Some(s) => s.to_string().take(50),
+                                Some(s) => s.to_string(),
                             }
                         } else {
                             "".to_string()
