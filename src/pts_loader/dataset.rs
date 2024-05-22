@@ -3,6 +3,7 @@ use crate::commandline::commandline::{Commandline, Range};
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
+use crate::utils::take::Take;
 use crate::Fluid;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
@@ -445,10 +446,47 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
+    fn missing_text_header(&self) {
+        let len = 122;
+        println!("|{}|", "-".repeat(len as usize));
+        println!(
+            "| {} | {} | {} | {} |",
+            String::from("title").take(50),
+            String::from("progarmid").take(15),
+            String::from("start").take(23),
+            String::from("end").take(23)
+        );
+        println!("|{}|", "-".repeat(len as usize));
+    }
+
     fn print_header_short(&self) {
-        println!("|--------------------------------+-----------------+-------------------------+-------------------------+--------------+----------------------|");
-        println!("| title                          | programid       | start                   | end                     | duration     | contentid            |");
-        println!("|--------------------------------+-----------------+-------------------------+-------------------------+--------------+----------------------|");
+        println!(
+            "|{}+{}+{}+{}+{}+{}|",
+            "-".repeat(32),
+            "-".repeat(17),
+            "-".repeat(25),
+            "-".repeat(25),
+            "-".repeat(14),
+            "-".repeat(22)
+        );
+        println!(
+            "| {} | {} | {} | {} | {} | {} |",
+            String::from("title").take(30),
+            String::from("programid").take(15),
+            String::from("start").take(23),
+            String::from("end").take(23),
+            String::from("duration").take(12),
+            String::from("contentid").take(20)
+        );
+        println!(
+            "|{}+{}+{}+{}+{}+{}|",
+            "-".repeat(32),
+            "-".repeat(17),
+            "-".repeat(25),
+            "-".repeat(25),
+            "-".repeat(14),
+            "-".repeat(22)
+        );
     }
 
     pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
@@ -636,12 +674,27 @@ impl DataSet {
         }) {
             summary.text_error += 1;
             if cmd.verbose() {
-                store.push(format!("{:?}", s));
+                let event = s.get_event();
+                store.push(format!(
+                    "| {} | {} | {} | {} |",
+                    event.get_title().take(50),
+                    event.get_programid().take(15),
+                    event.starttime_to_string(cmd.utc(), cmd.fps()).take(23),
+                    event.endtime_to_string(cmd.utc(), cmd.fps()).take(23)
+                ));
             }
         }
         if store.len() > 0 {
-            println!("{}", "Missings texts:");
-            store.iter().for_each(|x| println!("{}", x));
+            let len = 122;
+            println!("{}", "Missings texts:".red());
+            self.missing_text_header();
+            store.iter().enumerate().for_each(|(i, x)| {
+                println!("{}", x);
+                if i < store.len() - 1 {
+                    println!("|{}|", "-".repeat(len as usize));
+                }
+            });
+            self.missing_text_header();
         }
     }
 

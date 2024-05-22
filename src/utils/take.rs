@@ -19,7 +19,6 @@ impl Take for String {
             for _ in start..end {
                 iter.next();
             }
-
             Some(&s[start_pos..*iter.peek()?])
         } else {
             Some(&s)
@@ -28,7 +27,15 @@ impl Take for String {
 
     fn take(&mut self, length: usize) -> String {
         match self.take_slice(0, length) {
-            Some(string) => String::from(string),
+            Some(string) => {
+                let mut res: String = String::from(string);
+                if res.len() < length {
+                    res += &std::iter::repeat(" ")
+                        .take(length - res.len())
+                        .collect::<String>();
+                }
+                return res;
+            }
             None => String::from("TAKEERROR"),
         }
     }
