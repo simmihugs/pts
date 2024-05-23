@@ -159,7 +159,6 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code)]
     pub fn look_for_illegals(&self, illegals: &Vec<String>, cmd: &Commandline) {
         let events: &Vec<&Define> = &self
             .eventcommands
@@ -434,7 +433,6 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code)]
     pub fn print_si_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
         let mut si_events: Vec<&Define> = self.get_si_events();
 
