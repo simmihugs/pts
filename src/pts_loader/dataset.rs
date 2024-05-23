@@ -3,6 +3,7 @@ use crate::commandline::commandline::{Commandline, Range};
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
+use crate::utils::table_print;
 use crate::utils::take::Take;
 use crate::Fluid;
 use colored::Colorize;
@@ -25,35 +26,18 @@ pub struct EventCommands {
 }
 
 fn load_file(filename: &str) -> std::io::Result<String> {
-    match File::open(filename) {
-        Err(e) => Err(e),
-        Ok(mut file) => {
-            let mut s = String::new();
-            file.read_to_string(&mut s)?;
+    let mut file = File::open(filename)?;
+    let mut content = String::from("");
+    file.read_to_string(&mut content)?;
 
-            Ok(s)
-        }
-    }
+    Ok(content)
 }
 
 impl DataSet {
-    #[allow(dead_code)]
-    pub fn get_filename(&self) -> &str {
-        match &self.filename {
-            None => "None",
-            Some(_str) => _str,
-        }
-    }
-
     pub fn init_from_data(xml_text: String) -> Result<DataSet, serde_xml_rs::Error> {
-        let maybe_dataset: Result<DataSet, serde_xml_rs::Error> = serde_xml_rs::from_str(&xml_text);
-        match maybe_dataset {
-            Ok(mut dataset) => {
-                dataset.calculate_endtimes();
-                Ok(dataset)
-            }
-            Err(e) => Err(e),
-        }
+        let mut dataset: DataSet = serde_xml_rs::from_str(&xml_text)?;
+        dataset.calculate_endtimes();
+        Ok(dataset)
     }
 
     pub fn init(filename: &str) -> Result<DataSet, serde_xml_rs::Error> {
@@ -321,45 +305,45 @@ impl DataSet {
         (result, special_event_errors)
     }
 
-    fn print_line(&self, verbose: bool) {
-        if verbose {
-            println!("|{}|", self.line(158 + 53));
-        }
-    }
+    // fn print_line(&self, verbose: bool) {
+    //     if verbose {
+    //         println!("|{}|", self.line(158 + 53));
+    //     }
+    // }
 
-    fn line(&self, n: u64) -> String {
-        let mut line = String::new();
-        for _ in 0..n {
-            line += "-";
-        }
+    // fn line(&self, n: u64) -> String {
+    //     let mut line = String::new();
+    //     for _ in 0..n {
+    //         line += "-";
+    //     }
 
-        line
-    }
+    //     line
+    // }
 
-    fn print_line_cross(&self, verbose: bool) {
-        if verbose {
-            println!(
-                "|{}+{}+{}+{}+{}+{}+{}+{}|",
-                self.line(32),
-                self.line(52),
-                self.line(17),
-                self.line(25),
-                self.line(25),
-                self.line(14),
-                self.line(22),
-                self.line(17),
-            );
-        }
-    }
+    // fn print_line_cross(&self, verbose: bool) {
+    //     if verbose {
+    //         println!(
+    //             "|{}+{}+{}+{}+{}+{}+{}+{}|",
+    //             table_print::line(32),
+    //             table_print::line(52),
+    //             table_print::line(17),
+    //             table_print::line(25),
+    //             table_print::line(25),
+    //             table_print::line(14),
+    //             table_print::line(22),
+    //             table_print::line(17),
+    //         );
+    //     }
+    // }
 
-    fn print_head(&self, verbose: bool) {
-        if verbose {
-            println!(
-                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-                "title", "filename", "programid", "start", "end", "duration", "contentid", "logo",
-            );
-        }
-    }
+    // fn print_head(&self, verbose: bool) {
+    //     if verbose {
+    //         println!(
+    //             "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+    //             "title", "filename", "programid", "start", "end", "duration", "contentid", "logo",
+    //         );
+    //     }
+    // }
 
     pub fn update_werbungen(&self, cmd: &Commandline) -> std::io::Result<String> {
         let new_filename = format!("{}", cmd.filename().replace(".\\", ""));
@@ -446,59 +430,29 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    fn missing_text_header(&self) {
-        let len = 122;
-        println!("|{}|", "-".repeat(len as usize));
-        println!(
-            "| {} | {} | {} | {} |",
-            String::from("title").take(50),
-            String::from("progarmid").take(15),
-            String::from("start").take(23),
-            String::from("end").take(23)
-        );
-        println!("|{}|", "-".repeat(len as usize));
-    }
-
-    fn print_header_short(&self) {
-        println!(
-            "|{}+{}+{}+{}+{}+{}|",
-            "-".repeat(32),
-            "-".repeat(17),
-            "-".repeat(25),
-            "-".repeat(25),
-            "-".repeat(14),
-            "-".repeat(22)
-        );
-        println!(
-            "| {} | {} | {} | {} | {} | {} |",
-            String::from("title").take(30),
-            String::from("programid").take(15),
-            String::from("start").take(23),
-            String::from("end").take(23),
-            String::from("duration").take(12),
-            String::from("contentid").take(20)
-        );
-        println!(
-            "|{}+{}+{}+{}+{}+{}|",
-            "-".repeat(32),
-            "-".repeat(17),
-            "-".repeat(25),
-            "-".repeat(25),
-            "-".repeat(14),
-            "-".repeat(22)
-        );
-    }
+    // fn missing_text_header(&self) {
+    //     let len = 122;
+    //     println!("|{}|", "-".repeat(len as usize));
+    //     println!(
+    //         "| {} | {} | {} | {} |",
+    //         String::from("title").take(50),
+    //         String::from("progarmid").take(15),
+    //         String::from("start").take(23),
+    //         String::from("end").take(23)
+    //     );
+    //     println!("|{}|", "-".repeat(len as usize));
+    // }
 
     pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
         let va_events = &self.get_va_events_with_errors();
         summary.va_errors = va_events.len() as i64;
         if summary.va_errors != 0 && cmd.verbose() {
             println!("VaEvent errors:");
-            self.print_header_short();
+            table_print::print_header_short();
             for (time_error, event) in va_events {
                 event.print_va_event_verbose(time_error, cmd.utc(), cmd.fps());
             }
-            self.print_header_short();
+            table_print::print_header_short();
         }
     }
 
@@ -509,7 +463,6 @@ impl DataSet {
         fluid_data_set: &Fluid,
     ) {
         let (special_events, special_event_errors) = &self.get_special_events();
-
         summary.special_event_errors = special_event_errors.len() as i64;
         let mut new_special_events = Vec::new();
         if cmd.only_errors() {
@@ -524,25 +477,24 @@ impl DataSet {
         }
         let special_events = new_special_events;
 
-        if special_events.len() > 0 {
+        if special_events.len() > 0 && cmd.verbose() {
             println!("Special events:");
-            self.print_line(cmd.verbose());
-            self.print_head(cmd.verbose() && special_events.len() > 0);
-            self.print_line_cross(cmd.verbose());
+            table_print::print_line(158 + 53);
+            table_print::print_head();
+            table_print::print_line_cross();
             special_events.iter().for_each(|special_event| {
                 let terrors = special_event.get_time_errors();
                 let (lerrors, ierrors, length_errors) =
                     special_event.print_table(&terrors, cmd, fluid_data_set);
-                self.print_line_cross(cmd.verbose());
+                table_print::print_line_cross();
                 summary.id_errors += ierrors;
                 summary.logo_errors += lerrors;
                 summary.time_errors += terrors.len() as i64;
                 summary.length_error += length_errors;
             });
-            self.print_head(cmd.verbose() && special_events.len() > 0);
-            self.print_line(cmd.verbose());
+            table_print::print_head();
+            table_print::print_line(158 + 53);
         }
-
         if cmd.verbose() {
             for block in special_event_errors {
                 if block.is_begin() {
@@ -684,17 +636,17 @@ impl DataSet {
                 ));
             }
         }
-        if store.len() > 0 {
+        if store.len() > 0 && cmd.verbose() {
             let len = 122;
             println!("{}", "Missings texts:".red());
-            self.missing_text_header();
+            table_print::missing_text_header();
             store.iter().enumerate().for_each(|(i, x)| {
                 println!("{}", x);
                 if i < store.len() - 1 {
                     println!("|{}|", "-".repeat(len as usize));
                 }
             });
-            self.missing_text_header();
+            table_print::missing_text_header();
         }
     }
 
@@ -708,64 +660,5 @@ impl DataSet {
         }) {
             println!("{:?}\n", s);
         }
-    }
-
-    fn print_n_events(&self, all: bool, _define: &str, n: u64) {
-        let mut i = 0;
-        for define in self.eventcommands.define.iter() {
-            if i < n || all {
-                match define {
-                    Define::siEvent(..) => {
-                        if _define == "siEvent" {
-                            i += 1;
-                            println!("{:?}", define)
-                        }
-                    }
-                    Define::vaEvent(..) => {
-                        if _define == "vaEvent" {
-                            i += 1;
-                            println!("{:?}", define)
-                        }
-                    }
-                    Define::logoEvent(..) => {
-                        if _define == "logoEvent" {
-                            i += 1;
-                            println!("{:?}", define)
-                        }
-                    }
-                    Define::layoutEvent(..) => {
-                        if _define == "layoutEvent" {
-                            i += 1;
-                            println!("{:?}", define)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn print_si(&self) {
-        self.print_n_events(true, "siEvent", 0);
-    }
-
-    #[allow(dead_code)]
-    pub fn print_va(&self) {
-        self.print_n_events(true, "vaEvent", 0);
-    }
-
-    #[allow(dead_code)]
-    pub fn print_layout(&self) {
-        self.print_n_events(true, "layoutEvent", 0);
-    }
-
-    #[allow(dead_code)]
-    pub fn print_logo(&self) {
-        self.print_n_events(true, "logoEvent", 0);
-    }
-
-    #[allow(dead_code)]
-    pub fn print_n_si(&self, n: u64) {
-        self.print_n_events(false, "siEvent", n);
     }
 }
