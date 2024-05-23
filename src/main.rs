@@ -61,7 +61,7 @@ fn main() -> std::io::Result<()> {
                 }
 
                 if cmd.update_werbungen() {
-                    match dataset.update_werbungen(&cmd) {
+                    match dataset.update_commercials(&cmd) {
                         Err(e) => println!("{}", e),
                         Ok(file) => println!("updated pts file: {}", file),
                     }

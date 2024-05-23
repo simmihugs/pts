@@ -1,6 +1,10 @@
+use crate::pts_loader::block::Block;
+//use crate::pts_loader::dataset::DataSet;
 use crate::pts_loader::event::Event;
+use crate::utils::table_print;
 use crate::utils::take::Take;
 use crate::Fluid;
+use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
 use colored::{ColoredString, Colorize};
 
@@ -14,6 +18,42 @@ enum LengthError {
 #[derive(Clone)]
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
+}
+
+pub fn print_special_events(
+    special_events: Vec<&SpecialEvent<'_>>,
+    special_event_errors: &Vec<Block<'_>>,
+    fluid_data_set: &Fluid,
+    summary: &mut Summary,
+    cmd: &Commandline,
+) {
+    if special_events.len() > 0 {
+        println!("Special events:");
+        table_print::print_line(158 + 53);
+        table_print::print_head();
+        table_print::print_line_cross();
+        special_events.iter().for_each(|special_event| {
+            let terrors = special_event.get_time_errors();
+            let (lerrors, ierrors, length_errors) =
+                special_event.print_table(&terrors, cmd, fluid_data_set);
+            table_print::print_line_cross();
+            summary.id_errors += ierrors;
+            summary.logo_errors += lerrors;
+            summary.time_errors += terrors.len() as i64;
+            summary.length_error += length_errors;
+        });
+        table_print::print_head();
+        table_print::print_line(158 + 53);
+    }
+    for block in special_event_errors {
+        if block.is_begin() {
+            println!("{}", "missing end to event:".red());
+            println!("{:?}", block.event());
+        } else {
+            println!("{}", "missing begin to event:".red());
+            println!("{:?}", block.event());
+        }
+    }
 }
 
 impl<'a> SpecialEvent<'a> {
@@ -45,7 +85,7 @@ impl<'a> SpecialEvent<'a> {
         }
     }
 
-    pub fn get_werbungen(&self) -> Vec<String> {
+    pub fn get_commercials(&self) -> Vec<String> {
         let mut store = Vec::new();
 
         for s in &self.vec {

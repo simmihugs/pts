@@ -1,4 +1,4 @@
-use super::define::*;
+use super::{define::*, special_event};
 use crate::commandline::commandline::{Commandline, Range};
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
@@ -8,7 +8,7 @@ use crate::utils::take::Take;
 use crate::Fluid;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::prelude::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -26,11 +26,7 @@ pub struct EventCommands {
 }
 
 fn load_file(filename: &str) -> std::io::Result<String> {
-    let mut file = File::open(filename)?;
-    let mut content = String::from("");
-    file.read_to_string(&mut content)?;
-
-    Ok(content)
+    fs::read_to_string(filename)
 }
 
 impl DataSet {
@@ -305,65 +301,26 @@ impl DataSet {
         (result, special_event_errors)
     }
 
-    // fn print_line(&self, verbose: bool) {
-    //     if verbose {
-    //         println!("|{}|", self.line(158 + 53));
-    //     }
-    // }
-
-    // fn line(&self, n: u64) -> String {
-    //     let mut line = String::new();
-    //     for _ in 0..n {
-    //         line += "-";
-    //     }
-
-    //     line
-    // }
-
-    // fn print_line_cross(&self, verbose: bool) {
-    //     if verbose {
-    //         println!(
-    //             "|{}+{}+{}+{}+{}+{}+{}+{}|",
-    //             table_print::line(32),
-    //             table_print::line(52),
-    //             table_print::line(17),
-    //             table_print::line(25),
-    //             table_print::line(25),
-    //             table_print::line(14),
-    //             table_print::line(22),
-    //             table_print::line(17),
-    //         );
-    //     }
-    // }
-
-    // fn print_head(&self, verbose: bool) {
-    //     if verbose {
-    //         println!(
-    //             "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
-    //             "title", "filename", "programid", "start", "end", "duration", "contentid", "logo",
-    //         );
-    //     }
-    // }
-
-    pub fn update_werbungen(&self, cmd: &Commandline) -> std::io::Result<String> {
+    pub fn update_commercials(&self, cmd: &Commandline) -> std::io::Result<String> {
         let new_filename = format!("{}", cmd.filename().replace(".\\", ""));
         let (special_events, _) = &self.get_special_events();
-        let werbungen_liste: Vec<_> = special_events.iter().map(|e| e.get_werbungen()).collect();
-        if !werbungen_liste.is_empty() {
+        let commercials_liste: Vec<_> =
+            special_events.iter().map(|e| e.get_commercials()).collect();
+        if !commercials_liste.is_empty() {
             let mut source = File::open(cmd.filename())?;
             let mut data = String::new();
             source.read_to_string(&mut data)?;
             drop(source);
 
-            for werbungen in werbungen_liste {
-                if !werbungen.is_empty() {
-                    for werbung in werbungen {
+            for commercials in commercials_liste {
+                if !commercials.is_empty() {
+                    for commercial in commercials {
                         let contentid = "UHD1_WERBUNG-01";
-                        let newtitle = werbung
+                        let newtitle = commercial
                             .replace(contentid, "")
                             .replace(" ", "")
                             .replace("-", "");
-                        let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"", werbung);
+                        let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"", commercial);
                         let newstr = format!("\r\n\t\t\t\ttitle=\"{}\"", newtitle);
 
                         data = data.replace(&*oldstr, &*newstr);
@@ -430,19 +387,6 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    // fn missing_text_header(&self) {
-    //     let len = 122;
-    //     println!("|{}|", "-".repeat(len as usize));
-    //     println!(
-    //         "| {} | {} | {} | {} |",
-    //         String::from("title").take(50),
-    //         String::from("progarmid").take(15),
-    //         String::from("start").take(23),
-    //         String::from("end").take(23)
-    //     );
-    //     println!("|{}|", "-".repeat(len as usize));
-    // }
-
     pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
         let va_events = &self.get_va_events_with_errors();
         summary.va_errors = va_events.len() as i64;
@@ -462,49 +406,31 @@ impl DataSet {
         cmd: &Commandline,
         fluid_data_set: &Fluid,
     ) {
-        let (special_events, special_event_errors) = &self.get_special_events();
-        summary.special_event_errors = special_event_errors.len() as i64;
-        let mut new_special_events = Vec::new();
-        if cmd.only_errors() {
-            special_events.iter().for_each(|special_event| {
-                if special_event.has_id_errors() || special_event.has_logo_errors(cmd) {
-                    let event = special_event.clone();
-                    new_special_events.push(event);
-                }
-            });
-        } else {
-            new_special_events = special_events.to_vec();
-        }
-        let special_events = new_special_events;
-
-        if special_events.len() > 0 && cmd.verbose() {
-            println!("Special events:");
-            table_print::print_line(158 + 53);
-            table_print::print_head();
-            table_print::print_line_cross();
-            special_events.iter().for_each(|special_event| {
-                let terrors = special_event.get_time_errors();
-                let (lerrors, ierrors, length_errors) =
-                    special_event.print_table(&terrors, cmd, fluid_data_set);
-                table_print::print_line_cross();
-                summary.id_errors += ierrors;
-                summary.logo_errors += lerrors;
-                summary.time_errors += terrors.len() as i64;
-                summary.length_error += length_errors;
-            });
-            table_print::print_head();
-            table_print::print_line(158 + 53);
-        }
         if cmd.verbose() {
-            for block in special_event_errors {
-                if block.is_begin() {
-                    println!("{}", "missing end to event:".red());
-                    println!("{:?}", block.event());
-                } else {
-                    println!("{}", "missing begin to event:".red());
-                    println!("{:?}", block.event());
-                }
-            }
+            let (special_events, special_event_errors) = &self.get_special_events();
+            summary.special_event_errors = special_event_errors.len() as i64;
+            let special_events: Vec<&SpecialEvent<'_>> = special_events
+                .iter()
+                .filter(|x| {
+                    if cmd.only_errors() {
+                        if x.has_id_errors() || x.has_logo_errors(cmd) {
+                            true
+                        } else {
+                            false
+                        }
+                    } else {
+                        true
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            special_event::print_special_events(
+                special_events,
+                special_event_errors,
+                fluid_data_set,
+                summary,
+                cmd,
+            );
         }
     }
 
@@ -571,7 +497,6 @@ impl DataSet {
         }
     }
 
-    #[allow(dead_code)]
     pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
         let mut store = Vec::new();
         for s in self.get_si_events().iter().filter(|event| {
