@@ -31,9 +31,8 @@ def main():
         driver.switch_to.default_content()
         driver.find_element('id', 'SearchButton').click()
         login_success_full = True
-        print("[+] Login successful")
     except NoSuchElementException:
-        print("[!] Login failed")        
+        print("Login failed")        
 
     if login_success_full:
         export_menu_button = WebDriverWait(driver, 10).until(
