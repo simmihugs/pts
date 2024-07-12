@@ -9,6 +9,7 @@ use pts_loader::dataset::DataSet;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
+
     if cmd.filename() == "YOU_PICK_A_FILE" {
         Commandline::print_help();
     } else {
@@ -75,6 +76,12 @@ fn main() -> std::io::Result<()> {
                 if cmd.no_option() {
                     Commandline::print_help();
                 }
+
+                // TODO
+                // match cmd.trailers() {
+                //     None => println!("asdf"),
+                //     Some(trailers) => trailers.iter().for_each(|x| println!("{:?}", x)),
+                // }
             }
             Err(e) => {
                 if cmd.debug() {

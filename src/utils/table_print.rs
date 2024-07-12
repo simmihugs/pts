@@ -18,7 +18,7 @@ pub fn print_head() {
         "end".to_string().take(23),
         "duration".to_string().take(12),
         "contentid".to_string().take(20),
-        "logo".to_string().take(15),
+        "logo".to_string().take(16),
     );
 }
 
@@ -32,7 +32,7 @@ pub fn print_line_cross() {
         line(25),
         line(14),
         line(22),
-        line(17),
+        line(18),
     );
 }
 

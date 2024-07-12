@@ -54,6 +54,9 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     all: bool,
 
+    // TODO
+    // #[arg(long, default_value = None, num_args = 0..=1, default_missing_value = None)]
+    // list_trailers: Option<String>,
     #[arg(short, long, default_value_t = false)]
     only_errors: bool,
 
@@ -98,6 +101,30 @@ impl Commandline {
             args: Args::parse(),
         }
     }
+
+    //TODO
+    // pub fn trailers(&self) -> Option<Vec<String>> {
+    //     match &self.args.list_trailers {
+    //         None => {
+    //             println!("asdf");
+    //             None
+    //         }
+    //         //Some(string) => Some(string.split(",").collect::<Vec<String>>()),
+    //         Some(string) => {
+    //             println!("{}", "asdf");
+    //             let strings = string.split(",");
+    //             let mut result = vec![];
+    //             for s in strings {
+    //                 result.push(s.to_string());
+    //             }
+    //             if result.is_empty() {
+    //                 None
+    //             } else {
+    //                 Some(result)
+    //             }
+    //         }
+    //     }
+    // }
 
     pub fn update_werbungen(&self) -> bool {
         self.args.update_werbungen

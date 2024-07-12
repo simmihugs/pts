@@ -29,7 +29,7 @@ pub fn print_special_events(
 ) {
     if special_events.len() > 0 {
         println!("Special events:");
-        table_print::print_line(158 + 53);
+        table_print::print_line(158 + 53 + 1);
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
@@ -43,7 +43,7 @@ pub fn print_special_events(
             summary.length_error += length_errors;
         });
         table_print::print_head();
-        table_print::print_line(158 + 53);
+        table_print::print_line(158 + 53 + 1);
     }
     for block in special_event_errors {
         if block.is_begin() {
@@ -181,11 +181,18 @@ impl<'a> SpecialEvent<'a> {
         let mut answer: String = String::new();
         if event.get_contentid() == "cb7a119f84cb7b117b1b"
             || event.get_contentid() == "392654926764849cd5dc"
+        // Black
             || event.get_contentid() == "e90dfb84e30edf611e32"
             || event.get_contentid() == "b1735b7c5101727b3c6c"
+        // Werbung 
             || event.get_contentid().contains("WERBUNG")
-            || event.get_duration() < 60_000
+        //live
             || event.get_contentid() == "UHD_IN2"
+        // Baelle
+            || event.get_contentid() == "5675d8c63df2424bf286"
+        // Trailer
+            || event.get_title().contains("Trailer")
+            || event.get_contentid() == "b52d22eeb30a63a4518f"
         {
             if logos.len() != 0 {
                 if debug_me {
@@ -197,7 +204,6 @@ impl<'a> SpecialEvent<'a> {
         } else {
             if logos.len() > 1 {
                 if event.get_contentid() == "UHD_LIVE" {
-                    //answer = String::from("UHD_LIVE_LOGOS");
                 } else {
                     if debug_me {
                         println!("Should have 1 logos, has: {:?}", logos);
@@ -427,13 +433,6 @@ impl<'a> SpecialEvent<'a> {
                         title = title.take(30)
                     }
 
-                    if logostr.len() < 15 {
-                        for _ in 0..15 - logostr.len() {
-                            logostr += " ";
-                        }
-                    }
-                    logostr = logostr.drain(0..14).collect::<String>();
-
                     if title == "Dranbleiben" {
                         //Init starttime coloring with dranbleiben
                         found_dran_bleiben = true;
@@ -451,7 +450,7 @@ impl<'a> SpecialEvent<'a> {
 
                     if cmd.verbose() {
                         println!(
-                            "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                            "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {} |",
                             title,
                             if event.get_duration() > 30 * 1000
                                 && event.get_contentid() != "cb7a119f84cb7b117b1b"
@@ -495,9 +494,9 @@ impl<'a> SpecialEvent<'a> {
                                 contentid.red().clear()
                             },
                             if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                                logostr.red()
+                                logostr.take(16).red()
                             } else {
-                                logostr.red().clear()
+                                logostr.take(16).red().clear()
                             },
                         );
                         for logo in &logos {
@@ -507,7 +506,7 @@ impl<'a> SpecialEvent<'a> {
                             }
 
                             println!(
-                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {:15} |",
+                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {} |",
                                 " ",
                                 " ",
                                 logo.get_event().programid_to_string().green(),
@@ -519,7 +518,7 @@ impl<'a> SpecialEvent<'a> {
                                     .green(),
                                 logo.get_event().duration_to_string(cmd.fps()).green(),
                                 logo.get_event().get_contentid().green(),
-                                logostr.green(),
+                                logostr.take(16).green(),
                             );
                         }
                     }
