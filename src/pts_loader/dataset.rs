@@ -540,10 +540,15 @@ impl DataSet {
                 "DLXM Session: Freya Ridings",
             ]
             .iter()
-            .map(|x| x.to_string() == event.get_event().get_title())
+            .map(|x| {
+                x.to_string() == event.get_event().get_title()
+                    || event.get_event().get_title().contains("Olympia")
+            })
             .fold(false, |acc, value| acc || value))
                 && (match event.get_event().get_text() {
-                    None => false,
+                    None => {
+                        return false;
+                    }
                     Some(text) => text == "",
                 })
         }) {

@@ -190,6 +190,10 @@ impl<'a> SpecialEvent<'a> {
             || event.get_contentid() == "UHD_IN2"
         // Baelle
             || event.get_contentid() == "5675d8c63df2424bf286"
+        // galileo
+            || event.get_contentid() == "64bb104f8aa130071723"
+        // nachklappe pro7
+            || event.get_contentid() == "29996549985440a20fa1"
         // Trailer
             || event.get_title().contains("Trailer")
             || event.get_contentid() == "b52d22eeb30a63a4518f"
