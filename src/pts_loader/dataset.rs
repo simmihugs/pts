@@ -1,5 +1,5 @@
 use super::{define::*, special_event};
-use crate::commandline::commandline::{Commandline, Range};
+use crate::commandline::commandline::Commandline;
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
@@ -195,18 +195,26 @@ impl DataSet {
         event.print_si_events_verbose(next_event, &err, &display_err, verbose, utc);
     }
 
-    fn get_si_events(&self) -> Vec<&Define> {
-        self.eventcommands
-            .define
-            .iter()
-            .filter(|x| {
-                if let Define::siEvent(..) = x {
-                    true
-                } else {
-                    false
-                }
-            })
-            .collect::<Vec<&Define>>()
+    fn get_si_events(&self) -> SiEvents {
+        SiEvents {
+            events: self
+                .eventcommands
+                .define
+                .iter()
+                .filter(|x| {
+                    if let Define::siEvent(..) = x {
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .collect::<Vec<&Define>>(),
+        }
+    }
+
+    pub fn display_sievents(&self, cmd: &Commandline) {
+        let mut si_events = self.get_si_events();
+        si_events.print(cmd);
     }
 
     fn get_va_events_with_errors(&self) -> Vec<(bool, &Define)> {
@@ -434,7 +442,7 @@ impl DataSet {
     }
 
     pub fn print_si_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
-        let mut si_events: Vec<&Define> = self.get_si_events();
+        let mut si_events: Vec<&Define> = self.get_si_events().events;
 
         if si_events.len() > 1 {
             let mut length_errors = Vec::new();
@@ -497,7 +505,7 @@ impl DataSet {
 
     pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
         let mut store = Vec::new();
-        for s in self.get_si_events().iter().filter(|event| {
+        for s in self.get_si_events().events.iter().filter(|event| {
             !(vec![
                 "Derzeit keine UHD-Sendung im Programm",
                 "Derzeit kein UHD Event",
@@ -575,18 +583,6 @@ impl DataSet {
                 }
             });
             table_print::missing_text_header();
-        }
-    }
-
-    pub fn print_range(&mut self, range: &Range) {
-        for s in self.get_si_events().iter().filter(|event| {
-            let e = event.get_event();
-            match e.get_starttime() {
-                Some(start) => range.start_time < start && start <= range.end_time,
-                _ => false,
-            }
-        }) {
-            println!("{:?}\n", s);
         }
     }
 }

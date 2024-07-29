@@ -89,6 +89,9 @@ struct Args {
 
     #[arg(long, default_value_t = String::from(DEFAULT_FLUID_DATABASE))]
     fluid: String,
+
+    #[arg(long, default_value_t = false)]
+    display_sievents: bool,
 }
 
 pub struct Commandline {
@@ -102,30 +105,6 @@ impl Commandline {
         }
     }
 
-    //TODO
-    // pub fn trailers(&self) -> Option<Vec<String>> {
-    //     match &self.args.list_trailers {
-    //         None => {
-    //             println!("asdf");
-    //             None
-    //         }
-    //         //Some(string) => Some(string.split(",").collect::<Vec<String>>()),
-    //         Some(string) => {
-    //             println!("{}", "asdf");
-    //             let strings = string.split(",");
-    //             let mut result = vec![];
-    //             for s in strings {
-    //                 result.push(s.to_string());
-    //             }
-    //             if result.is_empty() {
-    //                 None
-    //             } else {
-    //                 Some(result)
-    //             }
-    //         }
-    //     }
-    // }
-
     pub fn update_werbungen(&self) -> bool {
         self.args.update_werbungen
     }
@@ -136,6 +115,10 @@ impl Commandline {
 
     pub fn debug(&self) -> bool {
         self.args.debug
+    }
+
+    pub fn display_sievents(&self) -> bool {
+        self.args.display_sievents
     }
 
     pub fn fluid_csv(&self) -> Option<String> {
@@ -293,7 +276,8 @@ impl Commandline {
             || self.ps_event()
             || self.sierrors()
             || self.vaerrors()
-            || self.missing_texts())
+            || self.missing_texts()
+            || self.display_sievents())
     }
 
     pub fn illegalevents(&self) -> Option<Vec<String>> {

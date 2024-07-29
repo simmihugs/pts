@@ -43,9 +43,8 @@ fn main() -> std::io::Result<()> {
                     dataset.print_missing_text_errors(&mut summary, &cmd);
                 }
 
-                match cmd.valid_range() {
-                    None => (),
-                    Some(range) => dataset.print_range(&range),
+                if cmd.all() || cmd.display_sievents() {
+                    dataset.display_sievents(&cmd);
                 }
 
                 summary.print(&cmd);
@@ -76,12 +75,6 @@ fn main() -> std::io::Result<()> {
                 if cmd.no_option() {
                     Commandline::print_help();
                 }
-
-                // TODO
-                // match cmd.trailers() {
-                //     None => println!("asdf"),
-                //     Some(trailers) => trailers.iter().for_each(|x| println!("{:?}", x)),
-                // }
             }
             Err(e) => {
                 if cmd.debug() {

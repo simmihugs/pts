@@ -1,9 +1,12 @@
-use crate::commandline::commandline::Commandline;
+use super::event::*;
+use crate::utils::take::Take;
+use crate::{
+    commandline::commandline::Commandline, commandline::commandline::Range, utils::table_print,
+};
 use chrono::{DateTime, LocalResult, NaiveDateTime, TimeZone, Utc};
+use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
-use super::event::*;
 
 #[allow(non_camel_case_types)]
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
@@ -106,6 +109,16 @@ impl SiError {
 }
 
 impl Define {
+    fn is_in_range(&self, range: Option<Range>) -> bool {
+        match range {
+            None => return false,
+            Some(range) => match self.get_event().get_starttime() {
+                None => return false,
+                Some(time) => return range.start_time <= time && time <= range.end_time,
+            },
+        }
+    }
+
     pub fn get_si_error(&self, next: &Define, cmd: &Commandline) -> SiError {
         match self {
             Define::siEvent(..) => match next {
@@ -159,6 +172,75 @@ impl Define {
             | Define::siEvent(ref mut event)
             | Define::logoEvent(ref mut event)
             | Define::layoutEvent(ref mut event) => event,
+        }
+    }
+}
+
+pub struct SiEvents<'a> {
+    pub events: Vec<&'a Define>,
+}
+
+impl SiEvents<'_> {
+    fn print_head(&self) {
+        println!(
+            "| {} | {} | {} | {} |",
+            "Title".to_string().take(30).blue(),
+            "StartTime".to_string().take(20).blue(),
+            "EndTime".to_string().take(20).blue(),
+            "ProgramId".to_string().take(20).blue(),
+        );
+    }
+
+    fn filter_range(&mut self, cmd: &Commandline) {
+        self.events = self
+            .events
+            .clone()
+            .into_iter()
+            .filter(|x| x.is_in_range(cmd.valid_range()))
+            .collect();
+    }
+
+    pub fn print(&mut self, cmd: &Commandline) {
+        let mut footer = false;
+        self.filter_range(cmd);
+        table_print::print_line(101);
+        self.print_head();
+        self.events.iter().enumerate().for_each(|(i, x)| {
+            let event = x.get_event();
+            let mut title = event.get_title().take(30).red().clear();
+            let mut starttime = event
+                .starttime_to_string(cmd.utc(), cmd.fps())
+                .take(20)
+                .red()
+                .clear();
+            let mut endtime = event
+                .endtime_to_string(cmd.utc(), cmd.fps())
+                .take(20)
+                .red()
+                .clear();
+            let mut programid = event.get_programid().take(20).red().clear();
+            if title.contains("Sendepause") {
+                title = title.red();
+                starttime = starttime.red();
+                endtime = endtime.red();
+                programid = programid.red();
+            }
+            println!(
+                "| {} | {} | {} | {} |",
+                title, starttime, endtime, programid,
+            );
+            table_print::print_line(101);
+            if i % 5 == 0 {
+                self.print_head();
+                table_print::print_line(101);
+                footer = true;
+            } else {
+                footer = false;
+            }
+        });
+        if !footer {
+            self.print_head();
+            table_print::print_line(101);
         }
     }
 }
