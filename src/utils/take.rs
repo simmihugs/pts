@@ -26,12 +26,18 @@ impl Take for String {
     }
 
     fn take(&mut self, length: usize) -> String {
+        let mut len = length;
+        if self.contains("ä") || self.contains("ü") || self.contains("ö") || self.contains("ß")
+        {
+            len += 1;
+        }
+
         match self.take_slice(0, length) {
             Some(string) => {
                 let mut res: String = String::from(string);
-                if res.len() < length {
+                if res.len() < len {
                     res += &std::iter::repeat(" ")
-                        .take(length - res.len())
+                        .take(len - res.len())
                         .collect::<String>();
                 }
                 return res;

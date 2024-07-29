@@ -44,7 +44,13 @@ fn main() -> std::io::Result<()> {
                 }
 
                 if cmd.all() || cmd.display_sievents() {
+                    println!("\nSiEvents");
                     dataset.display_sievents(&cmd);
+                }
+
+                if cmd.all() || cmd.display_trailers() {
+                    println!("\nTrailer");
+                    dataset.display_trailers(&cmd);
                 }
 
                 summary.print(&cmd);

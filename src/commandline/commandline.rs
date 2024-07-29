@@ -92,6 +92,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     display_sievents: bool,
+
+    #[arg(long, default_value_t = false)]
+    display_trailers: bool,
 }
 
 pub struct Commandline {
@@ -119,6 +122,10 @@ impl Commandline {
 
     pub fn display_sievents(&self) -> bool {
         self.args.display_sievents
+    }
+
+    pub fn display_trailers(&self) -> bool {
+        self.args.display_trailers
     }
 
     pub fn fluid_csv(&self) -> Option<String> {

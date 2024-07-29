@@ -185,8 +185,8 @@ impl SiEvents<'_> {
         println!(
             "| {} | {} | {} | {} |",
             "Title".to_string().take(30).blue(),
-            "StartTime".to_string().take(20).blue(),
-            "EndTime".to_string().take(20).blue(),
+            "StartTime".to_string().take(25).blue(),
+            "EndTime".to_string().take(25).blue(),
             "ProgramId".to_string().take(20).blue(),
         );
     }
@@ -203,19 +203,19 @@ impl SiEvents<'_> {
     pub fn print(&mut self, cmd: &Commandline) {
         let mut footer = false;
         self.filter_range(cmd);
-        table_print::print_line(101);
+        table_print::print_line(111);
         self.print_head();
         self.events.iter().enumerate().for_each(|(i, x)| {
             let event = x.get_event();
             let mut title = event.get_title().take(30).red().clear();
             let mut starttime = event
                 .starttime_to_string(cmd.utc(), cmd.fps())
-                .take(20)
+                .take(25)
                 .red()
                 .clear();
             let mut endtime = event
                 .endtime_to_string(cmd.utc(), cmd.fps())
-                .take(20)
+                .take(25)
                 .red()
                 .clear();
             let mut programid = event.get_programid().take(20).red().clear();
@@ -229,10 +229,10 @@ impl SiEvents<'_> {
                 "| {} | {} | {} | {} |",
                 title, starttime, endtime, programid,
             );
-            table_print::print_line(101);
+            table_print::print_line(111);
             if i % 5 == 0 {
                 self.print_head();
-                table_print::print_line(101);
+                table_print::print_line(111);
                 footer = true;
             } else {
                 footer = false;
@@ -240,7 +240,7 @@ impl SiEvents<'_> {
         });
         if !footer {
             self.print_head();
-            table_print::print_line(101);
+            table_print::print_line(111);
         }
     }
 }

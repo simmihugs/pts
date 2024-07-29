@@ -217,6 +217,25 @@ impl DataSet {
         si_events.print(cmd);
     }
 
+    pub fn display_trailers(&self, cmd: &Commandline) {
+        let mut events = SiEvents {
+            events: self
+                .eventcommands
+                .define
+                .iter()
+                .filter(|x| {
+                    if let Define::vaEvent(..) = x {
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .filter(|x| x.get_event().get_duration() <= 50000)
+                .collect(),
+        };
+        events.print(cmd);
+    }
+
     fn get_va_events_with_errors(&self) -> Vec<(bool, &Define)> {
         let mut va_events = self
             .eventcommands
