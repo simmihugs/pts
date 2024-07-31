@@ -26,11 +26,8 @@ impl Take for String {
     }
 
     fn take(&mut self, length: usize) -> String {
-        let mut len = length;
-        if self.contains("ä") || self.contains("ü") || self.contains("ö") || self.contains("ß")
-        {
-            len += 1;
-        }
+        // removes special character gaps
+        let len = length + self.len() - self.chars().count();
 
         match self.take_slice(0, length) {
             Some(string) => {

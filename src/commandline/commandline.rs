@@ -95,6 +95,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     display_trailers: bool,
+
+    #[arg(long, default_value_t = false)]
+    only_sendepausen: bool,
 }
 
 pub struct Commandline {
@@ -122,6 +125,10 @@ impl Commandline {
 
     pub fn display_sievents(&self) -> bool {
         self.args.display_sievents
+    }
+
+    pub fn display_sievents_only_sendepausen(&self) -> bool {
+        self.args.only_sendepausen
     }
 
     pub fn display_trailers(&self) -> bool {

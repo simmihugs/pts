@@ -43,7 +43,7 @@ fn main() -> std::io::Result<()> {
                     dataset.print_missing_text_errors(&mut summary, &cmd);
                 }
 
-                if cmd.all() || cmd.display_sievents() {
+                if cmd.display_sievents() {
                     println!("\nSiEvents");
                     dataset.display_sievents(&cmd);
                 }

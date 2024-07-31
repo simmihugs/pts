@@ -225,17 +225,28 @@ impl SiEvents<'_> {
                 endtime = endtime.red();
                 programid = programid.red();
             }
-            println!(
-                "| {} | {} | {} | {} |",
-                title, starttime, endtime, programid,
-            );
-            table_print::print_line(111);
-            if i % 5 == 0 {
-                self.print_head();
-                table_print::print_line(111);
-                footer = true;
+
+            if cmd.display_sievents_only_sendepausen() {
+                if title.contains("Sendepause") {
+                    println!(
+                        "| {} | {} | {} | {} |",
+                        title, starttime, endtime, programid,
+                    );
+                    table_print::print_line(111);
+                }
             } else {
-                footer = false;
+                println!(
+                    "| {} | {} | {} | {} |",
+                    title, starttime, endtime, programid,
+                );
+                table_print::print_line(111);
+                if i % 5 == 0 {
+                    self.print_head();
+                    table_print::print_line(111);
+                    footer = true;
+                } else {
+                    footer = false;
+                }
             }
         });
         if !footer {
