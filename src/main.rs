@@ -11,6 +11,7 @@ fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
 
     if cmd.filename() == "YOU_PICK_A_FILE" {
+        println!("{:?}", "file not found");
         Commandline::print_help();
     } else {
         let filename = cmd.filename();

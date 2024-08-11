@@ -54,6 +54,9 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     all: bool,
 
+    #[arg(long, default_value_t = String::from(""))]
+    werbungen: String,
+
     // TODO
     // #[arg(long, default_value = None, num_args = 0..=1, default_missing_value = None)]
     // list_trailers: Option<String>,
@@ -125,6 +128,25 @@ impl Commandline {
 
     pub fn display_sievents(&self) -> bool {
         self.args.display_sievents
+    }
+
+    pub fn werbungen(&self) -> Option<Vec<Vec<String>>> {
+        let werbungen: Vec<Vec<String>> = self
+            .args
+            .werbungen
+            .split(";")
+            .map(|x| {
+                x.to_string()
+                    .split("--")
+                    .map(|y| y.to_string())
+                    .collect::<Vec<String>>()
+            })
+            .collect::<Vec<Vec<String>>>();
+        if werbungen.len() == 0 {
+            None
+        } else {
+            Some(werbungen)
+        }
     }
 
     pub fn display_sievents_only_sendepausen(&self) -> bool {

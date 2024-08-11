@@ -1,3 +1,4 @@
+//use crate::commandline::summary;
 use crate::pts_loader::block::Block;
 //use crate::pts_loader::dataset::DataSet;
 use crate::pts_loader::event::Event;
@@ -35,7 +36,7 @@ pub fn print_special_events(
         special_events.iter().for_each(|special_event| {
             let terrors = special_event.get_time_errors();
             let (lerrors, ierrors, length_errors) =
-                special_event.print_table(&terrors, cmd, fluid_data_set);
+                special_event.print_table(&terrors, summary, cmd, fluid_data_set);
             table_print::print_line_cross();
             summary.id_errors += ierrors;
             summary.logo_errors += lerrors;
@@ -347,9 +348,12 @@ impl<'a> SpecialEvent<'a> {
     pub fn print_table(
         &self,
         time_errors: &Vec<String>,
+        summary: &mut Summary,
         cmd: &Commandline,
         fluid_data_set: &Fluid,
     ) -> (i64, i64, i64) {
+        let werbungen = &cmd.werbungen();
+
         let mut logoerrors = 0;
         let mut iderrors = 0;
         let mut length_errors: i64 = 0;
@@ -452,56 +456,138 @@ impl<'a> SpecialEvent<'a> {
                         logoerrors += 1;
                     }
 
+                    let mut title2 = title.red().clear();
+                    let mut programid2 = event.programid_to_string().red().clear();
+                    let mut starttime2 = SpecialEvent::color_starttime(
+                        time_errors,
+                        event,
+                        &mut found_first_event,
+                        &mut found_dran_bleiben,
+                        cmd.utc(),
+                        cmd.fps(),
+                    )
+                    .red()
+                    .clear();
+                    let mut duration2 = match event_length_error {
+                        LengthError::Trailer => event.duration_to_string(cmd.fps()).purple(),
+                        LengthError::LengthError => event.duration_to_string(cmd.fps()).red(),
+                        LengthError::NoError => {
+                            if title == "Werbung" {
+                                event.duration_to_string(cmd.fps()).yellow()
+                            } else {
+                                event.duration_to_string(cmd.fps()).yellow().clear()
+                            }
+                        }
+                    };
+                    let mut contentid2 = if contentid == "UHD1_WERBUNG-01" {
+                        contentid.yellow()
+                    } else if contentid.contains("-") {
+                        contentid.red()
+                    } else {
+                        contentid.red().clear()
+                    };
+                    let mut logostr2 =
+                        if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
+                            logostr.take(16).red()
+                        } else {
+                            logostr.take(16).red().clear()
+                        };
+                    let mut content2 = if event.get_duration() > 30 * 1000
+                        && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                        && event.get_contentid() != "392654926764849cd5dc"
+                    {
+                        match fluid_data_set.query(&contentid) {
+                            None => "".to_string(),
+                            Some(s) => s.to_string().take(50),
+                        }
+                    } else {
+                        "".to_string()
+                    }
+                    .red()
+                    .clear();
+                    let mut endtime2 = event.endtime_to_string(cmd.utc(), cmd.fps()).red().clear();
+                    match werbungen {
+                        None => (),
+                        Some(w) => {
+                            for x in w.iter() {
+                                if title.contains(&x[0]) {
+                                    if event.duration_to_string(cmd.fps()) != x[1] {
+                                        title2 = title2.red();
+                                        programid2 = programid2.red();
+                                        starttime2 = starttime2.red();
+                                        duration2 = duration2.red();
+                                        contentid2 = contentid2.red();
+                                        logostr2 = logostr2.red();
+                                        content2 = content2.red();
+                                        endtime2 = endtime2.red();
+                                        summary.commercial_error += 1;
+                                    } else {
+                                        title2 = title2.cyan();
+                                        programid2 = programid2.cyan();
+                                        starttime2 = starttime2.cyan();
+                                        duration2 = duration2.cyan();
+                                        contentid2 = contentid2.cyan();
+                                        logostr2 = logostr2.cyan();
+                                        content2 = content2.cyan();
+                                        endtime2 = endtime2.cyan();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if cmd.verbose() {
                         println!(
                             "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {} |",
-                            title,
-                            if event.get_duration() > 30 * 1000
-                                && event.get_contentid() != "cb7a119f84cb7b117b1b"
-                                && event.get_contentid() != "392654926764849cd5dc"
-                            {
-                                match fluid_data_set.query(&contentid) {
-                                    None => "".to_string(),
-                                    Some(s) => s.to_string().take(50),
-                                }
-                            } else {
-                                "".to_string()
-                            },
-                            event.programid_to_string(),
-                            SpecialEvent::color_starttime(
-                                time_errors,
-                                event,
-                                &mut found_first_event,
-                                &mut found_dran_bleiben,
-                                cmd.utc(),
-                                cmd.fps()
-                            ),
-                            event.endtime_to_string(cmd.utc(), cmd.fps()),
+                            //title,
+                            title2,
+                            content2,
+                            // if event.get_duration() > 30 * 1000
+                            //     && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                            //     && event.get_contentid() != "392654926764849cd5dc"
+                            // {
+                            //     match fluid_data_set.query(&contentid) {
+                            //         None => "".to_string(),
+                            //         Some(s) => s.to_string().take(50),
+                            //     }
+                            // } else {
+                            //     "".to_string()
+                            // },
+                            //event.programid_to_string(),
+                            programid2,
+                            // SpecialEvent::color_starttime(
+                            //     time_errors,
+                            //     event,
+                            //     &mut found_first_event,
+                            //     &mut found_dran_bleiben,
+                            //     cmd.utc(),
+                            //     cmd.fps()
+                            // ),
+                            starttime2,
+                            endtime2,
                             //Duration
-                            match event_length_error {
-                                LengthError::Trailer =>
-                                    event.duration_to_string(cmd.fps()).purple(),
-                                LengthError::LengthError =>
-                                    event.duration_to_string(cmd.fps()).red(),
-                                LengthError::NoError =>
-                                    if title == "Werbung" {
-                                        event.duration_to_string(cmd.fps()).yellow()
-                                    } else {
-                                        event.duration_to_string(cmd.fps()).yellow().clear()
-                                    },
-                            },
-                            if contentid == "UHD1_WERBUNG-01" {
-                                contentid.yellow()
-                            } else if contentid.contains("-") {
-                                contentid.red()
-                            } else {
-                                contentid.red().clear()
-                            },
-                            if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                                logostr.take(16).red()
-                            } else {
-                                logostr.take(16).red().clear()
-                            },
+                            // match event_length_error {
+                            //     LengthError::Trailer =>
+                            //         event.duration_to_string(cmd.fps()).purple(),
+                            //     LengthError::LengthError =>
+                            //         event.duration_to_string(cmd.fps()).red(),
+                            //     LengthError::NoError =>
+                            //         if title == "Werbung" {
+                            //             event.duration_to_string(cmd.fps()).yellow()
+                            //         } else {
+                            //             event.duration_to_string(cmd.fps()).yellow().clear()
+                            //         },
+                            // },
+                            duration2,
+                            // if contentid == "UHD1_WERBUNG-01" {
+                            //     contentid.yellow()
+                            // } else if contentid.contains("-") {
+                            //     contentid.red()
+                            // } else {
+                            //     contentid.red().clear()
+                            // },
+                            contentid2,
+                            logostr2,
                         );
                         for logo in &logos {
                             let mut logostr = logo.get_event().get_logo();

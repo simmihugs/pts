@@ -11,6 +11,7 @@ pub struct Summary {
     pub text_error: i64,
     pub length_error: i64,
     pub si_length_error: i64,
+    pub commercial_error: i64,
 }
 
 impl Summary {
@@ -25,6 +26,7 @@ impl Summary {
             text_error: 0,
             length_error: 0,
             si_length_error: 0,
+            commercial_error: 0,
         }
     }
 
@@ -82,6 +84,15 @@ impl Summary {
                     format!("{}", 0).green()
                 } else {
                     format!("{}", self.si_length_error).red()
+                }
+            );
+
+            println!(
+                "{:3} commercial length errors",
+                if self.commercial_error == 0 {
+                    format!("{}", 0).green()
+                } else {
+                    format!("{}", self.commercial_error).red()
                 }
             );
         }

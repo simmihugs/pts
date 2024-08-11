@@ -26,7 +26,6 @@ impl Take for String {
     }
 
     fn take(&mut self, length: usize) -> String {
-        // removes special character gaps
         let len = length + self.len() - self.chars().count();
 
         match self.take_slice(0, length) {
