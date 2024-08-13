@@ -1,6 +1,4 @@
-//use crate::commandline::summary;
 use crate::pts_loader::block::Block;
-//use crate::pts_loader::dataset::DataSet;
 use crate::pts_loader::event::Event;
 use crate::utils::table_print;
 use crate::utils::take::Take;
@@ -30,7 +28,7 @@ pub fn print_special_events(
 ) {
     if special_events.len() > 0 {
         println!("Special events:");
-        table_print::print_line(158 + 53 + 1);
+        table_print::print_line(158 + 53 + 1 + 28);
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
@@ -44,7 +42,7 @@ pub fn print_special_events(
             summary.length_error += length_errors;
         });
         table_print::print_head();
-        table_print::print_line(158 + 53 + 1);
+        table_print::print_line(158 + 53 + 1 + 28);
     }
     for block in special_event_errors {
         if block.is_begin() {
@@ -271,8 +269,24 @@ impl<'a> SpecialEvent<'a> {
                     }
                     let contentid = event.get_contentid();
 
+                    let tcin_tcout = if event.get_duration() < 3 * 60_000
+                        || (event.get_contentid() == "cb7a119f84cb7b117b1b"
+                            || event.get_contentid() == "392654926764849cd5dc")
+                    {
+                        format!("{};{}", " ".repeat(12), " ".repeat(12))
+                    } else {
+                        match &event.get_tcin_tcout() {
+                            None => format!("{};{}", " ".repeat(12), " ".repeat(12)),
+                            Some((a, b)) => format!(
+                                "{};{}",
+                                Event::standalone_duration_to_string(a, cmd.fps()).take(12),
+                                Event::standalone_duration_to_string(b, cmd.fps()).take(12),
+                            ),
+                        }
+                    };
+
                     special_event += &format!(
-                        "{};{};{};{};{};{};{}\n",
+                        "{};{};{};{};{};{};{};{}\n",
                         title,
                         if event.get_duration() > 30 * 1000
                             && event.get_contentid() != "cb7a119f84cb7b117b1b"
@@ -288,17 +302,19 @@ impl<'a> SpecialEvent<'a> {
                         event.starttime_to_string(cmd.utc(), cmd.fps()),
                         event.endtime_to_string(cmd.utc(), cmd.fps()),
                         event.duration_to_string(cmd.fps()),
+                        tcin_tcout,
                         contentid,
                         logostr,
                     );
                     for logo in &logos {
                         special_event += &format!(
-                            "{};{};{};{};{};{};{}\n",
+                            "{};{};{};{};{};{};{};{}\n",
                             "",
                             "",
                             logo.get_event().starttime_to_string(cmd.utc(), cmd.fps()),
                             logo.get_event().endtime_to_string(cmd.utc(), cmd.fps()),
                             logo.get_event().duration_to_string(cmd.fps()),
+                            format!("{};{}", " ".repeat(12), " ".repeat(12)),
                             logo.get_event().get_contentid(),
                             logo.get_event().get_logo(),
                         );
@@ -536,56 +552,32 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
+                    let tcin_tcout = if event.get_duration() < 3 * 60_000
+                        || (event.get_contentid() == "cb7a119f84cb7b117b1b"
+                            || event.get_contentid() == "392654926764849cd5dc")
+                    {
+                        format!("{} | {}", " ".repeat(12), " ".repeat(12))
+                    } else {
+                        match &event.get_tcin_tcout() {
+                            None => format!("{} | {}", " ".repeat(12), " ".repeat(12)),
+                            Some((a, b)) => format!(
+                                "{} | {}",
+                                Event::standalone_duration_to_string(a, cmd.fps()).take(12),
+                                Event::standalone_duration_to_string(b, cmd.fps()).take(12),
+                            ),
+                        }
+                    };
+
                     if cmd.verbose() {
                         println!(
-                            "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {} |",
-                            //title,
+                            "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
                             title2,
                             content2,
-                            // if event.get_duration() > 30 * 1000
-                            //     && event.get_contentid() != "cb7a119f84cb7b117b1b"
-                            //     && event.get_contentid() != "392654926764849cd5dc"
-                            // {
-                            //     match fluid_data_set.query(&contentid) {
-                            //         None => "".to_string(),
-                            //         Some(s) => s.to_string().take(50),
-                            //     }
-                            // } else {
-                            //     "".to_string()
-                            // },
-                            //event.programid_to_string(),
                             programid2,
-                            // SpecialEvent::color_starttime(
-                            //     time_errors,
-                            //     event,
-                            //     &mut found_first_event,
-                            //     &mut found_dran_bleiben,
-                            //     cmd.utc(),
-                            //     cmd.fps()
-                            // ),
                             starttime2,
                             endtime2,
-                            //Duration
-                            // match event_length_error {
-                            //     LengthError::Trailer =>
-                            //         event.duration_to_string(cmd.fps()).purple(),
-                            //     LengthError::LengthError =>
-                            //         event.duration_to_string(cmd.fps()).red(),
-                            //     LengthError::NoError =>
-                            //         if title == "Werbung" {
-                            //             event.duration_to_string(cmd.fps()).yellow()
-                            //         } else {
-                            //             event.duration_to_string(cmd.fps()).yellow().clear()
-                            //         },
-                            // },
                             duration2,
-                            // if contentid == "UHD1_WERBUNG-01" {
-                            //     contentid.yellow()
-                            // } else if contentid.contains("-") {
-                            //     contentid.red()
-                            // } else {
-                            //     contentid.red().clear()
-                            // },
+                            tcin_tcout,
                             contentid2,
                             logostr2,
                         );
@@ -596,7 +588,7 @@ impl<'a> SpecialEvent<'a> {
                             }
 
                             println!(
-                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:20} | {} |",
+                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
                                 " ",
                                 " ",
                                 logo.get_event().programid_to_string().green(),
@@ -607,6 +599,7 @@ impl<'a> SpecialEvent<'a> {
                                     .endtime_to_string(cmd.utc(), cmd.fps())
                                     .green(),
                                 logo.get_event().duration_to_string(cmd.fps()).green(),
+                                format!("{} | {}", " ".repeat(12), " ".repeat(12)),
                                 logo.get_event().get_contentid().green(),
                                 logostr.take(16).green(),
                             );

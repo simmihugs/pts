@@ -370,7 +370,7 @@ impl DataSet {
 
         let (special_events, _errors) = &self.get_special_events();
         let mut file = File::create(cmd.csv())?;
-        match file.write_all(b"title;filename;start;end;duration;contentid;logo;\n") {
+        match file.write_all(b"title;filename;start;end;duration;tcin;tcout;contentid;logo;\n") {
             _ => (),
         }
         special_events.iter().for_each(|special_event| {

@@ -10,13 +10,15 @@ pub fn print_line(n: usize) {
 
 pub fn print_head() {
     println!(
-        "| {} | {} | {} | {} | {} | {} | {} | {} |",
+        "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
         "title".to_string().take(30),
         "filename".to_string().take(50),
         "programid".to_string().take(15),
         "start".to_string().take(23),
         "end".to_string().take(23),
         "duration".to_string().take(12),
+        "tcin".to_string().take(12),
+        "tcout".to_string().take(12),
         "contentid".to_string().take(20),
         "logo".to_string().take(16),
     );
@@ -24,12 +26,14 @@ pub fn print_head() {
 
 pub fn print_line_cross() {
     println!(
-        "|{}+{}+{}+{}+{}+{}+{}+{}|",
+        "|{}+{}+{}+{}+{}+{}+{}+{}+{}+{}|",
         line(32),
         line(52),
         line(17),
         line(25),
         line(25),
+        line(14),
+        line(14),
         line(14),
         line(22),
         line(18),

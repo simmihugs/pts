@@ -35,6 +35,8 @@ pub struct Event {
 
     #[serde(rename = "contentId")]
     contentid: Option<String>,
+
+    offset: Option<String>,
 }
 
 impl fmt::Debug for Event {
@@ -46,6 +48,12 @@ impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.fmt_event(f)
     }
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, PartialOrd)]
+struct Tcin {
+    #[serde(deserialize_with = "duration_from_str")]
+    duration: i64,
 }
 
 impl Event {
@@ -90,6 +98,19 @@ impl Event {
 
     pub fn get_duration(&self) -> i64 {
         self.duration
+    }
+
+    pub fn get_tcin_tcout(&self) -> Option<(i64, i64)> {
+        match &self.offset {
+            None => None,
+            Some(s) => {
+                match serde_xml_rs::from_str::<Tcin>(&format!("<Tcin duration=\"{}\"></Tcin>", s,))
+                {
+                    Ok(d) => Some((d.duration, d.duration + &self.duration)),
+                    Err(..) => None,
+                }
+            }
+        }
     }
 
     pub fn get_title(&self) -> String {
@@ -327,6 +348,57 @@ impl Event {
 
     pub fn duration_to_string(&self, fps: Option<i64>) -> String {
         let mut milliseconds = self.duration;
+        let hours = milliseconds / 3600_000;
+        milliseconds -= hours * 3600_000;
+
+        let minutes = milliseconds / 60_000;
+        milliseconds -= minutes * 60_000;
+
+        let seconds = milliseconds / 1000;
+        milliseconds -= seconds * 1000;
+        let milliseconds = match fps {
+            None => {
+                if milliseconds < 10 {
+                    format!("00{milliseconds}")
+                } else if milliseconds < 100 {
+                    format!("0{milliseconds}")
+                } else {
+                    format!("{milliseconds}")
+                }
+            }
+            Some(fps_number) => {
+                let frames_per_second = milliseconds / (1000 / fps_number);
+                if frames_per_second < 10 {
+                    format!("0{}", frames_per_second)
+                } else {
+                    format!("{}", frames_per_second)
+                }
+            }
+        };
+
+        format!(
+            "{}:{}:{}.{}",
+            if hours < 10 {
+                format!("0{hours}")
+            } else {
+                format!("{hours}")
+            },
+            if minutes < 10 {
+                format!("0{minutes}")
+            } else {
+                format!("{minutes}")
+            },
+            if seconds < 10 {
+                format!("0{seconds}")
+            } else {
+                format!("{seconds}")
+            },
+            milliseconds
+        )
+    }
+
+    pub fn standalone_duration_to_string(duration: &i64, fps: Option<i64>) -> String {
+        let mut milliseconds = *duration;
         let hours = milliseconds / 3600_000;
         milliseconds -= hours * 3600_000;
 
