@@ -57,6 +57,10 @@ struct Args {
     #[arg(long, default_value_t = String::from(""))]
     werbungen: String,
 
+    //TODO: check if tcin and tcout match
+    #[arg(long, default_value_t = String::from(""))]
+    tcins_and_tcouts: String,
+
     // TODO
     // #[arg(long, default_value = None, num_args = 0..=1, default_missing_value = None)]
     // list_trailers: Option<String>,
@@ -146,6 +150,26 @@ impl Commandline {
             None
         } else {
             Some(werbungen)
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn tcins_tcouts(&self) -> Option<Vec<Vec<String>>> {
+        let tcins_tcouts: Vec<Vec<String>> = self
+            .args
+            .tcins_and_tcouts
+            .split(";")
+            .map(|x| {
+                x.to_string()
+                    .split("--")
+                    .map(|y| y.to_string())
+                    .collect::<Vec<String>>()
+            })
+            .collect::<Vec<Vec<String>>>();
+        if tcins_tcouts.len() == 0 {
+            None
+        } else {
+            Some(tcins_tcouts)
         }
     }
 

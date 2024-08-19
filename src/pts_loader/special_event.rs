@@ -193,6 +193,8 @@ impl<'a> SpecialEvent<'a> {
             || event.get_contentid() == "64bb104f8aa130071723"
         // nachklappe pro7
             || event.get_contentid() == "29996549985440a20fa1"
+        // nachklappe k1
+            || event.get_contentid() == "563f387cf4cfd279039a"
         // Trailer
             || event.get_title().contains("Trailer")
             || event.get_contentid() == "b52d22eeb30a63a4518f"
@@ -271,7 +273,8 @@ impl<'a> SpecialEvent<'a> {
 
                     let tcin_tcout = if event.get_duration() < 3 * 60_000
                         || (event.get_contentid() == "cb7a119f84cb7b117b1b"
-                            || event.get_contentid() == "392654926764849cd5dc")
+                            || event.get_contentid() == "392654926764849cd5dc"
+                            || event.get_contentid() == "UHD1_WERBUNG-01")
                     {
                         format!("{};{}", " ".repeat(12), " ".repeat(12))
                     } else {
@@ -369,6 +372,7 @@ impl<'a> SpecialEvent<'a> {
         fluid_data_set: &Fluid,
     ) -> (i64, i64, i64) {
         let werbungen = &cmd.werbungen();
+        //let tcins_tcouts = &cmd.tcins_tcouts();
 
         let mut logoerrors = 0;
         let mut iderrors = 0;
@@ -554,19 +558,51 @@ impl<'a> SpecialEvent<'a> {
 
                     let tcin_tcout = if event.get_duration() < 3 * 60_000
                         || (event.get_contentid() == "cb7a119f84cb7b117b1b"
-                            || event.get_contentid() == "392654926764849cd5dc")
+                            || event.get_contentid() == "392654926764849cd5dc"
+                            || event.get_contentid() == "UHD1_WERBUNG-01")
                     {
                         format!("{} | {}", " ".repeat(12), " ".repeat(12))
+                            .red()
+                            .clear()
                     } else {
                         match &event.get_tcin_tcout() {
-                            None => format!("{} | {}", " ".repeat(12), " ".repeat(12)),
+                            None => format!("{} | {}", " ".repeat(12), " ".repeat(12))
+                                .red()
+                                .clear(),
                             Some((a, b)) => format!(
                                 "{} | {}",
                                 Event::standalone_duration_to_string(a, cmd.fps()).take(12),
                                 Event::standalone_duration_to_string(b, cmd.fps()).take(12),
-                            ),
+                            )
+                            .red()
+                            .clear(),
                         }
                     };
+
+                    // match tcins_tcouts {
+                    //     None => (),
+                    //     Some(tt) => {
+                    //         let tcins_tcouts_title = &tt[0][0];
+                    //         if event.get_duration() >= 3 * 60_0000
+                    //             && title.contains(tcins_tcouts_title)
+                    //         {
+                    //             for i in 1..tt.len() {
+                    //                 match event.get_tcin_tcout() {
+                    //                     Some((a, b)) => {
+                    //                         let tcin =
+                    //                             Event::standalone_duration_to_string(&a, cmd.fps());
+                    //                         let tcout =
+                    //                             Event::standalone_duration_to_string(&b, cmd.fps());
+                    //                         if tcin != tt[i][0] || tcout != tt[i][1] {
+                    //                             tcin_tcout = tcin_tcout.red();
+                    //                         }
+                    //                     }
+                    //                     _ => (),
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
                     if cmd.verbose() {
                         println!(
