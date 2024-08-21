@@ -12,6 +12,7 @@ pub struct Summary {
     pub length_error: i64,
     pub si_length_error: i64,
     pub commercial_error: i64,
+    pub trailer_balls_error: i64,
 }
 
 impl Summary {
@@ -27,6 +28,7 @@ impl Summary {
             length_error: 0,
             si_length_error: 0,
             commercial_error: 0,
+            trailer_balls_error: 0,
         }
     }
 
@@ -126,6 +128,17 @@ impl Summary {
                     format!("{}", self.text_error).green()
                 } else {
                     format!("{}", self.text_error).red()
+                }
+            );
+        }
+
+        if cmd.all() {
+            println!(
+                "{:3} trailer balls mixup",
+                if self.trailer_balls_error == 0 {
+                    format!("{}", self.trailer_balls_error).green()
+                } else {
+                    format!("{}", self.trailer_balls_error).red()
                 }
             );
         }

@@ -54,6 +54,11 @@ fn main() -> std::io::Result<()> {
                     dataset.display_trailers(&cmd);
                 }
 
+                if cmd.all() {
+                    println!("\nTrailer and balls mixup");
+                    dataset.trailers_and_balls_mixup(&mut summary, &cmd);
+                }
+
                 summary.print(&cmd);
 
                 if cmd.write_csv() {

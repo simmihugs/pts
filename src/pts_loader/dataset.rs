@@ -3,7 +3,7 @@ use crate::commandline::commandline::Commandline;
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
 use crate::pts_loader::special_event::SpecialEvent;
-use crate::utils::table_print;
+use crate::utils::table_print::{self, print_line};
 use crate::utils::take::Take;
 use crate::Fluid;
 use colored::Colorize;
@@ -413,11 +413,124 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
+    //TODO
+    pub fn trailers_and_balls_mixup(&self, summary: &mut Summary, cmd: &Commandline) {
+        let events: Vec<_> = self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::siEvent(..) = x {
+                    false
+                } else {
+                    true
+                }
+            })
+            .collect::<Vec<&Define>>();
+
+        // events.iter().enumerate().for_each(|(i, x)| {
+        //     let event = x.get_event();
+        //     if event.get_contentid().contains("5675d8c63df2424bf286") {
+        //         let before = self.eventcommands.define[i - 1].get_event();
+        //         let after = self.eventcommands.define[i + 1].get_event();
+
+        //         if !((after.get_duration() > 5 * 60 * 60_000)
+        //             && (before.get_duration() < 50 * 60_000))
+        //         {
+        //             summary.trailer_balls_error += 1;
+        //             print_line(100);
+        //             println!(
+        //                 "| {} | {} | {} |",
+        //                 before.get_title().take(50),
+        //                 before.starttime_to_string(cmd.utc(), cmd.fps()),
+        //                 "",
+        //                 //before.get_contentid(),
+        //             );
+        //             print_line(100);
+        //             println!(
+        //                 "| {} | {} | {} |",
+        //                 event.get_title().take(50),
+        //                 event.starttime_to_string(cmd.utc(), cmd.fps()),
+        //                 //event.get_contentid(),
+        //                 ""
+        //             );
+        //             print_line(100);
+        //             println!(
+        //                 "| {} | {} | {} |",
+        //                 after.get_title().take(50),
+        //                 after.starttime_to_string(cmd.utc(), cmd.fps()),
+        //                 //after.get_contentid(),
+        //                 ""
+        //             );
+        //             print_line(100);
+        //             println!("");
+        //         }
+        //     }
+        // });
+
+        events.iter().enumerate().for_each(|(i, x)| {
+            let event = x.get_event();
+            if event.get_contentid().contains("5675d8c63df2424bf286") {
+                let before = events[i - 1].get_event();
+                let after = events[i + 1].get_event();
+
+                if 10 * 1_000 < before.get_duration() && before.get_duration() < 30 * 1_000 {
+                    //before is trailer
+                } else if 3 * 60_000 < before.get_duration() {
+                    // before is segment
+                } else {
+                }
+                println!("{}", before.get_duration());
+                //                assert!(before.get_duration() < 30 * 1_000);
+
+                print_line(100);
+                println!(
+                    "| {} | {} | {} |",
+                    before.get_title().take(50),
+                    before.starttime_to_string(cmd.utc(), cmd.fps()),
+                    before.duration_to_string(cmd.fps()).take(20),
+                );
+
+                print_line(100);
+                println!(
+                    "| {} | {} | {} |",
+                    event.get_title().take(50).blue(),
+                    event.starttime_to_string(cmd.utc(), cmd.fps()).blue(),
+                    event.duration_to_string(cmd.fps()).take(20).blue(),
+                );
+
+                print_line(100);
+
+                println!(
+                    "| {} | {} | {} |",
+                    after.get_title().take(50),
+                    after.starttime_to_string(cmd.utc(), cmd.fps()),
+                    after.duration_to_string(cmd.fps()).take(20),
+                );
+
+                print_line(100);
+                println!("");
+            }
+        });
+    }
+
     pub fn print_va_errors(&self, summary: &mut Summary, cmd: &Commandline) {
         let va_events = &self.get_va_events_with_errors();
-        summary.va_errors = va_events.len() as i64;
-        if summary.va_errors != 0 && cmd.verbose() {
-            println!("VaEvent errors:");
+        summary.va_errors = va_events
+            .iter()
+            .filter(|(time, _)| *time)
+            .map(|_| 1 as usize)
+            .collect::<Vec<usize>>()
+            .len() as i64;
+        summary.id_errors = va_events
+            .iter()
+            .filter(|(time, _)| !time)
+            .map(|_| 1 as usize)
+            .collect::<Vec<usize>>()
+            .len() as i64;
+
+        if (summary.va_errors != 0 || summary.id_errors != 0) && cmd.verbose() {
+            println!("VaEvent errors and id errors:");
             table_print::print_header_short();
             for (time_error, event) in va_events {
                 event.print_va_event_verbose(time_error, cmd.utc(), cmd.fps());
