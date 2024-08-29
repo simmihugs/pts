@@ -176,11 +176,16 @@ impl Define {
     }
 }
 
+#[derive(Debug)]
 pub struct SiEvents<'a> {
     pub events: Vec<&'a Define>,
 }
 
 impl SiEvents<'_> {
+    pub fn len(&self) -> usize {
+        self.events.len()
+    }
+
     fn print_head(&self) {
         println!(
             "| {} | {} | {} | {} |",

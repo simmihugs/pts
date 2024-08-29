@@ -105,6 +105,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     only_sendepausen: bool,
+
+    #[arg(long, default_value_t = false)]
+    check_all_contentids: bool,
 }
 
 pub struct Commandline {
@@ -120,6 +123,10 @@ impl Commandline {
 
     pub fn update_werbungen(&self) -> bool {
         self.args.update_werbungen
+    }
+
+    pub fn check_all_contentids(&self) -> bool {
+        self.args.check_all_contentids
     }
 
     pub fn minimum(&self) -> i64 {

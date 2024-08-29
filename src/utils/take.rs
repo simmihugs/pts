@@ -27,7 +27,7 @@ impl Take for String {
         }
     }
 
-        fn contains_special_characters(&self, length: usize) -> bool {
+    fn contains_special_characters(&self, length: usize) -> bool {
         match self.take_slice(0, length) {
             None => false,
             Some(s) => s.contains("ä")
@@ -44,6 +44,7 @@ impl Take for String {
         if self.contains_special_characters(length) {
             len = length + self.len() - self.chars().count();
         }
+
         match self.take_slice(0, length) {
             Some(string) => {
                 let mut res: String = String::from(string);
@@ -54,45 +55,9 @@ impl Take for String {
                 }
                 return res;
             }
-            None => String::from("TAKEERROR"),
+            None => {
+                self.to_string() + &" ".repeat(self.len() - self.chars().count())
+            },
         }
     }
-
-    /*
-        fn take(&mut self, length: usize) -> String {
-            let len = length + self.len() - self.chars().count();
-            // if len != length {
-            //     println!("{:?} len: {}", self, self.len());
-            //     println!("length: {} length meassured: {}", len, length);
-            // }
-
-            if self.len() < len {
-                self.to_string() + &" ".repeat(len - self.len())
-            } else if self.len() > len {
-                match self.take_slice(0, len) {
-                    Some(s) => s.to_string(),
-                    None => "TAKEERROR".to_string(),
-                }
-            } else {
-                self.to_string()
-            }
-
-            // match self.take_slice(0, length) {
-            //     Some(string) => {
-            //         let mut res: String = String::from(string);
-            //         if res.len() < len {
-            //             res += &std::iter::repeat(" ")
-            //                 .take(len - res.len())
-            //                 .collect::<String>();
-            //         }
-            //         return res;
-            //     }
-            //     None => {
-            //         //println!("{:?}", self);
-            //         //String::from("TAKEERROR")
-            //         self.to_string()
-            //     }
-            // }
-    }
-        */
 }

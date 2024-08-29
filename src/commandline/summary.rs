@@ -13,6 +13,7 @@ pub struct Summary {
     pub si_length_error: i64,
     pub commercial_error: i64,
     pub trailer_balls_error: i64,
+    pub invalid_content_id_error: usize,
 }
 
 impl Summary {
@@ -29,6 +30,7 @@ impl Summary {
             si_length_error: 0,
             commercial_error: 0,
             trailer_balls_error: 0,
+            invalid_content_id_error: 0,
         }
     }
 
@@ -139,6 +141,17 @@ impl Summary {
                     format!("{}", self.trailer_balls_error).green()
                 } else {
                     format!("{}", self.trailer_balls_error).red()
+                }
+            );
+        }
+
+        if cmd.all() {
+            println!(
+                "{:3} invalid content ids",
+                if self.invalid_content_id_error == 0 {
+                    format!("{}", self.invalid_content_id_error).green()
+                } else {
+                    format!("{}", self.invalid_content_id_error).red()
                 }
             );
         }

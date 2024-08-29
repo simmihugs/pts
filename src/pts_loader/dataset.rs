@@ -233,7 +233,34 @@ impl DataSet {
                 .filter(|x| x.get_event().get_duration() <= 50000)
                 .collect(),
         };
+        if events.len() > 0 {
+            events.print(cmd);
+        }
+    }
+
+    pub fn display_all_content_id_errors(&self, summary: &mut Summary, cmd: &Commandline) {
+        let mut events = SiEvents {
+            events: self
+                .eventcommands
+                .define
+                .iter()
+                .filter(|x| {
+                    if let Define::vaEvent(..) = x {
+                        true
+                    } else {
+                        false
+                    }
+                })
+                .filter(|x| {
+                    let id = x.get_event().get_contentid();
+                    id.contains("-") && !id.contains("WERBUNG")
+                })
+                .collect(),
+        };
+
         events.print(cmd);
+        events.events.iter().for_each(|x| println!("{:?}", x));
+        summary.invalid_content_id_error = events.events.len();
     }
 
     fn get_va_events_with_errors(&self) -> Vec<(bool, &Define)> {
@@ -413,8 +440,8 @@ impl DataSet {
         file.write_all(&windows_1252_encoded_string.as_ref())
     }
 
-    //TODO
-    pub fn trailers_and_balls_mixup(&self, summary: &mut Summary, cmd: &Commandline) {
+    #[allow(dead_code)]
+    pub fn trailers_and_balls_mixup(&self, _summary: &mut Summary, cmd: &Commandline) {
         let events: Vec<_> = self
             .eventcommands
             .define
