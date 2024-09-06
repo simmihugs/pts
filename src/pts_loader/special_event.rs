@@ -194,10 +194,12 @@ impl<'a> SpecialEvent<'a> {
             || event.get_contentid() == "29996549985440a20fa1"
         // nachklappe k1
             || event.get_contentid() == "563f387cf4cfd279039a"
-        // Trailer
+        // Trailer75d1d4afe3f26b6412d4
             || event.get_title().contains("Trailer")
             || event.get_contentid() == "b52d22eeb30a63a4518f"
             || event.get_title().contains("ST2QX9MQ")
+            || event.get_contentid().contains("e4a2e62d68e2ad9bfaae")
+            || event.get_contentid().contains("75d1d4afe3f26b6412d4")
         {
             if logos.len() != 0 {
                 if debug_me {
