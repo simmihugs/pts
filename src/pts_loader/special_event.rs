@@ -200,6 +200,7 @@ impl<'a> SpecialEvent<'a> {
             || event.get_title().contains("ST2QX9MQ")
             || event.get_contentid().contains("e4a2e62d68e2ad9bfaae")
             || event.get_contentid().contains("75d1d4afe3f26b6412d4")
+            || event.get_contentid().contains("e48363d83407359a6dd2")
         {
             if logos.len() != 0 {
                 if debug_me {
@@ -575,8 +576,8 @@ impl<'a> SpecialEvent<'a> {
                         None => (),
                         Some(w) => {
                             for x in w.iter() {
-                                if title.contains(&x[0]) {
-                                    if event.duration_to_string(cmd.fps()) != x[1] {
+                             if x.len() > 1 {
+                                if title.contains(&x[0]) && event.duration_to_string(cmd.fps()) != x[1] {
                                         title_string = title_string.red();
                                         programid_string = programid_string.red();
                                         starttime_string = starttime_string.red();
