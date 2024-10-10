@@ -232,7 +232,7 @@ impl DataSet {
                 })
                 .filter(|x| x.get_event().get_duration() <= 50000)
                 .collect(),
-        };
+        };        
         if events.len() > 0 {
             events.print(cmd);
         }

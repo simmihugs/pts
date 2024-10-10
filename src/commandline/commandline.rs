@@ -1,5 +1,4 @@
 use clap::{CommandFactory, Parser};
-
 use crate::pts_loader::sistandard::*;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -196,6 +195,15 @@ impl Commandline {
     }
 
     pub fn valid_range(&self) -> Option<Range> {
+        let default_range: Range = match serde_json::from_value::<Range>(json!({
+            "startTime": "2000-01-01T01:00:00.000Z",
+            "endTime": "2100-01-01T01:00:00.000Z",
+        })) {
+            Err(err) => {
+                panic!("{}", err);
+            }
+            Ok(range) => range,
+        };
         let range_str = self.args.valid_range.to_string();
         match serde_json::from_str::<Range>(&range_str) {
             Err(error) => {
@@ -203,7 +211,7 @@ impl Commandline {
                     if self.debug() {
                         println!("{}", "default value");
                     }
-                    None
+                    Some(default_range)
                 } else if error.is_eof() {
                     None
                 } else if error.is_syntax() {

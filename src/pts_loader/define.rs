@@ -201,7 +201,9 @@ impl SiEvents<'_> {
             .events
             .clone()
             .into_iter()
-            .filter(|x| x.is_in_range(cmd.valid_range()))
+            .filter(|x| {
+                x.is_in_range(cmd.valid_range())
+            })
             .collect();
     }
 
