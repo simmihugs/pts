@@ -14,6 +14,25 @@ enum LengthError {
     NoError,
 }
 
+static CONTENT_IDS: &'static [&str; 16] = &[
+    "cb7a119f84cb7b117b1b",
+    "392654926764849cd5dc",
+    "e90dfb84e30edf611e32",
+    "b1735b7c5101727b3c6c",
+    "5675d8c63df2424bf286",
+    "64bb104f8aa130071723",
+    "29996549985440a20fa1",
+    "563f387cf4cfd279039a",
+    "b52d22eeb30a63a4518f",
+    "e4a2e62d68e2ad9bfaae",
+    "75d1d4afe3f26b6412d4",
+    "e48363d83407359a6dd2",
+    "34500e2e4a0d1a0806bb",
+    "WERBUNG",
+    "cb7a119f84cb7b117b1b",
+    "ec12fb722064b74776d6"
+];
+
 #[derive(Clone)]
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
@@ -177,30 +196,7 @@ impl<'a> SpecialEvent<'a> {
         let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
-        if event.get_contentid() == "cb7a119f84cb7b117b1b"
-            || event.get_contentid() == "392654926764849cd5dc"
-        // Black
-            || event.get_contentid() == "e90dfb84e30edf611e32"
-            || event.get_contentid() == "b1735b7c5101727b3c6c"
-        // Werbung 
-            || event.get_contentid().contains("WERBUNG")
-        //live
-            || event.get_contentid() == "UHD_IN2"
-        // Baelle
-            || event.get_contentid() == "5675d8c63df2424bf286"
-        // galileo
-            || event.get_contentid() == "64bb104f8aa130071723"
-        // nachklappe pro7
-            || event.get_contentid() == "29996549985440a20fa1"
-        // nachklappe k1
-            || event.get_contentid() == "563f387cf4cfd279039a"
-        // Trailer75d1d4afe3f26b6412d4
-            || event.get_title().contains("Trailer")
-            || event.get_contentid() == "b52d22eeb30a63a4518f"
-            || event.get_title().contains("ST2QX9MQ")
-            || event.get_contentid().contains("e4a2e62d68e2ad9bfaae")
-            || event.get_contentid().contains("75d1d4afe3f26b6412d4")
-            || event.get_contentid().contains("e48363d83407359a6dd2")
+        if CONTENT_IDS.iter().any(|x| event.get_contentid().contains(x)) || event.get_title().contains("railer")
         {
             if logos.len() != 0 {
                 if debug_me {
@@ -522,7 +518,7 @@ impl<'a> SpecialEvent<'a> {
                                 .take(duration_length)
                                 .red(),
                             LengthError::NoError => {
-                                if title == "Werbung" {
+                                if contentid.contains("WERB") {
                                     event
                                         .duration_to_string(cmd.fps())
                                         .take(duration_length)
@@ -539,7 +535,7 @@ impl<'a> SpecialEvent<'a> {
                     };
                     let mut contentid_string = {
                         let length = 20;
-                        if contentid == "UHD1_WERBUNG-01" {
+                        if contentid.contains("WERB") {
                             contentid.to_string().take(length).yellow()
                         } else if contentid.contains("-") {
                             contentid.to_string().take(length).red()

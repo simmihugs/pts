@@ -49,20 +49,15 @@ fn main() -> std::io::Result<()> {
                     dataset.display_sievents(&cmd);
                 }
 
-                if cmd.all() || cmd.display_trailers() {
+                if cmd.display_trailers() {
                     println!("\nTrailer");
                     dataset.display_trailers(&cmd);
                 }
 
-                if cmd.all() || cmd.check_all_contentids() {
+                if cmd.check_all_contentids() {
                     println!("{}", "\nAll content ids");
                     dataset.display_all_content_id_errors(&mut summary, &cmd);
                 }
-
-                // if cmd.all() {
-                //     println!("\nTrailer and balls mixup");
-                //     dataset.trailers_and_balls_mixup(&mut summary, &cmd);
-                // }
 
                 summary.print(&cmd);
 
