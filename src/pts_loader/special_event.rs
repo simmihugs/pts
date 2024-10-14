@@ -509,10 +509,18 @@ impl<'a> SpecialEvent<'a> {
                     let mut duration_string = {
                         let duration_length = 12;
                         match event_length_error {
-                            LengthError::Trailer => event
+                            LengthError::Trailer =>
+                                if contentid.contains("WERB") {
+                                    event
+                                        .duration_to_string(cmd.fps())
+                                        .take(duration_length)
+                                        .yellow()
+					} else {
+			    event
                                 .duration_to_string(cmd.fps())
                                 .take(duration_length)
-                                .purple(),
+                                .purple()
+				},
                             LengthError::LengthError => event
                                 .duration_to_string(cmd.fps())
                                 .take(duration_length)
