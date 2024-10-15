@@ -21,8 +21,9 @@ impl std::fmt::Display for Range {
     }
 }
 
-const DEFAULT_VALID_RANGE: &str =
-    "startTime = YYYY-MM-DDTHH:mm:ss.mssZ; endTime = YYYY-MM-DDTHH:mm:ss.mssZ";
+// const DEFAULT_VALID_RANGE: &str =
+//     "startTime = YYYY-MM-DDTHH:mm:ss.mssZ; endTime = YYYY-MM-DDTHH:mm:ss.mssZ";
+const DEFAULT_VALID_RANGE: &str = "DEFAULT_VALID_RANGE";
 
 const DEFAULT_FLUID_DATABASE: &str = "DEFAULT_FLUID_DATABASE";
 
