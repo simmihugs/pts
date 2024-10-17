@@ -30,7 +30,7 @@ static CONTENT_IDS: &'static [&str; 16] = &[
     "34500e2e4a0d1a0806bb",
     "WERBUNG",
     "cb7a119f84cb7b117b1b",
-    "ec12fb722064b74776d6"
+    "ec12fb722064b74776d6",
 ];
 
 #[derive(Clone)]
@@ -196,7 +196,10 @@ impl<'a> SpecialEvent<'a> {
         let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
-        if CONTENT_IDS.iter().any(|x| event.get_contentid().contains(x)) || event.get_title().contains("railer")
+        if CONTENT_IDS
+            .iter()
+            .any(|x| event.get_contentid().contains(x))
+            || event.get_title().contains("railer")
         {
             if logos.len() != 0 {
                 if debug_me {
@@ -270,10 +273,10 @@ impl<'a> SpecialEvent<'a> {
                     }
                     let contentid = event.get_contentid();
 
-                    let tcin_tcout = if event.get_duration() < 3 * 60_000
-                        || (event.get_contentid() == "cb7a119f84cb7b117b1b"
-                            || event.get_contentid() == "392654926764849cd5dc"
-                            || event.get_contentid() == "UHD1_WERBUNG-01")
+                    let tcin_tcout = if CONTENT_IDS
+                        .iter()
+                        .any(|x| event.get_contentid().contains(x))
+                        || event.get_title().contains("railer")
                     {
                         format!("{};{}", " ".repeat(12), " ".repeat(12))
                     } else {
@@ -509,18 +512,19 @@ impl<'a> SpecialEvent<'a> {
                     let mut duration_string = {
                         let duration_length = 12;
                         match event_length_error {
-                            LengthError::Trailer =>
+                            LengthError::Trailer => {
                                 if contentid.contains("WERB") {
                                     event
                                         .duration_to_string(cmd.fps())
                                         .take(duration_length)
                                         .yellow()
-					} else {
-			    event
-                                .duration_to_string(cmd.fps())
-                                .take(duration_length)
-                                .purple()
-				},
+                                } else {
+                                    event
+                                        .duration_to_string(cmd.fps())
+                                        .take(duration_length)
+                                        .purple()
+                                }
+                            }
                             LengthError::LengthError => event
                                 .duration_to_string(cmd.fps())
                                 .take(duration_length)
@@ -580,8 +584,10 @@ impl<'a> SpecialEvent<'a> {
                         None => (),
                         Some(w) => {
                             for x in w.iter() {
-                             if x.len() > 1 {
-                                if title.contains(&x[0]) && event.duration_to_string(cmd.fps()) != x[1] {
+                                if x.len() > 1 {
+                                    if title.contains(&x[0])
+                                        && event.duration_to_string(cmd.fps()) != x[1]
+                                    {
                                         title_string = title_string.red();
                                         programid_string = programid_string.red();
                                         starttime_string = starttime_string.red();
@@ -606,10 +612,10 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
-                    let tcin_tcout = if event.get_duration() < 3 * 60_000
-                        || (event.get_contentid() == "cb7a119f84cb7b117b1b"
-                            || event.get_contentid() == "392654926764849cd5dc"
-                            || event.get_contentid() == "UHD1_WERBUNG-01")
+                    let tcin_tcout = if CONTENT_IDS
+                        .iter()
+                        .any(|x| event.get_contentid().contains(x))
+                        || event.get_title().contains("railer")
                     {
                         format!("{} | {}", " ".repeat(12), " ".repeat(12))
                             .red()
