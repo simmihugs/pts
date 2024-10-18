@@ -9,50 +9,51 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 from datetime import date
 
+
 def main():
-    username = prompt(prompt='username: ')
-    password = prompt(prompt='password: ')    
+    username = prompt(prompt="username: ")
+    password = prompt(prompt="password: ")
 
     options = Options()
-    options.add_argument('--headless')
+    options.add_argument("--headless")
 
     driver = webdriver.Firefox(options=options)
     driver.get("https://secure.ses-ps.com/fluid/ui/dist/login.html")
 
-    driver.switch_to.frame('fluid-login-iframe')
-    driver.find_element('name', 'user').send_keys(username)
-    driver.find_element('id', 'pwd').send_keys(password)
-    driver.find_element('id', 'loginBtn').click()
+    driver.switch_to.frame("fluid-login-iframe")
+    driver.find_element("name", "user").send_keys(username)
+    driver.find_element("id", "pwd").send_keys(password)
+    driver.find_element("id", "loginBtn").click()
 
     login_success_full = False
     try:
         driver.refresh()
         time.sleep(3)
         driver.switch_to.default_content()
-        driver.find_element('id', 'SearchButton').click()
+        driver.find_element("id", "SearchButton").click()
         login_success_full = True
     except NoSuchElementException:
-        print("Login failed")        
+        print("Login failed")
 
     if login_success_full:
         export_menu_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.ID, 'ExportButton'))
+            EC.element_to_be_clickable((By.ID, "ExportButton"))
         )
         export_menu_button.click()
 
-        file_name = 'New_fluid_export_' + str(date.today())
-        export_input = driver.find_element('id', 'customPrompt')
+        file_name = "New_fluid_export_" + str(date.today())
+        export_input = driver.find_element("id", "customPrompt")
         export_input.clear()
         export_input.send_keys(file_name)
 
         export_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.big'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "button.big"))
         )
         export_button.click()
 
-        print(f'Successfully exported: {file_name}.xlxs')
+        print(f"Successfully exported: {file_name}.xlxs")
         driver.close()
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()
