@@ -33,6 +33,8 @@ static CONTENT_IDS: &'static [&str; 16] = &[
     "ec12fb722064b74776d6",
 ];
 
+const LINE_WIDTH: usize = 242;
+
 #[derive(Clone)]
 pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
@@ -47,7 +49,7 @@ pub fn print_special_events(
 ) {
     if special_events.len() > 0 {
         println!("Special events:");
-        table_print::print_line(158 + 53 + 1 + 30);
+        table_print::print_line(LINE_WIDTH);
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
@@ -60,7 +62,7 @@ pub fn print_special_events(
             summary.length_error += length_errors;
         });
         table_print::print_head();
-        table_print::print_line(158 + 53 + 1 + 30);
+        table_print::print_line(LINE_WIDTH);
     }
     for block in special_event_errors {
         if block.is_begin() {
@@ -575,6 +577,7 @@ impl<'a> SpecialEvent<'a> {
                     .take(50)
                     .red()
                     .clear();
+
                     let mut endtime_string = event
                         .endtime_to_string(cmd.utc(), cmd.fps())
                         .take(23)
@@ -612,39 +615,57 @@ impl<'a> SpecialEvent<'a> {
                         }
                     }
 
-                    let tcin_tcout = if CONTENT_IDS
+                    let (mut tcin, mut tcout) = if CONTENT_IDS
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")
                     {
-                        format!("{} | {}", " ".repeat(12), " ".repeat(12))
-                            .red()
-                            .clear()
+                        (format!("{}", " ".repeat(12)).red().clear(),
+                         format!("{}", " ".repeat(12)).red().clear())
                     } else {
                         match &event.get_tcin_tcout() {
-                            None => format!("{} | {}", " ".repeat(12), " ".repeat(12))
-                                .red()
-                                .clear(),
-                            Some((a, b)) => format!(
-                                "{} | {}",
-                                Event::standalone_duration_to_string(a, cmd.fps()).take(12),
-                                Event::standalone_duration_to_string(b, cmd.fps()).take(12),
-                            )
-                            .red()
-                            .clear(),
+                            None =>
+                                (format!("{}", " ".repeat(12)).red().clear(),
+                                 format!("{}", " ".repeat(12)).red().clear()),
+                            Some((a, b)) =>
+                                (format!("{}", Event::standalone_duration_to_string(a, cmd.fps()).take(12)).red().clear(),
+                                 format!("{}",Event::standalone_duration_to_string(b, cmd.fps()).take(12)).red().clear()),
                         }
                     };
 
+                    match fluid_data_set.query_duration(&contentid) {
+                        Some(duration) => {
+                            if duration < event.get_duration() {
+                                title_string = title_string.red();
+                                programid_string = programid_string.red();
+                                starttime_string = starttime_string.red();
+                                duration_string = duration_string.bright_red();
+                                contentid_string = contentid_string.red();
+                                logostr_string = logostr_string.red();
+                                content_string = content_string.red();
+                                endtime_string = endtime_string.red();
+                                tcin = format!(
+                                    "{}",
+                                    Event::a_duration_to_string(duration, cmd.fps()).take(12),
+                                ).bright_red();
+                                tcout = format!("{}", " ".repeat(12)).bright_red().clear();
+                                summary.length_error += 1;
+                            }
+                        }
+                        None => (),
+                    }
+
                     if cmd.verbose() {
                         println!(
-                            "| {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
                             title_string,
                             content_string,
                             programid_string,
                             starttime_string,
                             endtime_string,
                             duration_string,
-                            tcin_tcout,
+                            tcin,
+                            tcout,
                             contentid_string,
                             logostr_string,
                         );

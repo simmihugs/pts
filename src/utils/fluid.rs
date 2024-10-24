@@ -3,6 +3,9 @@ use csv::ReaderBuilder;
 use std::collections::HashMap;
 use std::fs::File;
 
+use crate::pts_loader::sistandard::*;
+use serde::{Deserialize, Serialize};
+
 fn read_csv(path: &String) -> Option<Reader<File>> {
     let mut result = None;
     for delimiter in vec![b';', b',', b'\t'] {
@@ -51,6 +54,12 @@ pub struct Fluid {
     database: Vec<HashMap<String, String>>,
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, PartialOrd)]
+struct ContentDuration {
+    #[serde(deserialize_with = "duration_from_str")]
+    duration: i64,
+}
+
 impl Fluid {
     pub fn init() -> Self {
         Fluid { database: vec![] }
@@ -79,5 +88,27 @@ impl Fluid {
             }
         }
         None
+    }
+
+    #[allow(dead_code)]
+    pub fn query_duration(&self, id: &str) -> Option<i64> {
+        for entry in &self.database {
+            if entry["ContentId"] == id {
+                let duration_str = &entry["RuntimeMs"].to_string();
+                let parts: Vec<&str> = duration_str.split(".").collect::<Vec<&str>>();
+                let hours: String = parts[0].to_string();
+                let ms: String = format!("{}", parts[1].parse::<i32>().unwrap());
+                let new_duration_str = format!("00 {}.{}", hours, ms);
+
+                return match serde_xml_rs::from_str::<ContentDuration>(&format!(
+                    "<ContentDuration duration=\"{}\"></ContentDuration>",
+                    new_duration_str
+                )) {
+                    Err(..) => None,
+                    Ok(d) => Some(d.duration),
+                };
+            }
+        }
+        return None;
     }
 }

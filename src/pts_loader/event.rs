@@ -346,8 +346,8 @@ impl Event {
         }
     }
 
-    pub fn duration_to_string(&self, fps: Option<i64>) -> String {
-        let mut milliseconds = self.duration;
+    pub fn a_duration_to_string(duration: i64, fps: Option<i64>) -> String {
+        let mut milliseconds = duration;
         let hours = milliseconds / 3600_000;
         milliseconds -= hours * 3600_000;
 
@@ -395,6 +395,10 @@ impl Event {
             },
             milliseconds
         )
+    }
+    
+    pub fn duration_to_string(&self, fps: Option<i64>) -> String {
+        Event::a_duration_to_string(self.duration, fps)
     }
 
     pub fn standalone_duration_to_string(duration: &i64, fps: Option<i64>) -> String {
