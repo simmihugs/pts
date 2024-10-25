@@ -14,7 +14,7 @@ enum LengthError {
     NoError,
 }
 
-static CONTENT_IDS: &'static [&str; 16] = &[
+static CONTENT_IDS: &'static [&str; 17] = &[
     "cb7a119f84cb7b117b1b",
     "392654926764849cd5dc",
     "e90dfb84e30edf611e32",
@@ -31,6 +31,7 @@ static CONTENT_IDS: &'static [&str; 16] = &[
     "WERBUNG",
     "cb7a119f84cb7b117b1b",
     "ec12fb722064b74776d6",
+    "98bcc270bf534db740b8",
 ];
 
 const LINE_WIDTH: usize = 242;
@@ -620,16 +621,30 @@ impl<'a> SpecialEvent<'a> {
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")
                     {
-                        (format!("{}", " ".repeat(12)).red().clear(),
-                         format!("{}", " ".repeat(12)).red().clear())
+                        (
+                            format!("{}", " ".repeat(12)).red().clear(),
+                            format!("{}", " ".repeat(12)).red().clear(),
+                        )
                     } else {
                         match &event.get_tcin_tcout() {
-                            None =>
-                                (format!("{}", " ".repeat(12)).red().clear(),
-                                 format!("{}", " ".repeat(12)).red().clear()),
-                            Some((a, b)) =>
-                                (format!("{}", Event::standalone_duration_to_string(a, cmd.fps()).take(12)).red().clear(),
-                                 format!("{}",Event::standalone_duration_to_string(b, cmd.fps()).take(12)).red().clear()),
+                            None => (
+                                format!("{}", " ".repeat(12)).red().clear(),
+                                format!("{}", " ".repeat(12)).red().clear(),
+                            ),
+                            Some((a, b)) => (
+                                format!(
+                                    "{}",
+                                    Event::standalone_duration_to_string(a, cmd.fps()).take(12)
+                                )
+                                .red()
+                                .clear(),
+                                format!(
+                                    "{}",
+                                    Event::standalone_duration_to_string(b, cmd.fps()).take(12)
+                                )
+                                .red()
+                                .clear(),
+                            ),
                         }
                     };
 
@@ -647,7 +662,8 @@ impl<'a> SpecialEvent<'a> {
                                 tcin = format!(
                                     "{}",
                                     Event::a_duration_to_string(duration, cmd.fps()).take(12),
-                                ).bright_red();
+                                )
+                                .bright_red();
                                 tcout = format!("{}", " ".repeat(12)).bright_red().clear();
                                 summary.length_error += 1;
                             }
