@@ -113,6 +113,10 @@ impl<'a> SpecialEvent<'a> {
                 Define::vaEvent(event) => {
                     let id = event.get_contentid();
                     let title = event.get_title();
+                    // TODO add for removal
+                    // if title.starts_with(" - 00") {
+                    //     println!("{}", title);
+                    // }
                     if id == "UHD1_WERBUNG-01" && title != " -  UHD1_WERBUNG-01" {
                         store.push(format!("{}", title));
                     }
@@ -296,16 +300,21 @@ impl<'a> SpecialEvent<'a> {
                     special_event += &format!(
                         "{};{};{};{};{};{};{};{}\n",
                         title,
-                        if event.get_duration() > 30 * 1000
-                            && event.get_contentid() != "cb7a119f84cb7b117b1b"
-                            && event.get_contentid() != "392654926764849cd5dc"
-                        {
-                            match fluid_data_set.query(&contentid) {
-                                None => "".to_string(),
-                                Some(s) => s.to_string(),
+                        match cmd.fluid_csv() {
+                            None => "".to_string(),
+                            Some(..) => {
+                                if event.get_duration() > 30 * 1000
+                                    && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                                    && event.get_contentid() != "392654926764849cd5dc"
+                                {
+                                    match fluid_data_set.query(&contentid) {
+                                        None => "".to_string(),
+                                        Some(s) => s.to_string(),
+                                    }
+                                } else {
+                                    "".to_string()
+                                }
                             }
-                        } else {
-                            "".to_string()
                         },
                         event.starttime_to_string(cmd.utc(), cmd.fps()),
                         event.endtime_to_string(cmd.utc(), cmd.fps()),
@@ -453,54 +462,16 @@ impl<'a> SpecialEvent<'a> {
                     }
 
                     let mut title = event.get_title();
-
-                    // if title.contains(":") || title.contains("-") {
-                    //     println!(
-                    //         "{:?} has length: {} and number of chars: {}",
-                    //         title,
-                    //         title.len(),
-                    //         title.chars().count(),
-                    //     )
-                    // }
-
-                    let contentid = event.get_contentid();
-                    // if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
-                    //     iderrors += 1;
-                    // }
-                    if contentid == "UHD1_WERBUNG-01" {
-                        if title == " -  UHD1_WERBUNG-01" {
-                            title = "UHD1_WERBUNG-01".to_string();
-                        } else {
-                            title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
-                        }
-                    } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
-                        title = "Dranbleiben".to_string();
-                    } else if event.get_contentid() == "392654926764849cd5dc" {
-                        title = "Pausentafel ".to_string();
-                    }
                     title = title.take(30).take(30);
-
-                    if title == "Dranbleiben" {
-                        //Init starttime coloring with dranbleiben
-                        found_dran_bleiben = true;
-                    } else if found_dran_bleiben && event.get_duration() >= 60000 {
-                        //Found first event after dranbleiben with length in minutes
-                        found_first_event = true;
-                    }
-
-                    if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                        if cmd.debug() {
-                            println!("{}", "found error");
-                        }
-                        logoerrors += 1;
-                    }
-
                     let mut title_string = if title.contains("TAK") {
                         title.red()
                     } else {
                         title.red().clear()
                     };
+
+                    let contentid = event.get_contentid();
                     let mut programid_string = event.programid_to_string().take(15).red().clear();
+
                     let mut starttime_string = SpecialEvent::color_starttime(
                         time_errors,
                         event,
@@ -512,6 +483,7 @@ impl<'a> SpecialEvent<'a> {
                     )
                     .red()
                     .clear();
+
                     let mut duration_string = {
                         let duration_length = 12;
                         match event_length_error {
@@ -548,6 +520,7 @@ impl<'a> SpecialEvent<'a> {
                             }
                         }
                     };
+
                     let mut contentid_string = {
                         let length = 20;
                         if contentid.contains("WERB") {
@@ -558,12 +531,14 @@ impl<'a> SpecialEvent<'a> {
                             contentid.to_string().take(length).red().clear()
                         }
                     };
+
                     let mut logostr_string =
                         if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
                             logostr.take(16).red()
                         } else {
                             logostr.take(16).red().clear()
                         };
+
                     let mut content_string = if event.get_duration() > 30 * 1000
                         && event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
@@ -584,38 +559,6 @@ impl<'a> SpecialEvent<'a> {
                         .take(23)
                         .red()
                         .clear();
-                    match werbungen {
-                        None => (),
-                        Some(w) => {
-                            for x in w.iter() {
-                                if x.len() > 1 {
-                                    if title.contains(&x[0])
-                                        && event.duration_to_string(cmd.fps()) != x[1]
-                                    {
-                                        title_string = title_string.red();
-                                        programid_string = programid_string.red();
-                                        starttime_string = starttime_string.red();
-                                        duration_string = duration_string.red();
-                                        contentid_string = contentid_string.red();
-                                        logostr_string = logostr_string.red();
-                                        content_string = content_string.red();
-                                        endtime_string = endtime_string.red();
-                                        summary.commercial_error += 1;
-                                    } else {
-                                        title_string = title_string.cyan();
-                                        programid_string = programid_string.cyan();
-                                        starttime_string = starttime_string.cyan();
-                                        duration_string = duration_string.cyan();
-                                        contentid_string = contentid_string.cyan();
-                                        logostr_string = logostr_string.cyan();
-                                        content_string = content_string.cyan();
-                                        endtime_string = endtime_string.cyan();
-                                    }
-                                }
-                            }
-                        }
-                    }
-
                     let (mut tcin, mut tcout) = if CONTENT_IDS
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
@@ -648,29 +591,114 @@ impl<'a> SpecialEvent<'a> {
                         }
                     };
 
-                    match fluid_data_set.query_duration(&contentid) {
-                        Some(duration) => {
-                            if duration < event.get_duration() {
-                                title_string = title_string.red();
-                                programid_string = programid_string.red();
-                                starttime_string = starttime_string.red();
-                                duration_string = duration_string.bright_red();
-                                contentid_string = contentid_string.red();
-                                logostr_string = logostr_string.red();
-                                content_string = content_string.red();
-                                endtime_string = endtime_string.red();
-                                tcin = format!(
-                                    "{}",
-                                    Event::a_duration_to_string(duration, cmd.fps()).take(12),
-                                )
-                                .bright_red();
-                                tcout = format!("{}", " ".repeat(12)).bright_red().clear();
-                                summary.length_error += 1;
+                    if title.starts_with(" - 00") {
+                        //New werbung
+                        title_string = title.replace(" - 00", "00").take(30).take(30).yellow();
+                        content_string = content_string.yellow();
+                        programid_string = programid_string.yellow();
+                        starttime_string = starttime_string.yellow();
+                        endtime_string = endtime_string.yellow();
+                        duration_string = duration_string.yellow();
+                        tcin = tcin.yellow();
+                        tcout = tcout.yellow();
+                        contentid_string = contentid_string.yellow();
+                        logostr_string = "".to_string().take(16).red().clear();
+                    } else if title.split(" ").collect::<Vec<&str>>()[0]
+                        .to_string()
+                        .parse::<i64>()
+                        .is_ok()
+                    {
+                        title_string = title_string.blue();
+                        content_string = content_string.blue();
+                        programid_string = programid_string.blue();
+                        starttime_string = starttime_string.blue();
+                        endtime_string = endtime_string.blue();
+                        duration_string = duration_string.blue();
+                        tcin = tcin.blue();
+                        tcout = tcout.blue();
+                        contentid_string = contentid_string.blue();
+                        logostr_string = "".to_string().take(16).red().clear();
+                    } else {
+                        if contentid == "UHD1_WERBUNG-01" {
+                            if title == " -  UHD1_WERBUNG-01" {
+                                title = "UHD1_WERBUNG-01".to_string();
+                            } else {
+                                title = title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+                            }
+                        } else if event.get_contentid() == "cb7a119f84cb7b117b1b" {
+                            title = "Dranbleiben".to_string();
+                        } else if event.get_contentid() == "392654926764849cd5dc" {
+                            title = "Pausentafel ".to_string();
+                        }
+
+                        if title == "Dranbleiben" {
+                            found_dran_bleiben = true;
+                        } else if found_dran_bleiben && event.get_duration() >= 60000 {
+                            found_first_event = true;
+                        }
+
+                        if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
+                            if cmd.debug() {
+                                println!("{}", "found error");
+                            }
+                            logoerrors += 1;
+                        }
+
+                        match werbungen {
+                            None => (),
+                            Some(w) => {
+                                for x in w.iter() {
+                                    if x.len() > 1 {
+                                        if title.contains(&x[0])
+                                            && event.duration_to_string(cmd.fps()) != x[1]
+                                        {
+                                            title_string = title_string.red();
+                                            programid_string = programid_string.red();
+                                            starttime_string = starttime_string.red();
+                                            duration_string = duration_string.red();
+                                            contentid_string = contentid_string.red();
+                                            logostr_string = logostr_string.red();
+                                            content_string = content_string.red();
+                                            endtime_string = endtime_string.red();
+                                            summary.commercial_error += 1;
+                                        } else {
+                                            title_string = title_string.cyan();
+                                            programid_string = programid_string.cyan();
+                                            starttime_string = starttime_string.cyan();
+                                            duration_string = duration_string.cyan();
+                                            contentid_string = contentid_string.cyan();
+                                            logostr_string = logostr_string.cyan();
+                                            content_string = content_string.cyan();
+                                            endtime_string = endtime_string.cyan();
+                                        }
+                                    }
+                                }
                             }
                         }
-                        None => (),
-                    }
 
+                        match fluid_data_set.query_duration(&contentid) {
+                            Some(duration) => {
+                                if duration < event.get_duration() {
+                                    title_string = title_string.red();
+                                    programid_string = programid_string.red();
+                                    starttime_string = starttime_string.red();
+                                    duration_string = duration_string.bright_red();
+                                    contentid_string = contentid_string.red();
+                                    logostr_string = logostr_string.red();
+                                    content_string = content_string.red();
+                                    endtime_string = endtime_string.red();
+                                    tcin = format!(
+                                        "{}",
+                                        Event::a_duration_to_string(duration, cmd.fps()).take(12),
+                                    )
+                                    .bright_red();
+                                    tcout = format!("{}", " ".repeat(12)).bright_red().clear();
+                                    summary.length_error += 1;
+                                }
+                            }
+                            None => (),
+                        }
+                    }
                     if cmd.verbose() {
                         println!(
                             "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
@@ -685,6 +713,7 @@ impl<'a> SpecialEvent<'a> {
                             contentid_string,
                             logostr_string,
                         );
+
                         for logo in &logos {
                             let mut logostr = logo.get_event().get_logo();
                             if logostr.len() > 14 {

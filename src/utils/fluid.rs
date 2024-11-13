@@ -81,35 +81,38 @@ impl Fluid {
     }
 
     pub fn list_line(&self, line_index: usize) {
-        let columns = vec![
-            "Title",
-            "Res.",
-            "Registration",
-            "RuntimeMs",
-            "Format",
-            "Class",
-            "ContentId",
-            "MaterialId",
-            "Filename",
-            "Customer",
-            "ContentOwner",
-            "InDustbin",
-        ]
-        .iter()
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>();
-        for (index, column) in columns.iter().enumerate() {
-            print!("{} = {:?}, ", column, &self.database[line_index][column]);
-            if index == columns.len() - 1 {
-                println!("");
+        if self.database.len() > 0 {
+            let columns = vec![
+                "Title",
+                "Res.",
+                "Registration",
+                "RuntimeMs",
+                "Format",
+                "Class",
+                "ContentId",
+                "MaterialId",
+                "Filename",
+                "Customer",
+                "ContentOwner",
+                "InDustbin",
+            ]
+            .iter()
+            .map(|s| s.to_string())
+            .collect::<Vec<String>>();
+
+            for (index, column) in columns.iter().enumerate() {
+                print!("{} = {:?}, ", column, &self.database[line_index][column]);
+                if index == columns.len() - 1 {
+                    println!("");
+                }
             }
         }
     }
 
     #[allow(dead_code)]
     pub fn query(&self, id: &str) -> Option<String> {
-        if self.database.len() < 50 {
-            for i in 0..&self.database.len()-1 {
+        if 0 < self.database.len() && self.database.len() < 50 {
+            for i in 0..&self.database.len() - 1 {
                 self.list_line(i);
             }
             panic!("something with the csv does not work");

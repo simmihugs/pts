@@ -232,7 +232,7 @@ impl DataSet {
                 })
                 .filter(|x| x.get_event().get_duration() <= 50000)
                 .collect(),
-        };        
+        };
         if events.len() > 0 {
             events.print(cmd);
         }
@@ -253,7 +253,15 @@ impl DataSet {
                 })
                 .filter(|x| {
                     let id = x.get_event().get_contentid();
-                    id.contains("-") && !id.contains("WERBUNG")
+                    let title = x.get_event().get_title();
+                    let id_error = (id.contains("-") && !title.starts_with(" - 00"))
+                        && !title.split(" ").collect::<Vec<&str>>()[0]
+                            .to_string()
+                            .parse::<i64>()
+                            .is_ok()
+                        && !id.contains("WERBUNG");
+
+                    id_error
                 })
                 .collect(),
         };
@@ -281,13 +289,21 @@ impl DataSet {
             let mut va_errors = Vec::new();
             let head = va_events[0];
             va_events.drain(1..).into_iter().fold(head, |acc, value| {
+                let id = acc.get_event().get_contentid();
+                let title = acc.get_event().get_title();
+                let id_error = (id.contains("-") && !title.starts_with(" - 00"))
+                    && !title.split(" ").collect::<Vec<&str>>()[0]
+                        .to_string()
+                        .parse::<i64>()
+                        .is_ok()
+                    && !id.contains("WERBUNG");
                 if acc.get_event().get_endtime() != value.get_event().get_starttime() {
                     va_errors.push((true, value));
-                } else if acc.get_event().get_contentid().contains("-")
-                    && !acc.get_event().get_contentid().contains("WERBUNG")
-                {
+                } else if id_error {
+                    println!("{}: {}", "id error for", title);
                     va_errors.push((false, acc));
                 }
+
                 value
             });
             va_errors
@@ -368,15 +384,25 @@ impl DataSet {
             for commercials in commercials_liste {
                 if !commercials.is_empty() {
                     for commercial in commercials {
-                        let contentid = "UHD1_WERBUNG-01";
-                        let newtitle = commercial
-                            .replace(contentid, "")
-                            .replace(" ", "")
-                            .replace("-", "");
                         let oldstr = format!("\r\n\t\t\t\ttitle=\"{}\"", commercial);
-                        let newstr = format!("\r\n\t\t\t\ttitle=\"{}\"", newtitle);
 
-                        data = data.replace(&*oldstr, &*newstr);
+                        // TODO update new commercials
+                        if commercial.starts_with(" - 00") {
+                            let newstr = format!(
+                                "\r\n\t\t\t\ttitle=\"{}\"",
+                                commercial.replace(" - 00", "00")
+                            );
+                            data = data.replace(&*oldstr, &*newstr);
+                        } else {
+                            let newstr = format!(
+                                "\r\n\t\t\t\ttitle=\"{}\"",
+                                commercial
+                                    .replace("UHD1_WERBUNG-01", "")
+                                    .replace(" ", "")
+                                    .replace("-", "")
+                            );
+                            data = data.replace(&*oldstr, &*newstr);
+                        }
                     }
                 }
             }
@@ -574,6 +600,7 @@ impl DataSet {
     ) {
         if cmd.verbose() {
             let (special_events, special_event_errors) = &self.get_special_events();
+
             summary.special_event_errors = special_event_errors.len() as i64;
             let special_events: Vec<&SpecialEvent<'_>> = special_events
                 .iter()
@@ -590,6 +617,7 @@ impl DataSet {
                 })
                 .collect::<Vec<_>>();
 
+            // TODO hier ist der wurm drin
             special_event::print_special_events(
                 special_events,
                 special_event_errors,
