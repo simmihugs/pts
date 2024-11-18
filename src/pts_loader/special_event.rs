@@ -14,7 +14,7 @@ enum LengthError {
     NoError,
 }
 
-static CONTENT_IDS: &'static [&str; 17] = &[
+static CONTENT_IDS: &'static [&str; 19] = &[
     "cb7a119f84cb7b117b1b",
     "392654926764849cd5dc",
     "e90dfb84e30edf611e32",
@@ -32,6 +32,8 @@ static CONTENT_IDS: &'static [&str; 17] = &[
     "cb7a119f84cb7b117b1b",
     "ec12fb722064b74776d6",
     "98bcc270bf534db740b8",
+    "a81fe4c3875d5ab4bfa5",
+    "2d9aec2d4a2e12c0b8bc",
 ];
 
 const LINE_WIDTH: usize = 242;
