@@ -309,7 +309,7 @@ impl<'a> SpecialEvent<'a> {
                                     && event.get_contentid() != "cb7a119f84cb7b117b1b"
                                     && event.get_contentid() != "392654926764849cd5dc"
                                 {
-                                    match fluid_data_set.query(&contentid) {
+                                    match fluid_data_set.query(&contentid, &title) {
                                         None => "".to_string(),
                                         Some(s) => s.to_string(),
                                     }
@@ -541,11 +541,11 @@ impl<'a> SpecialEvent<'a> {
                             logostr.take(16).red().clear()
                         };
 
-                    let mut content_string = if event.get_duration() > 30 * 1000
-                        && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                    let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
+                    //&& event.get_duration() > 30 * 1000
                     {
-                        match fluid_data_set.query(&contentid) {
+                        match fluid_data_set.query(&contentid, &title) {
                             None => "".to_string(),
                             Some(s) => s.to_string().take(50),
                         }
@@ -610,15 +610,15 @@ impl<'a> SpecialEvent<'a> {
                         .parse::<i64>()
                         .is_ok()
                     {
-                        title_string = title_string.blue();
-                        content_string = content_string.blue();
-                        programid_string = programid_string.blue();
-                        starttime_string = starttime_string.blue();
-                        endtime_string = endtime_string.blue();
-                        duration_string = duration_string.blue();
-                        tcin = tcin.blue();
-                        tcout = tcout.blue();
-                        contentid_string = contentid_string.blue();
+                        title_string = title_string.cyan();
+                        content_string = content_string.cyan();
+                        programid_string = programid_string.cyan();
+                        starttime_string = starttime_string.cyan();
+                        endtime_string = endtime_string.cyan();
+                        duration_string = duration_string.cyan();
+                        tcin = tcin.cyan();
+                        tcout = tcout.cyan();
+                        contentid_string = contentid_string.cyan();
                         logostr_string = "".to_string().take(16).red().clear();
                     } else {
                         if contentid == "UHD1_WERBUNG-01" {

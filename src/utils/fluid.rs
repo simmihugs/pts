@@ -1,47 +1,57 @@
+use crate::pts_loader::sistandard::*;
 use csv::Reader;
 use csv::ReaderBuilder;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::error::Error;
 use std::fs::File;
 use std::process::{Command, Output};
-use std::error::Error;
-use crate::pts_loader::sistandard::*;
-use serde::{Deserialize, Serialize};
-
 
 pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error>> {
-    println!("Trying to download fluid database");    
+    println!("Trying to download fluid database");
     let venv_activation_script = if cfg!(target_os = "windows") {
-        r"fluid_downloader\venv\Scripts\activate.bat"  // Use .bat for Windows
+        r"fluid_downloader\venv\Scripts\activate.bat" // Use .bat for Windows
     } else {
         r"source fluid_downloader\venv\bin\activate"
     };
 
     let output: Output = if cfg!(target_os = "windows") {
         Command::new("cmd")
-            //.args(&["/C", &venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])            
-            .args(&["/C", venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])            
+            //.args(&["/C", &venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])
+            .args(&[
+                "/C",
+                venv_activation_script,
+                "&&",
+                "python",
+                "-m",
+                "fluid_downloader.app",
+                "-o",
+                file_name,
+            ])
             .output()?
-    }  else {
+    } else {
         Command::new("sh")
             .arg("-c")
-            .arg(format!("{} && python -m fluid_downloader.app -o {}", venv_activation_script, file_name))
+            .arg(format!(
+                "{} && python -m fluid_downloader.app -o {}",
+                venv_activation_script, file_name
+            ))
             .output()?
     };
 
-    let stdout = String::from_utf8_lossy(&output.stdout); 
+    let stdout = String::from_utf8_lossy(&output.stdout);
     //println!("stdout: {:?}", stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
     println!("stderr: {:?}", stderr);
-    
+
     let mut res = String::from("");
     for line in stdout.lines() {
         if line.contains(file_name) {
             res = String::from(line);
-        }        
+        }
     }
     Ok(res)
 }
-
 
 fn read_csv(path: &String) -> Option<Reader<File>> {
     let mut result = None;
@@ -102,6 +112,10 @@ impl Fluid {
         Fluid { database: vec![] }
     }
 
+    pub fn size(&self) -> usize {
+        self.database.len()
+    }
+
     pub fn load(&mut self, path: String) {
         self.database = load_database(&path);
     }
@@ -147,7 +161,7 @@ impl Fluid {
     }
 
     #[allow(dead_code)]
-    pub fn query(&self, id: &str) -> Option<String> {
+    pub fn query(&self, id: &str, title: &str) -> Option<String> {
         if 0 < self.database.len() && self.database.len() < 50 {
             for i in 0..&self.database.len() - 1 {
                 self.list_line(i);
@@ -155,7 +169,11 @@ impl Fluid {
             panic!("something with the csv does not work");
         }
         for entry in &self.database {
-            if entry["ContentId"].contains(id) || id.contains(&entry["ContentId"]) {
+            if entry["Title"].contains(title)
+                || title.contains(&entry["Title"])
+                || entry["ContentId"].contains(id)
+                || id.contains(&entry["ContentId"])
+            {
                 return Some(format!("{}", entry["Filename"]));
             }
         }
