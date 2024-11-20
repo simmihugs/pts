@@ -1,2 +1,0 @@
-# coki
-A fluid downloader
