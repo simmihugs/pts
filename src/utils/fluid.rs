@@ -4,21 +4,21 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::process::{Command, Output};
 use std::error::Error;
-
 use crate::pts_loader::sistandard::*;
 use serde::{Deserialize, Serialize};
 
 
 pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error>> {
-    println!("Trying to download fluid database");
+    println!("Trying to download fluid database");    
     let venv_activation_script = if cfg!(target_os = "windows") {
         r"fluid_downloader\venv\Scripts\activate.bat"  // Use .bat for Windows
     } else {
-        r"source fluid_downloader/venv/bin/activate"   // Use source for Unix-like systems
+        r"source fluid_downloader\venv\bin\activate"
     };
 
     let output: Output = if cfg!(target_os = "windows") {
         Command::new("cmd")
+            //.args(&["/C", &venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])            
             .args(&["/C", venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])            
             .output()?
     }  else {
@@ -30,8 +30,8 @@ pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error
 
     let stdout = String::from_utf8_lossy(&output.stdout); 
     //println!("stdout: {:?}", stdout);
-    //let stderr = String::from_utf8_lossy(&output.stderr);
-    //println!("stderr: {:?}", stderr);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    println!("stderr: {:?}", stderr);
     
     let mut res = String::from("");
     for line in stdout.lines() {
@@ -39,7 +39,6 @@ pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error
             res = String::from(line);
         }        
     }
-    //panic!("");
     Ok(res)
 }
 
