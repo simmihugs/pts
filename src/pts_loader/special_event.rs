@@ -5,6 +5,7 @@ use crate::utils::take::Take;
 use crate::Fluid;
 use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
+use chrono::{DateTime, Utc};
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
@@ -56,13 +57,30 @@ pub fn print_special_events(
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
-            let terrors = special_event.get_time_errors();
-            let (lerrors, length_errors) =
-                special_event.print_table(&terrors, summary, cmd, fluid_data_set);
-            table_print::print_line_cross();
-            summary.logo_errors += lerrors;
-            summary.time_errors += terrors.len() as i64;
-            summary.length_error += length_errors;
+            if cmd.today() {
+                let start: DateTime<Utc> =
+                    special_event.vec[0].get_event().get_starttime().unwrap();
+                let utc: DateTime<Utc> = Utc::now();
+                if start.date_naive() == utc.date_naive() {
+                    let terrors = special_event.get_time_errors();
+                    let (lerrors, length_errors) =
+                        special_event.print_table(&terrors, summary, cmd, fluid_data_set);
+                    table_print::print_line_cross();
+
+                    summary.logo_errors += lerrors;
+                    summary.time_errors += terrors.len() as i64;
+                    summary.length_error += length_errors;
+                }
+            } else {
+                let terrors = special_event.get_time_errors();
+                let (lerrors, length_errors) =
+                    special_event.print_table(&terrors, summary, cmd, fluid_data_set);
+                table_print::print_line_cross();
+
+                summary.logo_errors += lerrors;
+                summary.time_errors += terrors.len() as i64;
+                summary.length_error += length_errors;
+            }
         });
         table_print::print_head();
         table_print::print_line(LINE_WIDTH);
@@ -295,7 +313,7 @@ impl<'a> SpecialEvent<'a> {
                         || event.get_title().split(" ").collect::<Vec<&str>>()[0]
                             .to_string()
                             .parse::<i64>()
-                            .is_ok()                        
+                            .is_ok()
                     {
                         format!("{};{}", " ".repeat(12), " ".repeat(12))
                     } else {
@@ -731,21 +749,21 @@ impl<'a> SpecialEvent<'a> {
                             }
 
                             println!(
-                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
-                                " ",
-                                " ",
-                                logo.get_event().programid_to_string().green(),
-                                logo.get_event()
-                                    .starttime_to_string(cmd.utc(), cmd.fps())
-                                    .green(),
-                                logo.get_event()
-                                    .endtime_to_string(cmd.utc(), cmd.fps())
-                                    .green(),
-                                logo.get_event().duration_to_string(cmd.fps()).green(),
-                                format!("{} | {}", " ".repeat(12), " ".repeat(12)),
-                                logo.get_event().get_contentid().green(),
-                                logostr.take(16).green(),
-                            );
+                                    "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
+                                    " ",
+                                    " ",
+                                    logo.get_event().programid_to_string().green(),
+                                    logo.get_event()
+                                        .starttime_to_string(cmd.utc(), cmd.fps())
+                                        .green(),
+                                    logo.get_event()
+                                        .endtime_to_string(cmd.utc(), cmd.fps())
+                                        .green(),
+                                    logo.get_event().duration_to_string(cmd.fps()).green(),
+                                    format!("{} | {}", " ".repeat(12), " ".repeat(12)),
+                                    logo.get_event().get_contentid().green(),
+                                    logostr.take(16).green(),
+                                );
                         }
                     }
                 }

@@ -87,7 +87,10 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     debug: bool,
-
+    
+    #[arg(short, long, default_value_t = false)]
+    today: bool,
+    
     #[arg(long, default_value_t = 5 * 60 * 1000)]
     minimum: i64,
 
@@ -118,6 +121,13 @@ pub struct Commandline {
 }
 
 impl Commandline {
+    #[allow(dead_code)]
+    pub fn copy(&self) -> Commandline {
+        Self {
+            args: Args::parse().clone(),
+        }
+    }
+
     pub fn parse() -> Self {
         Self {
             args: Args::parse(),
@@ -140,8 +150,17 @@ impl Commandline {
         self.args.minimum
     }
 
+    #[allow(dead_code)]
+    pub fn set_debug(&mut self, value: bool) {
+        self.args.debug = value;
+    }
+
     pub fn debug(&self) -> bool {
         self.args.debug
+    }
+
+    pub fn today(&self) -> bool {
+        self.args.today
     }
 
     pub fn display_sievents(&self) -> bool {
