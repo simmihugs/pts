@@ -108,6 +108,9 @@ struct Args {
 
     #[arg(long, default_value_t = false)]
     check_all_contentids: bool,
+
+    #[arg(long, default_value_t = false)]
+    update_fluid_data_base: bool,
 }
 
 pub struct Commandline {
@@ -119,6 +122,10 @@ impl Commandline {
         Self {
             args: Args::parse(),
         }
+    }
+
+    pub fn update_fluid_data_base(&self) -> bool {
+        self.args.update_fluid_data_base
     }
 
     pub fn update_werbungen(&self) -> bool {

@@ -6,9 +6,17 @@ use crate::utils::fluid::Fluid;
 use commandline::commandline::Commandline;
 use commandline::summary::Summary;
 use pts_loader::dataset::DataSet;
+use utils::fluid;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
+
+    if cmd.update_fluid_data_base() {
+        match fluid::download_fluid_data_base("test") {
+            Ok(file_path) => println!("success: {}", file_path),
+            Err(err) => eprintln!("{}", err),       
+        }
+    }
 
     if cmd.filename() == "YOU_PICK_A_FILE" {
         println!("{:?}", "file not found");
