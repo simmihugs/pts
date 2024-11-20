@@ -209,6 +209,11 @@ impl<'a> SpecialEvent<'a> {
             .iter()
             .any(|x| event.get_contentid().contains(x))
             || event.get_title().contains("railer")
+            || event.get_title().starts_with(" - 00")
+            || event.get_title().split(" ").collect::<Vec<&str>>()[0]
+                .to_string()
+                .parse::<i64>()
+                .is_ok()
         {
             if logos.len() != 0 {
                 if debug_me {
@@ -286,6 +291,11 @@ impl<'a> SpecialEvent<'a> {
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")
+                        || event.get_title().starts_with(" - 00")
+                        || event.get_title().split(" ").collect::<Vec<&str>>()[0]
+                            .to_string()
+                            .parse::<i64>()
+                            .is_ok()                        
                     {
                         format!("{};{}", " ".repeat(12), " ".repeat(12))
                     } else {
@@ -305,8 +315,7 @@ impl<'a> SpecialEvent<'a> {
                         match cmd.fluid_csv() {
                             None => "".to_string(),
                             Some(..) => {
-                                if event.get_duration() > 30 * 1000
-                                    && event.get_contentid() != "cb7a119f84cb7b117b1b"
+                                if event.get_contentid() != "cb7a119f84cb7b117b1b"
                                     && event.get_contentid() != "392654926764849cd5dc"
                                 {
                                     match fluid_data_set.query(&contentid, &title) {
@@ -543,7 +552,6 @@ impl<'a> SpecialEvent<'a> {
 
                     let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
-                    //&& event.get_duration() > 30 * 1000
                     {
                         match fluid_data_set.query(&contentid, &title) {
                             None => "".to_string(),

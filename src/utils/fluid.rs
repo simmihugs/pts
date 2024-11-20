@@ -112,6 +112,7 @@ impl Fluid {
         Fluid { database: vec![] }
     }
 
+    #[allow(dead_code)]
     pub fn size(&self) -> usize {
         self.database.len()
     }
