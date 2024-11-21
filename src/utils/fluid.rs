@@ -1,3 +1,4 @@
+use crate::pts_loader::event::*;
 use crate::pts_loader::sistandard::*;
 use csv::Reader;
 use csv::ReaderBuilder;
@@ -6,6 +7,11 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::process::{Command, Output};
+
+pub enum QueryType {
+    Filename,
+    Duration,
+}
 
 pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error>> {
     println!("Trying to download fluid database");
@@ -17,7 +23,6 @@ pub fn download_fluid_data_base(file_name: &str) -> Result<String, Box<dyn Error
 
     let output: Output = if cfg!(target_os = "windows") {
         Command::new("cmd")
-            //.args(&["/C", &venv_activation_script, "&&", "python", "-m", "fluid_downloader.app", "-o", file_name])
             .args(&[
                 "/C",
                 venv_activation_script,
@@ -132,6 +137,7 @@ impl Fluid {
         }
     }
 
+    #[allow(dead_code)]
     pub fn list_line(&self, line_index: usize) {
         if self.database.len() > 0 {
             let columns = vec![
@@ -162,20 +168,14 @@ impl Fluid {
     }
 
     #[allow(dead_code)]
-    pub fn query(&self, id: &str, title: &str) -> Option<String> {
-        if 0 < self.database.len() && self.database.len() < 50 {
-            for i in 0..&self.database.len() - 1 {
-                self.list_line(i);
-            }
-            panic!("something with the csv does not work");
-        }
+    pub fn query(&self, event: &Event, qtype: QueryType) -> Option<String> {
+        let id = event.get_contentid();
         for entry in &self.database {
-            if entry["Title"].contains(title)
-                || title.contains(&entry["Title"])
-                || entry["ContentId"].contains(id)
-                || id.contains(&entry["ContentId"])
-            {
-                return Some(format!("{}", entry["Filename"]));
+            if entry["ContentId"].contains(&id) || id.contains(&entry["ContentId"]) {
+                match qtype {
+                    QueryType::Filename => return Some(format!("{}", entry["Filename"])),
+                    QueryType::Duration => return Some(format!("{}", entry["RuntimeMs"])),
+                }
             }
         }
         None

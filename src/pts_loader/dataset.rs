@@ -2,7 +2,10 @@ use super::{define::*, special_event};
 use crate::commandline::commandline::Commandline;
 use crate::commandline::summary::Summary;
 use crate::pts_loader::block::Block;
+use crate::pts_loader::event::Event;
+use crate::pts_loader::sistandard::a_duration_from_string;
 use crate::pts_loader::special_event::SpecialEvent;
+use crate::utils::fluid::QueryType;
 use crate::utils::table_print::{self, print_line};
 use crate::utils::take::Take;
 use crate::Fluid;
@@ -30,6 +33,92 @@ fn load_file(filename: &str) -> std::io::Result<String> {
 }
 
 impl DataSet {
+    pub fn list_vaevents_with_length_errors(
+        &self,
+        summary: &mut Summary,
+        cmd: &Commandline,
+        fluid_data_set: &Fluid,
+    ) {
+        let vaevents: Vec<_> = self
+            .eventcommands
+            .define
+            .iter()
+            .filter(|x| {
+                if let Define::vaEvent(..) = x {
+                    return true;
+                } else {
+                    return false;
+                }
+            })
+            .map(|event| event.get_event())
+            .collect();
+
+        let mut content_length_errors = vec![];
+
+        for event in vaevents {
+            match fluid_data_set.query(&event, QueryType::Duration) {
+                None => (),
+                Some(duration) => {
+                    let event_duration: i64 = event.get_duration();
+                    let dbase_duration: i64 = match a_duration_from_string(duration) {
+                        Ok(i) => i,
+                        Err(..) => 0,
+                    };
+                    if event_duration > dbase_duration {
+                        content_length_errors.push((event, dbase_duration));
+                        /*                         summary.content_to_long_error += 1;
+                                               println!(
+                                                   "ERROR: Title: {:?} Id: {:?} has duration: {:?} > fluid_duration: {}",
+                                                   event.get_contentid(),
+                                                   event.get_title(),
+                                                   Event::a_duration_to_string(event_duration, cmd.fps()),
+                                                   Event::a_duration_to_string(dbase_duration, cmd.fps()),
+                                               )
+                        */
+                    }
+                }
+            }
+        }
+
+        if content_length_errors.len() > 0 {
+            let length = 182;
+            println!(
+                "\n{}:\n|{}|",
+                "Content length error".to_string().red(),
+                "-".repeat(length)
+            );
+            println!(
+                "| {} | {} | {} | {} | {} | {} |",
+                "title".to_string().take(40),
+                "starttime".to_string().take(30),
+                "programid".to_string().take(25),
+                "id".to_string().take(20),
+                "duration".to_string().take(20),
+                "database duration".to_string().take(30)
+            );
+            println!("|{}|", "-".repeat(length));
+            for (event, dbase_duration) in content_length_errors.iter() {
+                println!(
+                    "| {} | {} | {} | {} | {} | {} |",
+                    event.get_title().to_string().take(40),
+                    event.starttime_to_string(cmd.utc(), cmd.fps()).take(30),
+                    event.get_programid().to_string().take(25),
+                    event.get_contentid().to_string().take(20),
+                    Event::a_duration_to_string(event.get_duration(), cmd.fps())
+                        .to_string()
+                        .take(20)
+                        .red(),
+                    Event::a_duration_to_string(*dbase_duration, cmd.fps())
+                        .to_string()
+                        .take(30)
+                );
+                println!("|{}|", "-".repeat(length));
+            }
+            println!("");
+        }
+        summary.content_to_long_error += content_length_errors.len();
+    }
+
     pub fn init_from_data(xml_text: String) -> Result<DataSet, serde_xml_rs::Error> {
         let mut dataset: DataSet = serde_xml_rs::from_str(&xml_text)?;
         dataset.calculate_endtimes();

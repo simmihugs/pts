@@ -14,6 +14,7 @@ pub struct Summary {
     pub commercial_error: i64,
     pub trailer_balls_error: i64,
     pub invalid_content_id_error: usize,
+    pub content_to_long_error: usize,
 }
 
 impl Summary {
@@ -31,6 +32,7 @@ impl Summary {
             commercial_error: 0,
             trailer_balls_error: 0,
             invalid_content_id_error: 0,
+            content_to_long_error: 0,
         }
     }
 
@@ -155,5 +157,17 @@ impl Summary {
                 }
             );
         }
+
+        if cmd.all() && cmd.fluid_csv().is_some() {
+            println!(
+                "{:3} content which is to long",
+                if self.content_to_long_error == 0 {
+                    format!("{}", self.content_to_long_error).green()
+                } else {
+                    format!("{}", self.content_to_long_error).red()
+                }
+            );            
+        }
+
     }
 }

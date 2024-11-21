@@ -7,6 +7,7 @@ use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
 use chrono::{DateTime, Utc};
 use colored::{ColoredString, Colorize};
+use crate::utils::fluid::QueryType;
 
 #[derive(Clone)]
 enum LengthError {
@@ -336,7 +337,7 @@ impl<'a> SpecialEvent<'a> {
                                 if event.get_contentid() != "cb7a119f84cb7b117b1b"
                                     && event.get_contentid() != "392654926764849cd5dc"
                                 {
-                                    match fluid_data_set.query(&contentid, &title) {
+                                    match fluid_data_set.query(&event, QueryType::Filename) {
                                         None => "".to_string(),
                                         Some(s) => s.to_string(),
                                     }
@@ -571,7 +572,7 @@ impl<'a> SpecialEvent<'a> {
                     let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
                     {
-                        match fluid_data_set.query(&contentid, &title) {
+                        match fluid_data_set.query(&event ,QueryType::Filename) {
                             None => "".to_string(),
                             Some(s) => s.to_string().take(50),
                         }

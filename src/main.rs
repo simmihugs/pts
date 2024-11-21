@@ -14,7 +14,7 @@ fn main() -> std::io::Result<()> {
     if cmd.update_fluid_data_base() {
         match fluid::download_fluid_data_base("test") {
             Ok(file_path) => println!("success: {}", file_path),
-            Err(err) => eprintln!("{}", err),       
+            Err(err) => eprintln!("{}", err),
         }
     }
 
@@ -29,11 +29,8 @@ fn main() -> std::io::Result<()> {
 
                 let mut fluid_data_base = Fluid::init();
 
-                match cmd.fluid_csv() {
-                    None => (),
-                    Some(path) => {
-                        fluid_data_base.load(path);
-                    }
+                if cmd.fluid_csv().is_some() {
+                    fluid_data_base.load(cmd.fluid_csv().unwrap());
                 }
 
                 if cmd.all() || cmd.ps_event() {
@@ -65,6 +62,10 @@ fn main() -> std::io::Result<()> {
                 if cmd.check_all_contentids() {
                     println!("{}", "\nAll content ids");
                     dataset.display_all_content_id_errors(&mut summary, &cmd);
+                }
+
+                if cmd.all() && cmd.fluid_csv().is_some() {
+                    dataset.list_vaevents_with_length_errors(&mut summary, &cmd, &fluid_data_base);
                 }
 
                 summary.print(&cmd);
