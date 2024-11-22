@@ -22,8 +22,7 @@ fn main() -> std::io::Result<()> {
         println!("{:?}", "file not found");
         Commandline::print_help();
     } else {
-        let filename = cmd.filename();
-        match DataSet::init(filename) {
+        match DataSet::init(cmd.filename()) {
             Ok(mut dataset) => {
                 let mut summary = Summary::new();
 
@@ -98,7 +97,12 @@ fn main() -> std::io::Result<()> {
                 }
             }
             Err(e) => {
-                if cmd.debug() {
+                if format!("{}", e).contains("os error 2") {
+                    println!(
+                        "Das System kann die angegebene Datei {:?} nicht finden.",
+                        cmd.filename()
+                    );
+                } else if cmd.debug() {
                     println!("{}", e);
                 }
                 Commandline::print_help()
