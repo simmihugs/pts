@@ -135,10 +135,6 @@ impl<'a> SpecialEvent<'a> {
                 Define::vaEvent(event) => {
                     let id = event.get_contentid();
                     let title = event.get_title();
-                    // TODO add for removal
-                    // if title.starts_with(" - 00") {
-                    //     println!("{}", title);
-                    // }
                     if id == "UHD1_WERBUNG-01" && title != " -  UHD1_WERBUNG-01" {
                         store.push(format!("{}", title));
                     }
@@ -621,7 +617,19 @@ impl<'a> SpecialEvent<'a> {
                         }
                     };
 
-                    if title.starts_with(" - 00") {
+                    if contentid.contains("-") && contentid.len() == "1529458-0".len() {
+                        title_string = title.replace(" - 00", "00").take(30).take(30).red();
+                        content_string = content_string.red();
+                        programid_string = programid_string.red();
+                        starttime_string = starttime_string.red();
+                        endtime_string = endtime_string.red();
+                        duration_string = duration_string.red();
+                        tcin = tcin.red();
+                        tcout = tcout.red();
+                        contentid_string = contentid_string.bright_red();
+                        logostr_string = "".to_string().take(16).red().clear();
+                    }
+                    else if title.starts_with(" - 00") {
                         //New werbung
                         title_string = title.replace(" - 00", "00").take(30).take(30).yellow();
                         content_string = content_string.yellow();

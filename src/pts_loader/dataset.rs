@@ -343,20 +343,25 @@ impl DataSet {
                 .filter(|x| {
                     let id = x.get_event().get_contentid();
                     let title = x.get_event().get_title();
-                    let id_error = (id.contains("-") && !title.starts_with(" - 00"))
-                        && !title.split(" ").collect::<Vec<&str>>()[0]
-                            .to_string()
-                            .parse::<i64>()
-                            .is_ok()
-                        && !id.contains("WERBUNG");
+                    let id_error: bool = (id.contains("-") && "1529410-0".len() == id.len())
+                        || ((id.contains("-") && !title.starts_with(" - 00"))
+                            && (id.contains("-") && !title.starts_with(" - 00"))
+                            && (id.contains("-") && "1529410-0".len() == id.len())
+                            && !title.split(" ").collect::<Vec<&str>>()[0]
+                                .to_string()
+                                .parse::<i64>()
+                                .is_ok()
+                            && !id.contains("WERBUNG"));
 
                     id_error
                 })
                 .collect(),
         };
 
-        events.print(cmd);
-        events.events.iter().for_each(|x| println!("{:?}", x));
+        if cmd.debug() {
+            events.print(cmd);
+            events.events.iter().for_each(|x| println!("{:?}", x));
+        }
         summary.invalid_content_id_error = events.events.len();
     }
 

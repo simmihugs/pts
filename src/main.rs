@@ -58,7 +58,7 @@ fn main() -> std::io::Result<()> {
                     dataset.display_trailers(&cmd);
                 }
 
-                if cmd.check_all_contentids() {
+                if cmd.all() || cmd.check_all_contentids() {
                     println!("{}", "\nAll content ids");
                     dataset.display_all_content_id_errors(&mut summary, &cmd);
                 }
