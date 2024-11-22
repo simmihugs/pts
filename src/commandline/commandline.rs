@@ -1,6 +1,6 @@
-use clap::{CommandFactory, Parser};
 use crate::pts_loader::sistandard::*;
 use chrono::{DateTime, Utc};
+use clap::{CommandFactory, Parser};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -21,11 +21,10 @@ impl std::fmt::Display for Range {
     }
 }
 
-// const DEFAULT_VALID_RANGE: &str =
-//     "startTime = YYYY-MM-DDTHH:mm:ss.mssZ; endTime = YYYY-MM-DDTHH:mm:ss.mssZ";
 const DEFAULT_VALID_RANGE: &str = "DEFAULT_VALID_RANGE";
 
-const DEFAULT_FLUID_DATABASE: &str = "DEFAULT_FLUID_DATABASE";
+const DEFAULT_FLUID_DATABASE: &str =
+    "C:\\Users\\SimonGraetz\\OneDrive - CreateCtrl AG\\uhd1-plannung\\uhd_fluid_database.csv";
 
 #[derive(Clone, Serialize, Deserialize, Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -57,13 +56,9 @@ struct Args {
     #[arg(long, default_value_t = String::from(""))]
     werbungen: String,
 
-    //TODO: check if tcin and tcout match
     #[arg(long, default_value_t = String::from(""))]
     tcins_and_tcouts: String,
 
-    // TODO
-    // #[arg(long, default_value = None, num_args = 0..=1, default_missing_value = None)]
-    // list_trailers: Option<String>,
     #[arg(short, long, default_value_t = false)]
     only_errors: bool,
 
@@ -87,18 +82,18 @@ struct Args {
 
     #[arg(short, long, default_value_t = false)]
     debug: bool,
-    
+
     #[arg(short, long, default_value_t = false)]
     today: bool,
-    
+
     #[arg(long, default_value_t = 5 * 60 * 1000)]
     minimum: i64,
 
     #[arg(long, default_value_t = false)]
     update_werbungen: bool,
 
-    #[arg(long, default_value_t = String::from(DEFAULT_FLUID_DATABASE))]
-    fluid: String,
+    #[arg(long)]
+    fluid: Option<Option<String>>,
 
     #[arg(long, default_value_t = false)]
     display_sievents: bool,
@@ -215,10 +210,11 @@ impl Commandline {
     }
 
     pub fn fluid_csv(&self) -> Option<String> {
-        if self.args.fluid != DEFAULT_FLUID_DATABASE {
-            return Some(self.args.fluid.to_string());
+        match &self.args.fluid {
+            None => None,
+            Some(None) => Some(String::from(DEFAULT_FLUID_DATABASE)),
+            Some(s) => s.clone(),
         }
-        None
     }
 
     pub fn valid_range(&self) -> Option<Range> {
