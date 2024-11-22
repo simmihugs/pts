@@ -1,5 +1,5 @@
-use crate::pts_loader::sistandard::*;
-use chrono::{DateTime, Utc};
+use crate::pts_loader::{event::Event, sistandard::*};
+use chrono::{DateTime, NaiveDate, Utc};
 use clap::{CommandFactory, Parser};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -86,6 +86,9 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     today: bool,
 
+    #[arg(long)]
+    day: Option<String>,
+
     #[arg(long, default_value_t = 5 * 60 * 1000)]
     minimum: i64,
 
@@ -120,6 +123,25 @@ impl Commandline {
     pub fn copy(&self) -> Commandline {
         Self {
             args: Args::parse().clone(),
+        }
+    }
+
+    pub fn day(&self) -> Option<NaiveDate> {
+        match &self.args.day {
+            Some(s) => {
+                let date = NaiveDate::parse_from_str(&s, "%d.%m.%Y");
+                match date {
+                    Ok(d) => {
+                        Some(d)
+                    }
+                    Err(err) => {
+                        println!("{:?}", err);
+                        println!("required format is dd.mm.yyyy");
+                        None
+                    }
+                }
+            }
+            None => None,
         }
     }
 

@@ -1,13 +1,14 @@
 use crate::pts_loader::block::Block;
 use crate::pts_loader::event::Event;
+use crate::utils::fluid::QueryType;
 use crate::utils::table_print;
 use crate::utils::take::Take;
 use crate::Fluid;
 use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
+use chrono::NaiveDate;
 use chrono::{DateTime, Utc};
 use colored::{ColoredString, Colorize};
-use crate::utils::fluid::QueryType;
 
 #[derive(Clone)]
 enum LengthError {
@@ -59,11 +60,15 @@ pub fn print_special_events(
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
-            if cmd.today() {
-                let start: DateTime<Utc> =
-                    special_event.vec[0].get_event().get_starttime().unwrap();
-                let utc: DateTime<Utc> = Utc::now();
-                if start.date_naive() == utc.date_naive() {
+            if cmd.day().is_some() || cmd.today() {
+                let date: NaiveDate;
+                if cmd.day().is_some() {
+                    date = cmd.day().unwrap();
+                } else {
+                    date = Utc::now().date_naive();
+                }                
+                let event_date: NaiveDate = special_event.vec[0].get_event().get_starttime().unwrap().date_naive();
+                if event_date == date {
                     let terrors = special_event.get_time_errors();
                     let (lerrors, length_errors) =
                         special_event.print_table(&terrors, summary, cmd, fluid_data_set);
@@ -569,7 +574,7 @@ impl<'a> SpecialEvent<'a> {
                     let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
                     {
-                        match fluid_data_set.query(&event ,QueryType::Filename) {
+                        match fluid_data_set.query(&event, QueryType::Filename) {
                             None => "".to_string(),
                             Some(s) => s.to_string().take(50),
                         }
@@ -628,8 +633,7 @@ impl<'a> SpecialEvent<'a> {
                         tcout = tcout.red();
                         contentid_string = contentid_string.bright_red();
                         logostr_string = "".to_string().take(16).red().clear();
-                    }
-                    else if title.starts_with(" - 00") {
+                    } else if title.starts_with(" - 00") {
                         //New werbung
                         title_string = title.replace(" - 00", "00").take(30).take(30).yellow();
                         content_string = content_string.yellow();

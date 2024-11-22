@@ -11,6 +11,8 @@ use utils::fluid;
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
 
+    println!("{:?}", cmd.day());
+
     if cmd.update_fluid_data_base() {
         match fluid::download_fluid_data_base("test") {
             Ok(file_path) => println!("success: {}", file_path),
