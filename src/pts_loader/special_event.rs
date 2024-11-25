@@ -7,7 +7,7 @@ use crate::Fluid;
 use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
 use chrono::NaiveDate;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
@@ -16,29 +16,6 @@ enum LengthError {
     LengthError,
     NoError,
 }
-
-static CONTENT_IDS: &'static [&str; 20] = &[
-    "cb7a119f84cb7b117b1b",
-    "392654926764849cd5dc",
-    "e90dfb84e30edf611e32",
-    "b1735b7c5101727b3c6c",
-    "5675d8c63df2424bf286",
-    "64bb104f8aa130071723",
-    "29996549985440a20fa1",
-    "563f387cf4cfd279039a",
-    "b52d22eeb30a63a4518f",
-    "e4a2e62d68e2ad9bfaae",
-    "75d1d4afe3f26b6412d4",
-    "e48363d83407359a6dd2",
-    "34500e2e4a0d1a0806bb",
-    "WERBUNG",
-    "cb7a119f84cb7b117b1b",
-    "ec12fb722064b74776d6",
-    "98bcc270bf534db740b8",
-    "a81fe4c3875d5ab4bfa5",
-    "2d9aec2d4a2e12c0b8bc",
-    "33e36ad39c3bc14d66b3",
-];
 
 const LINE_WIDTH: usize = 242;
 
@@ -226,7 +203,7 @@ impl<'a> SpecialEvent<'a> {
         let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
-        if CONTENT_IDS
+        if cmd.get_content_ids_to_ignore()
             .iter()
             .any(|x| event.get_contentid().contains(x))
             || event.get_title().contains("railer")
@@ -308,7 +285,7 @@ impl<'a> SpecialEvent<'a> {
                     }
                     let contentid = event.get_contentid();
 
-                    let tcin_tcout = if CONTENT_IDS
+                    let tcin_tcout = if cmd.get_content_ids_to_ignore()
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")
@@ -590,7 +567,7 @@ impl<'a> SpecialEvent<'a> {
                         .take(23)
                         .red()
                         .clear();
-                    let (mut tcin, mut tcout) = if CONTENT_IDS
+                    let (mut tcin, mut tcout) = if cmd.get_content_ids_to_ignore()
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")

@@ -3,6 +3,7 @@ mod pts_loader;
 mod utils;
 
 use crate::utils::fluid::Fluid;
+use colored::Colorize;
 use commandline::commandline::Commandline;
 use commandline::summary::Summary;
 use pts_loader::dataset::DataSet;
@@ -10,9 +11,6 @@ use utils::fluid;
 
 fn main() -> std::io::Result<()> {
     let cmd = Commandline::parse();
-
-    println!("{:?}", cmd.day());
-
     if cmd.update_fluid_data_base() {
         match fluid::download_fluid_data_base("test") {
             Ok(file_path) => println!("success: {}", file_path),
@@ -78,7 +76,7 @@ fn main() -> std::io::Result<()> {
                                 println!("{}", e);
                             }
                         }
-                        Ok(..) => println!("Wrote csv to {}", cmd.csv()),
+                        Ok(..) => println!("Wrote csv to '{}'", cmd.csv().to_string().cyan()),
                     }
                 }
 

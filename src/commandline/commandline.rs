@@ -1,8 +1,10 @@
-use crate::pts_loader::{event::Event, sistandard::*};
+use crate::pts_loader::sistandard::starttime_from_str;
 use chrono::{DateTime, NaiveDate, Utc};
 use clap::{CommandFactory, Parser};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::fs::File;
+use std::io::Read;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Range {
@@ -20,6 +22,31 @@ impl std::fmt::Display for Range {
         write!(f, "({}, {})", self.start_time, self.end_time)
     }
 }
+
+const CONTENT_IDS_DATABASE: &str =
+    "C:\\Users\\SimonGraetz\\OneDrive - CreateCtrl AG\\uhd1-plannung\\content_ids.txt";
+static CONTENT_IDS: &'static [&str; 20] = &[
+    "cb7a119f84cb7b117b1b",
+    "392654926764849cd5dc",
+    "e90dfb84e30edf611e32",
+    "b1735b7c5101727b3c6c",
+    "5675d8c63df2424bf286",
+    "64bb104f8aa130071723",
+    "29996549985440a20fa1",
+    "563f387cf4cfd279039a",
+    "b52d22eeb30a63a4518f",
+    "e4a2e62d68e2ad9bfaae",
+    "75d1d4afe3f26b6412d4",
+    "e48363d83407359a6dd2",
+    "34500e2e4a0d1a0806bb",
+    "WERBUNG",
+    "cb7a119f84cb7b117b1b",
+    "ec12fb722064b74776d6",
+    "98bcc270bf534db740b8",
+    "a81fe4c3875d5ab4bfa5",
+    "2d9aec2d4a2e12c0b8bc",
+    "33e36ad39c3bc14d66b3",
+];
 
 const DEFAULT_VALID_RANGE: &str = "DEFAULT_VALID_RANGE";
 
@@ -62,8 +89,8 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     only_errors: bool,
 
-    #[arg(short, long, default_value_t = String::from("YOU_PICK_A_CSV"))]
-    csv: String,
+    #[arg(short, long)]
+    csv: Option<Option<String>>,
 
     #[arg(short, long, default_value_t = String::from("utf-8"))]
     encoding: String,
@@ -98,6 +125,9 @@ struct Args {
     #[arg(long)]
     fluid: Option<Option<String>>,
 
+    #[arg(long)]
+    content_ids_to_ignore: Option<String>,
+
     #[arg(long, default_value_t = false)]
     display_sievents: bool,
 
@@ -116,6 +146,7 @@ struct Args {
 
 pub struct Commandline {
     args: Args,
+    content_ids_vec: Vec<String>,
 }
 
 impl Commandline {
@@ -123,7 +154,12 @@ impl Commandline {
     pub fn copy(&self) -> Commandline {
         Self {
             args: Args::parse().clone(),
+            content_ids_vec: self.content_ids_vec.clone(),
         }
+    }
+
+    pub fn get_content_ids_to_ignore(&self) -> Vec<String> {
+        self.content_ids_vec.clone()
     }
 
     pub fn day(&self) -> Option<NaiveDate> {
@@ -131,9 +167,7 @@ impl Commandline {
             Some(s) => {
                 let date = NaiveDate::parse_from_str(&s, "%d.%m.%Y");
                 match date {
-                    Ok(d) => {
-                        Some(d)
-                    }
+                    Ok(d) => Some(d),
                     Err(err) => {
                         println!("{:?}", err);
                         println!("required format is dd.mm.yyyy");
@@ -146,8 +180,41 @@ impl Commandline {
     }
 
     pub fn parse() -> Self {
+        let args: Args = Args::parse();
+
+        let mut content_ids_vec: Vec<String> = CONTENT_IDS.iter().map(|&s| s.to_string()).collect();
+        match File::open(CONTENT_IDS_DATABASE) {
+            Ok(mut f) => {
+                let mut tmp = String::new();
+                let _ = f.read_to_string(&mut tmp);
+                for value in tmp.lines() {
+                    content_ids_vec.push(value.trim().to_string());
+                }
+            }
+            Err(err) => {
+                if args.debug {
+                    println!("{:?}", err)
+                }
+            }
+        }
+        match args.content_ids_to_ignore {
+            None => (),
+            Some(ref s) => match File::open(s) {
+                Ok(mut f) => {
+                    let mut tmp = String::new();
+                    let _ = f.read_to_string(&mut tmp);
+                    for line in tmp.lines() {
+                        content_ids_vec.push(line.trim().to_string());
+                    }
+                }
+                _ => (),
+            },
+        }
+        content_ids_vec.sort();
+        content_ids_vec.dedup();
         Self {
-            args: Args::parse(),
+            args,
+            content_ids_vec,
         }
     }
 
@@ -237,6 +304,19 @@ impl Commandline {
             Some(None) => Some(String::from(DEFAULT_FLUID_DATABASE)),
             Some(s) => s.clone(),
         }
+    }
+
+    pub fn csv(&self) -> String {
+        match &self.args.csv {
+            None => String::from("YOU_PICK_A_CSV"),
+            Some(None) => String::from("bloecke.csv"),
+            Some(file_name)=> format!("{}", file_name.clone().unwrap()
+        ),
+        }
+    }
+
+    pub fn write_csv(&self) -> bool {
+        self.csv() != "YOU_PICK_A_CSV"
     }
 
     pub fn valid_range(&self) -> Option<Range> {
@@ -372,14 +452,6 @@ impl Commandline {
         } else {
             Some(self.args.fps)
         }
-    }
-
-    pub fn csv(&self) -> &String {
-        &self.args.csv
-    }
-
-    pub fn write_csv(&self) -> bool {
-        self.args.csv != "YOU_PICK_A_CSV"
     }
 
     pub fn look_for_illegalevents(&self) -> bool {
