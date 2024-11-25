@@ -212,6 +212,13 @@ impl Commandline {
         }
         content_ids_vec.sort();
         content_ids_vec.dedup();
+
+        if args.debug {
+            println!("{}", "content ids to ignore for logos");
+            for (index, value) in content_ids_vec.iter().enumerate() {
+                println!("{}\t{}", index, value);
+            }
+        }
         Self {
             args,
             content_ids_vec,
@@ -310,8 +317,7 @@ impl Commandline {
         match &self.args.csv {
             None => String::from("YOU_PICK_A_CSV"),
             Some(None) => String::from("bloecke.csv"),
-            Some(file_name)=> format!("{}", file_name.clone().unwrap()
-        ),
+            Some(file_name) => format!("{}", file_name.clone().unwrap()),
         }
     }
 
