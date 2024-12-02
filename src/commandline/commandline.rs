@@ -25,7 +25,7 @@ impl std::fmt::Display for Range {
 
 const CONTENT_IDS_DATABASE: &str =
     "C:\\Users\\SimonGraetz\\OneDrive - CreateCtrl AG\\uhd1-plannung\\content_ids.txt";
-static CONTENT_IDS: &'static [&str; 20] = &[
+static CONTENT_IDS: &'static [&str; 21] = &[
     "cb7a119f84cb7b117b1b",
     "392654926764849cd5dc",
     "e90dfb84e30edf611e32",
@@ -46,6 +46,7 @@ static CONTENT_IDS: &'static [&str; 20] = &[
     "a81fe4c3875d5ab4bfa5",
     "2d9aec2d4a2e12c0b8bc",
     "33e36ad39c3bc14d66b3",
+    "UHD_LIVE",
 ];
 
 const DEFAULT_VALID_RANGE: &str = "DEFAULT_VALID_RANGE";
