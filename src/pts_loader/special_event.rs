@@ -43,8 +43,12 @@ pub fn print_special_events(
                     date = cmd.day().unwrap();
                 } else {
                     date = Utc::now().date_naive();
-                }                
-                let event_date: NaiveDate = special_event.vec[0].get_event().get_starttime().unwrap().date_naive();
+                }
+                let event_date: NaiveDate = special_event.vec[0]
+                    .get_event()
+                    .get_starttime()
+                    .unwrap()
+                    .date_naive();
                 if event_date == date {
                     let terrors = special_event.get_time_errors();
                     let (lerrors, length_errors) =
@@ -203,7 +207,8 @@ impl<'a> SpecialEvent<'a> {
         let debug_me = false;
         let logos = self.find_logo(event);
         let mut answer: String = String::new();
-        if cmd.get_content_ids_to_ignore()
+        if cmd
+            .get_content_ids_to_ignore()
             .iter()
             .any(|x| event.get_contentid().contains(x))
             || event.get_title().contains("railer")
@@ -223,6 +228,7 @@ impl<'a> SpecialEvent<'a> {
         } else {
             if logos.len() > 1 {
                 if event.get_contentid() == "UHD_LIVE" {
+                    // TODO
                 } else {
                     if debug_me {
                         println!("Should have 1 logos, has: {:?}", logos);
@@ -230,10 +236,12 @@ impl<'a> SpecialEvent<'a> {
                     answer = String::from("ERROR_MORE_THAN_ONE_LOGO");
                 }
             } else if logos.len() == 0 {
-                if debug_me {
-                    println!("Should have logos, has 0");
+                if event.get_contentid() != "UHD_IN2" {
+                    if debug_me {
+                        println!("Should have logos, has 0");
+                    }
+                    answer = String::from("ERROR_NO_LOGO_FOUND");
                 }
-                answer = String::from("ERROR_NO_LOGO_FOUND");
             } else {
                 for logo in &logos {
                     match logo {
@@ -285,7 +293,8 @@ impl<'a> SpecialEvent<'a> {
                     }
                     let contentid = event.get_contentid();
 
-                    let tcin_tcout = if cmd.get_content_ids_to_ignore()
+                    let tcin_tcout = if cmd
+                        .get_content_ids_to_ignore()
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")
@@ -567,7 +576,8 @@ impl<'a> SpecialEvent<'a> {
                         .take(23)
                         .red()
                         .clear();
-                    let (mut tcin, mut tcout) = if cmd.get_content_ids_to_ignore()
+                    let (mut tcin, mut tcout) = if cmd
+                        .get_content_ids_to_ignore()
                         .iter()
                         .any(|x| event.get_contentid().contains(x))
                         || event.get_title().contains("railer")

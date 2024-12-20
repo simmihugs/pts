@@ -46,7 +46,7 @@ static CONTENT_IDS: &'static [&str; 21] = &[
     "a81fe4c3875d5ab4bfa5",
     "2d9aec2d4a2e12c0b8bc",
     "33e36ad39c3bc14d66b3",
-    "UHD_LIVE",
+    "UHD_IN2",
 ];
 
 const DEFAULT_VALID_RANGE: &str = "DEFAULT_VALID_RANGE";
