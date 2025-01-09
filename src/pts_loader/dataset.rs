@@ -393,8 +393,7 @@ impl DataSet {
                     && !id.contains("WERBUNG");
                 if acc.get_event().get_endtime() != value.get_event().get_starttime() {
                     va_errors.push((true, value));
-                } else if id_error {
-                    println!("{}: {}", "id error for", title);
+                } else if id_error {                    
                     va_errors.push((false, acc));
                 }
 
