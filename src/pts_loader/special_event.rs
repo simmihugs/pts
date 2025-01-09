@@ -7,7 +7,6 @@ use crate::Fluid;
 use crate::Summary;
 use crate::{commandline::commandline::Commandline, pts_loader::define::Define};
 use chrono::NaiveDate;
-use chrono::Utc;
 use colored::{ColoredString, Colorize};
 
 #[derive(Clone)]
@@ -37,12 +36,13 @@ pub fn print_special_events(
         table_print::print_head();
         table_print::print_line_cross();
         special_events.iter().for_each(|special_event| {
-            if cmd.day().is_some() || cmd.today() {
+            if cmd.day().is_some() || cmd.today().is_some() {
                 let date: NaiveDate;
                 if cmd.day().is_some() {
                     date = cmd.day().unwrap();
                 } else {
-                    date = Utc::now().date_naive();
+                    //date = Utc::now().date_naive();
+                    date = cmd.today().unwrap();
                 }
                 let event_date: NaiveDate = special_event.vec[0]
                     .get_event()

@@ -1,5 +1,5 @@
 use crate::pts_loader::sistandard::starttime_from_str;
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc, Days};
 use clap::{CommandFactory, Parser};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -23,6 +23,7 @@ impl std::fmt::Display for Range {
     }
 }
 
+// TODO remove hardcoded
 const CONTENT_IDS_DATABASE: &str =
     "C:\\Users\\SimonGraetz\\OneDrive - CreateCtrl AG\\uhd1-plannung\\content_ids.txt";
 static CONTENT_IDS: &'static [&str; 21] = &[
@@ -111,8 +112,8 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     debug: bool,
 
-    #[arg(short, long, default_value_t = false)]
-    today: bool,
+    #[arg(short, long)]
+    today: Option<Option<String>>,
 
     #[arg(long)]
     day: Option<String>,
@@ -251,8 +252,46 @@ impl Commandline {
         self.args.debug
     }
 
-    pub fn today(&self) -> bool {
-        self.args.today
+    pub fn today(&self) -> Option<NaiveDate> {
+        match &self.args.today {
+            None => None,
+            Some(None) => Some(Utc::now().date_naive()),
+            Some(Some(s)) => {
+                let mut today = Utc::now().date_naive();
+                if s.contains("+") {
+                    let mut count: u64 = 1;
+                    if s != "+" {
+                        let parse = s.split("+").map(|s| s.to_string()).collect::<Vec<String>>();
+                        if parse.len() == 2 && parse[0] == "" {
+                            match parse[1].parse() {
+                                Ok(b) => count = b,
+                                _ => (),
+                            }
+                        }
+                    }
+                    match today.checked_add_days(Days::new(count)) {
+                        Some(d) => today = d,
+                        _ => (),
+                    }
+                } else if s.contains("-") {
+                    let mut count: u64 = 1;
+                    if s != "-" {
+                        let parse = s.split("-").map(|s| s.to_string()).collect::<Vec<String>>();
+                        if parse.len() == 2 && parse[0] == "" {
+                            match parse[1].parse() {
+                                Ok(b) => count = b,
+                                _ => (),
+                            }
+                        }
+                    }
+                    match today.checked_sub_days(Days::new(count)) {
+                        Some(d) => today = d,
+                        _ => (),
+                    }                    
+                } 
+                Some(today)
+            },
+        }
     }
 
     pub fn display_sievents(&self) -> bool {
