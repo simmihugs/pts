@@ -637,16 +637,44 @@ impl<'a> SpecialEvent<'a> {
                         .parse::<i64>()
                         .is_ok()
                     {
-                        title_string = title_string.cyan();
-                        content_string = content_string.cyan();
-                        programid_string = programid_string.cyan();
-                        starttime_string = starttime_string.cyan();
-                        endtime_string = endtime_string.cyan();
-                        duration_string = duration_string.cyan();
-                        tcin = tcin.cyan();
-                        tcout = tcout.cyan();
-                        contentid_string = contentid_string.cyan();
-                        logostr_string = "".to_string().take(16).red().clear();
+                        if title.contains("PUFFER") {
+                            if event.get_duration() == 30_000 {
+                                summary.puffer_schleife_error += 1;
+                                title_string = title_string.on_red();
+                                content_string = content_string.on_red();
+                                programid_string = programid_string.on_red();
+                                starttime_string = starttime_string.on_red();
+                                endtime_string = endtime_string.on_red();
+                                duration_string = duration_string.on_red();
+                                tcin = tcin.on_red();
+                                tcout = tcout.on_red();
+                                contentid_string = contentid_string.on_red();
+                                logostr_string = "".to_string().take(16).red().clear();           
+                            } else {
+                                title_string = title_string.black().on_cyan();
+                                content_string = content_string.black().on_cyan();
+                                programid_string = programid_string.black().on_cyan();
+                                starttime_string = starttime_string.black().on_cyan();
+                                endtime_string = endtime_string.black().on_cyan();
+                                duration_string = duration_string.black().on_cyan();
+                                tcin = tcin.black().on_cyan();
+                                tcout = tcout.black().on_cyan();
+                                contentid_string = contentid_string.black().on_cyan();
+                                logostr_string = "".to_string().take(16).red().clear();           
+                            }
+                        } else {
+                            title_string = title_string.cyan();
+                            content_string = content_string.cyan();
+                            programid_string = programid_string.cyan();
+                            starttime_string = starttime_string.cyan();
+                            endtime_string = endtime_string.cyan();
+                            duration_string = duration_string.cyan();
+                            tcin = tcin.cyan();
+                            tcout = tcout.cyan();
+                            contentid_string = contentid_string.cyan();
+                            logostr_string = "".to_string().take(16).red().clear();
+    
+                        }
                     } else {
                         if contentid == "UHD1_WERBUNG-01" {
                             if title == " -  UHD1_WERBUNG-01" {

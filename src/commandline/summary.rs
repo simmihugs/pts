@@ -13,8 +13,9 @@ pub struct Summary {
     pub si_length_error: i64,
     pub commercial_error: i64,
     pub trailer_balls_error: i64,
-    pub invalid_content_id_error: usize,
+    //pub invalid_content_id_error: usize,
     pub content_to_long_error: usize,
+    pub puffer_schleife_error: i64,
 }
 
 impl Summary {
@@ -31,8 +32,9 @@ impl Summary {
             si_length_error: 0,
             commercial_error: 0,
             trailer_balls_error: 0,
-            invalid_content_id_error: 0,
+            //invalid_content_id_error: 0,
             content_to_long_error: 0,
+            puffer_schleife_error: 0,
         }
     }
 
@@ -50,6 +52,7 @@ impl Summary {
                     format!("{}", self.time_errors).green()
                 }
             );
+            
             println!(
                 "{:3} id errors",
                 if self.id_errors > 0 {
@@ -58,6 +61,7 @@ impl Summary {
                     format!("{}", self.id_errors).green()
                 }
             );
+            
             println!(
                 "{:3} logo errors",
                 if self.logo_errors > 0 {
@@ -147,6 +151,7 @@ impl Summary {
             );
         }
 
+        /*
         if cmd.all() {
             println!(
                 "{:3} invalid content ids",
@@ -157,6 +162,7 @@ impl Summary {
                 }
             );
         }
+        */
 
         if cmd.all() && cmd.fluid_csv().is_some() {
             println!(
@@ -167,6 +173,17 @@ impl Summary {
                     format!("{}", self.content_to_long_error).red()
                 }
             );            
+        }
+
+        if cmd.all() {
+            println!(
+                "{:3} pufferschleifen errors",
+                if self.puffer_schleife_error == 0 {
+                    format!("{}", self.puffer_schleife_error).green()
+                } else {
+                    format!("{}", self.puffer_schleife_error).red()
+                }
+            );
         }
 
     }

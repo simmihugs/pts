@@ -362,7 +362,8 @@ impl DataSet {
             events.print(cmd);
             events.events.iter().for_each(|x| println!("{:?}", x));
         }
-        summary.invalid_content_id_error = events.events.len();
+        //summary.invalid_content_id_error = events.events.len();
+        summary.id_errors = events.events.len() as i64;
     }
 
     fn get_va_events_with_errors(&self) -> Vec<(bool, &Define)> {
