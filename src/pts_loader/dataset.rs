@@ -827,6 +827,7 @@ impl DataSet {
                 "DLXM Session: Sportfreunde Stiller",
                 "DLXM Session: Malik Harris",
                 "DLXM Session: Freya Ridings",
+                "DLXM Session: Loi",
             ]
             .iter()
             .map(|x| {
