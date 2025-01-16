@@ -466,7 +466,7 @@ impl<'a> SpecialEvent<'a> {
                         }
                     };
 
-                    let (logos, mut logostr) = self.find_logo_str(event, cmd);
+                    let (logos, logostr) = self.find_logo_str(event, cmd);
 
                     if cmd.debug() {
                         println!("Logo: {}", logostr);
@@ -549,13 +549,17 @@ impl<'a> SpecialEvent<'a> {
                             contentid.to_string().take(length).red().clear()
                         }
                     };
-
+                    
+                    /*
                     let mut logostr_string =
                         if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
+                            println!("logostr: {:?}\n\n", logostr);
                             logostr.take(16).red()
                         } else {
+                            println!("logostr: {:?}\n\n", logostr);
                             logostr.take(16).red().clear()
                         };
+                    */
 
                     let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
@@ -619,7 +623,7 @@ impl<'a> SpecialEvent<'a> {
                         tcin = tcin.red();
                         tcout = tcout.red();
                         contentid_string = contentid_string.bright_red();
-                        logostr_string = "".to_string().take(16).red().clear();
+                        //logostr_string = "".to_string().take(16).red().clear();
                     } else if title.starts_with(" - 00") {
                         //New werbung
                         title_string = title.replace(" - 00", "00").take(30).take(30).yellow();
@@ -631,7 +635,7 @@ impl<'a> SpecialEvent<'a> {
                         tcin = tcin.yellow();
                         tcout = tcout.yellow();
                         contentid_string = contentid_string.yellow();
-                        logostr_string = "".to_string().take(16).red().clear();
+                        //logostr_string = "".to_string().take(16).red().clear();
                     } else if title.split(" ").collect::<Vec<&str>>()[0]
                         .to_string()
                         .parse::<i64>()
@@ -649,7 +653,7 @@ impl<'a> SpecialEvent<'a> {
                                 tcin = tcin.on_red();
                                 tcout = tcout.on_red();
                                 contentid_string = contentid_string.on_red();
-                                logostr_string = "".to_string().take(16).red().clear();           
+                                //logostr_string = "".to_string().take(16).red().clear();           
                             } else {
                                 title_string = title_string.black().on_cyan();
                                 content_string = content_string.black().on_cyan();
@@ -660,7 +664,7 @@ impl<'a> SpecialEvent<'a> {
                                 tcin = tcin.black().on_cyan();
                                 tcout = tcout.black().on_cyan();
                                 contentid_string = contentid_string.black().on_cyan();
-                                logostr_string = "".to_string().take(16).red().clear();           
+                                //logostr_string = "".to_string().take(16).red().clear();           
                             }
                         } else {
                             title_string = title_string.cyan();
@@ -672,7 +676,7 @@ impl<'a> SpecialEvent<'a> {
                             tcin = tcin.cyan();
                             tcout = tcout.cyan();
                             contentid_string = contentid_string.cyan();
-                            logostr_string = "".to_string().take(16).red().clear();
+                            //logostr_string = "".to_string().take(16).red().clear();
     
                         }
                     } else {
@@ -714,7 +718,7 @@ impl<'a> SpecialEvent<'a> {
                                             starttime_string = starttime_string.red();
                                             duration_string = duration_string.red();
                                             contentid_string = contentid_string.red();
-                                            logostr_string = logostr_string.red();
+                                            //logostr_string = logostr_string.red();
                                             content_string = content_string.red();
                                             endtime_string = endtime_string.red();
                                             summary.commercial_error += 1;
@@ -724,7 +728,7 @@ impl<'a> SpecialEvent<'a> {
                                             starttime_string = starttime_string.cyan();
                                             duration_string = duration_string.cyan();
                                             contentid_string = contentid_string.cyan();
-                                            logostr_string = logostr_string.cyan();
+                                            //logostr_string = logostr_string.cyan();
                                             content_string = content_string.cyan();
                                             endtime_string = endtime_string.cyan();
                                         }
@@ -741,7 +745,7 @@ impl<'a> SpecialEvent<'a> {
                                     starttime_string = starttime_string.red();
                                     duration_string = duration_string.bright_red();
                                     contentid_string = contentid_string.red();
-                                    logostr_string = logostr_string.red();
+                                    //logostr_string = logostr_string.red();
                                     content_string = content_string.red();
                                     endtime_string = endtime_string.red();
                                     tcin = format!(
@@ -768,7 +772,7 @@ impl<'a> SpecialEvent<'a> {
                             tcin,
                             tcout,
                             contentid_string,
-                            logostr_string,
+                            "".to_string().take(16), //logostr_string,
                         );
 
                         for logo in &logos {
@@ -776,22 +780,36 @@ impl<'a> SpecialEvent<'a> {
                             if logostr.len() > 14 {
                                 logostr = logostr.drain(0..14).collect::<String>();
                             }
-
+                            
+                            let is_error = logostr.contains("ERROR");
+                            let c_color = |x: String| {
+                                if is_error { 
+                                    if x.contains("ERROR") {
+                                        return x.red()
+                                    } else {
+                                        return x.on_red()
+                                    }
+                                    
+                                }
+                                else {return x.black().on_green()
+                                }
+                            };
+                            if logostr.contains("ERROR") {
+                                logoerrors += 1;
+                            }
                             println!(
                                     "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
                                     " ",
                                     " ",
-                                    logo.get_event().programid_to_string().green(),
-                                    logo.get_event()
-                                        .starttime_to_string(cmd.utc(), cmd.fps())
-                                        .green(),
-                                    logo.get_event()
-                                        .endtime_to_string(cmd.utc(), cmd.fps())
-                                        .green(),
-                                    logo.get_event().duration_to_string(cmd.fps()).green(),
+                                    c_color(logo.get_event().programid_to_string()),
+                                    c_color(logo.get_event()
+                                        .starttime_to_string(cmd.utc(), cmd.fps())),                                        
+                                    c_color(logo.get_event()
+                                        .endtime_to_string(cmd.utc(), cmd.fps())),
+                                    c_color(logo.get_event().duration_to_string(cmd.fps())),
                                     format!("{} | {}", " ".repeat(12), " ".repeat(12)),
-                                    logo.get_event().get_contentid().green(),
-                                    logostr.take(16).green(),
+                                    c_color(logo.get_event().get_contentid()),
+                                    c_color(logostr.take(16)),
                                 );
                         }
                     }

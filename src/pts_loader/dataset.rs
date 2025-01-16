@@ -575,46 +575,6 @@ impl DataSet {
             })
             .collect::<Vec<&Define>>();
 
-        // events.iter().enumerate().for_each(|(i, x)| {
-        //     let event = x.get_event();
-        //     if event.get_contentid().contains("5675d8c63df2424bf286") {
-        //         let before = self.eventcommands.define[i - 1].get_event();
-        //         let after = self.eventcommands.define[i + 1].get_event();
-
-        //         if !((after.get_duration() > 5 * 60 * 60_000)
-        //             && (before.get_duration() < 50 * 60_000))
-        //         {
-        //             summary.trailer_balls_error += 1;
-        //             print_line(100);
-        //             println!(
-        //                 "| {} | {} | {} |",
-        //                 before.get_title().take(50),
-        //                 before.starttime_to_string(cmd.utc(), cmd.fps()),
-        //                 "",
-        //                 //before.get_contentid(),
-        //             );
-        //             print_line(100);
-        //             println!(
-        //                 "| {} | {} | {} |",
-        //                 event.get_title().take(50),
-        //                 event.starttime_to_string(cmd.utc(), cmd.fps()),
-        //                 //event.get_contentid(),
-        //                 ""
-        //             );
-        //             print_line(100);
-        //             println!(
-        //                 "| {} | {} | {} |",
-        //                 after.get_title().take(50),
-        //                 after.starttime_to_string(cmd.utc(), cmd.fps()),
-        //                 //after.get_contentid(),
-        //                 ""
-        //             );
-        //             print_line(100);
-        //             println!("");
-        //         }
-        //     }
-        // });
-
         events.iter().enumerate().for_each(|(i, x)| {
             let event = x.get_event();
             if event.get_contentid().contains("5675d8c63df2424bf286") {
@@ -784,6 +744,8 @@ impl DataSet {
         }
     }
 
+    // TODO move to external file
+    // TODO astra logo no real error
     pub fn print_missing_text_errors(&mut self, summary: &mut Summary, cmd: &Commandline) {
         let mut store = Vec::new();
         for s in self.get_si_events().events.iter().filter(|event| {
