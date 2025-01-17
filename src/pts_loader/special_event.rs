@@ -44,18 +44,18 @@ pub fn print_special_events(
                     //date = Utc::now().date_naive();
                     date = cmd.today().unwrap();
                 }
-                let event_date: NaiveDate = special_event.vec[0]
+                   let event_date: NaiveDate = special_event.vec[0]
                     .get_event()
                     .get_starttime()
                     .unwrap()
                     .date_naive();
                 if event_date == date {
                     let terrors = special_event.get_time_errors();
-                    let (lerrors, length_errors) =
+                    let (logo_errors, length_errors) =
                         special_event.print_table(&terrors, summary, cmd, fluid_data_set);
                     table_print::print_line_cross();
 
-                    summary.logo_errors += lerrors;
+                    summary.logo_errors += logo_errors;
                     summary.time_errors += terrors.len() as i64;
                     summary.length_error += length_errors;
                 }
@@ -152,7 +152,6 @@ impl<'a> SpecialEvent<'a> {
             match s {
                 Define::vaEvent(event) => {
                     let (logos, logostr) = self.find_logo_str(event, cmd);
-
                     if logostr.contains("ERROR") {
                         return true;
                     }
@@ -423,6 +422,7 @@ impl<'a> SpecialEvent<'a> {
         let _5min = 5 * _1min;
         let _15min = 15 * _1min;
 
+        let mut logo_errors_found = 0;
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
@@ -431,7 +431,7 @@ impl<'a> SpecialEvent<'a> {
                             "392654926764849cd5dc" => {
                                 if !(_5min <= event.get_duration()
                                     && event.get_duration() <= _15min)
-                                {
+                                {                                    
                                     length_errors += 1;
                                     LengthError::LengthError
                                 } else {
@@ -781,7 +781,15 @@ impl<'a> SpecialEvent<'a> {
                                 logostr = logostr.drain(0..14).collect::<String>();
                             }
                             let duration = logo.get_event().duration_to_string(cmd.fps());
-                            let is_time_error = logo.get_event().get_duration() != event.get_duration();
+
+                            let is_logo_not_layout = match logo {
+                                Define::layoutEvent(..) => true,
+                                _ => false,
+                            };
+
+                            let is_time_error = is_logo_not_layout && logo.get_event().get_duration() != event.get_duration();
+                            
+                            
                             let is_error = logostr.contains("ERROR") || is_time_error;
                             let c_color = |x: String| {
                                 if is_error { 
@@ -801,10 +809,13 @@ impl<'a> SpecialEvent<'a> {
                                 else {return x.black().on_green()
                                 }
                             };
-                            if logostr.contains("ERROR") {
+
+                            if is_error {
+                                //println!("{:?}", event);
                                 logoerrors += 1;
                             }
-                            println!(
+                            
+                                println!(
                                     "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
                                     " ",
                                     " ",
@@ -816,15 +827,34 @@ impl<'a> SpecialEvent<'a> {
                                     c_color(duration.to_string()),
                                     format!("{} | {}", " ".repeat(12), " ".repeat(12)),
                                     c_color(logo.get_event().get_contentid()),
-                                    c_color(logostr.take(16)),
+                                    c_color(logostr.take(16))
                                 );
+
+                            
                         }
+                    
+                        if logoerrors != logo_errors_found {
+                            logo_errors_found = logoerrors;
+                            println!(
+                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:12} | {:12} | {:20} | {} |",
+                                "-".repeat(30).black().on_red(),
+                                "-".repeat(50).black().on_red(),
+                                "-".repeat(15).black().on_red(),
+                                "-".repeat(23).black().on_red(),
+                                "-".repeat(23).black().on_red(),
+                                "-".repeat(12).black().on_red(),
+                                "-".repeat(12).black().on_red(),
+                                "-".repeat(12).black().on_red(),
+                                "-".repeat(20).black().on_red(),
+                                "Missing logo".to_string().take(16).black().on_red(),
+                            );
+                        }
+
                     }
                 }
                 _ => (),
-            }
+            }   
         }
-
         (logoerrors, length_errors)
     }
 }
