@@ -780,12 +780,19 @@ impl<'a> SpecialEvent<'a> {
                             if logostr.len() > 14 {
                                 logostr = logostr.drain(0..14).collect::<String>();
                             }
-                            
-                            let is_error = logostr.contains("ERROR");
+                            let duration = logo.get_event().duration_to_string(cmd.fps());
+                            let is_time_error = logo.get_event().get_duration() != event.get_duration();
+                            let is_error = logostr.contains("ERROR") || is_time_error;
                             let c_color = |x: String| {
                                 if is_error { 
-                                    if x.contains("ERROR") {
+                                    if x.contains("ERROR") {	
                                         return x.red()
+                                    } else if is_time_error {
+                                        if x == duration.to_string() {
+                                            return x.black().on_red()
+                                        } else {
+                                            return x.red()
+                                        }                                        
                                     } else {
                                         return x.on_red()
                                     }
@@ -806,7 +813,7 @@ impl<'a> SpecialEvent<'a> {
                                         .starttime_to_string(cmd.utc(), cmd.fps())),                                        
                                     c_color(logo.get_event()
                                         .endtime_to_string(cmd.utc(), cmd.fps())),
-                                    c_color(logo.get_event().duration_to_string(cmd.fps())),
+                                    c_color(duration.to_string()),
                                     format!("{} | {}", " ".repeat(12), " ".repeat(12)),
                                     c_color(logo.get_event().get_contentid()),
                                     c_color(logostr.take(16)),
