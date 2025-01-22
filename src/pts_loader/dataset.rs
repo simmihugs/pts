@@ -517,7 +517,13 @@ impl DataSet {
 
         let (special_events, _errors) = &self.get_special_events();
         let mut file = File::create(cmd.csv())?;
-        match file.write_all(b"title;filename;start;end;duration;tcin;tcout;contentid;logo;\n") {
+        let fps = match cmd.fps() {
+            Some(25) => "25fps",
+            Some(50) => "50fps",
+            _ => "ms",
+        };
+        let head = format!("title;filename;start ({fps});end ({fps});duration ({fps});tcin ({fps});tcout ({fps});contentid;logo;\n");
+        match file.write_all(head.as_bytes()) {
             _ => (),
         }
         special_events.iter().for_each(|special_event| {
