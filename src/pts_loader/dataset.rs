@@ -394,7 +394,7 @@ impl DataSet {
                     && !id.contains("WERBUNG");
                 if acc.get_event().get_endtime() != value.get_event().get_starttime() {
                     va_errors.push((true, value));
-                } else if id_error {                    
+                } else if id_error {
                     va_errors.push((false, acc));
                 }
 
@@ -665,7 +665,7 @@ impl DataSet {
             let special_events: Vec<&SpecialEvent<'_>> = special_events
                 .iter()
                 .filter(|x| {
-                    if cmd.only_errors() {
+                    if cmd.only_errors() {                        
                         if x.has_id_errors() || x.has_logo_errors(cmd) {
                             true
                         } else {

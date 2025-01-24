@@ -89,6 +89,11 @@ impl<'a> SpecialEvent<'a> {
         Self { vec }
     }
 
+    #[allow(dead_code)]
+    pub fn get_vec(&self) -> Vec<&Define> {
+        self.vec.clone()
+    }
+
     pub fn get_time_errors(&self) -> Vec<String> {
         let mut events: Vec<_> = self
             .vec
@@ -136,8 +141,8 @@ impl<'a> SpecialEvent<'a> {
         for s in &self.vec {
             match s {
                 Define::vaEvent(event) => {
-                    let contentid = event.get_contentid();
-                    if contentid.contains("-") && contentid != "UHD1_WERBUNG-01" {
+                    let contentid = event.get_contentid(); 
+                    if contentid.len() < "1572515-971182".len() {
                         return true;
                     }
                 }
