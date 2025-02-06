@@ -16,6 +16,7 @@ pub struct Summary {
     //pub invalid_content_id_error: usize,
     pub content_to_long_error: usize,
     pub puffer_schleife_error: i64,
+    pub alte_tafel_error: i64,
 }
 
 impl Summary {
@@ -35,6 +36,7 @@ impl Summary {
             //invalid_content_id_error: 0,
             content_to_long_error: 0,
             puffer_schleife_error: 0,
+            alte_tafel_error: 0,
         }
     }
 
@@ -52,7 +54,7 @@ impl Summary {
                     format!("{}", self.time_errors).green()
                 }
             );
-            
+
             println!(
                 "{:3} id errors",
                 if self.id_errors > 0 {
@@ -61,7 +63,7 @@ impl Summary {
                     format!("{}", self.id_errors).green()
                 }
             );
-            
+
             println!(
                 "{:3} logo errors",
                 if self.logo_errors > 0 {
@@ -172,7 +174,7 @@ impl Summary {
                 } else {
                     format!("{}", self.content_to_long_error).red()
                 }
-            );            
+            );
         }
 
         if cmd.all() {
@@ -186,5 +188,19 @@ impl Summary {
             );
         }
 
+        if cmd.all() {
+            println!(
+                "{:3} Alte Tafel errors",
+                if self.alte_tafel_error == 0 {
+                    format!("{}", self.alte_tafel_error).green()
+                } else {
+                    format!("{}", self.alte_tafel_error).red()
+                }
+            );
+            if self.alte_tafel_error > 0 {
+                println!("please use 'Dranbleiben - gleich geht's lo' 3ecea6b8084f35c2634d");
+                println!("please use 'Bald geht's hier weiter mit de' 02e9d82071c7735de5cd");
+            }
+        }
     }
 }

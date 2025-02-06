@@ -453,6 +453,26 @@ impl<'a> SpecialEvent<'a> {
                                     LengthError::NoError
                                 }
                             }
+                            "3ecea6b8084f35c2634d" => {
+                                if !(_5min <= event.get_duration()
+                                    && event.get_duration() <= _15min)
+                                {                                    
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
+                            "02e9d82071c7735de5cd" => {
+                                if !(_5min <= event.get_duration()
+                                    && event.get_duration() <= _15min)
+                                {
+                                    length_errors += 1;
+                                    LengthError::LengthError
+                                } else {
+                                    LengthError::NoError
+                                }
+                            }
                             "e90dfb84e30edf611e32" => {
                                 if !(event.get_duration() <= _30sec) {
                                     length_errors += 1;
@@ -617,7 +637,20 @@ impl<'a> SpecialEvent<'a> {
                             ),
                         }
                     };
-
+                    let mut logostr_string = "".to_string().take(16).red().clear(); 
+                    if contentid == "cb7a119f84cb7b117b1b" || contentid == "392654926764849cd5dc" {
+                        title_string = title.white().on_bright_red();
+                        content_string = content_string.white().on_bright_red();
+                        programid_string = programid_string.white().on_bright_red();
+                        starttime_string = starttime_string.white().on_bright_red();
+                        endtime_string = endtime_string.white().on_bright_red();
+                        duration_string = duration_string.white().on_bright_red();
+                        tcin = tcin.white().on_bright_red();
+                        tcout = tcout.white().on_bright_red();
+                        contentid_string = contentid_string.white().bright_red();
+                        logostr_string = "ALTE TAFEL".to_string().take(16).white().bright_red();
+                        summary.alte_tafel_error += 1;  
+                    } else 
                     if contentid.contains("-") && contentid.len() == "1529458-0".len() {
                         title_string = title.replace(" - 00", "00").take(30).take(30).red();
                         content_string = content_string.red();
@@ -777,7 +810,7 @@ impl<'a> SpecialEvent<'a> {
                             tcin,
                             tcout,
                             contentid_string,
-                            "".to_string().take(16), //logostr_string,
+                            logostr_string,
                         );
 
                         for logo in &logos {

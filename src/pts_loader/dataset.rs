@@ -420,15 +420,19 @@ impl DataSet {
             })
             .collect::<Vec<&Define>>();
 
-        let blocks = special_events
+        let blocks: Vec<Block<'_>> = special_events
             .iter()
             .enumerate()
             .filter(|(_, &x)| {
-                x.get_event().get_contentid() == "cb7a119f84cb7b117b1b"
-                    || x.get_event().get_contentid() == "392654926764849cd5dc"
+                let contentid = x.get_event().get_contentid();
+                contentid == "cb7a119f84cb7b117b1b"
+                    || contentid == "392654926764849cd5dc"
+                    || contentid == "3ecea6b8084f35c2634d"
+                    || contentid == "02e9d82071c7735de5cd"
             })
             .map(|(i, x)| {
-                if x.get_event().get_contentid() == "cb7a119f84cb7b117b1b" {
+                let contentid = x.get_event().get_contentid();
+                if contentid == "cb7a119f84cb7b117b1b" || contentid == "3ecea6b8084f35c2634d" {
                     Block::Begin {
                         index: i as usize,
                         event: x,
@@ -440,7 +444,7 @@ impl DataSet {
                     }
                 }
             })
-            .collect::<Vec<Block<'_>>>();
+            .collect();
         let mut special_event_errors = Vec::new();
         let mut pairs = Vec::new();
         for (i, block) in blocks.iter().enumerate() {
@@ -665,7 +669,7 @@ impl DataSet {
             let special_events: Vec<&SpecialEvent<'_>> = special_events
                 .iter()
                 .filter(|x| {
-                    if cmd.only_errors() {                        
+                    if cmd.only_errors() {
                         if x.has_id_errors() || x.has_logo_errors(cmd) {
                             true
                         } else {
