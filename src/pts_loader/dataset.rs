@@ -5,11 +5,13 @@ use crate::pts_loader::block::Block;
 use crate::pts_loader::event::Event;
 use crate::pts_loader::sistandard::a_duration_from_string;
 use crate::pts_loader::special_event::SpecialEvent;
+use crate::utils::excel::Excel;
 use crate::utils::fluid::QueryType;
 use crate::utils::table_print::{self, print_line};
 use crate::utils::take::Take;
 use crate::Fluid;
 use colored::Colorize;
+use rust_xlsxwriter::XlsxError;
 use serde::{Deserialize, Serialize};
 use std::fs::{self, File};
 use std::io::prelude::*;
@@ -66,15 +68,6 @@ impl DataSet {
                     };
                     if event_duration > dbase_duration {
                         content_length_errors.push((event, dbase_duration));
-                        /*                         summary.content_to_long_error += 1;
-                                               println!(
-                                                   "ERROR: Title: {:?} Id: {:?} has duration: {:?} > fluid_duration: {}",
-                                                   event.get_contentid(),
-                                                   event.get_title(),
-                                                   Event::a_duration_to_string(event_duration, cmd.fps()),
-                                                   Event::a_duration_to_string(dbase_duration, cmd.fps()),
-                                               )
-                        */
                     }
                 }
             }
@@ -553,6 +546,48 @@ impl DataSet {
                 println!("only available encodings are utf-8 and windows1252\nNo file written.");
             }
         });
+
+        Ok(())
+    }
+
+    pub fn write_special_events_xlsx(
+        &self,
+        cmd: &Commandline,
+        fluid_data_set: &Fluid,
+    ) -> Result<(), XlsxError> {
+        let mut excel = Excel::new(&cmd.xlsx());
+
+        let (special_events, _errors) = &self.get_special_events();
+        let fps = match cmd.fps() {
+            Some(25) => "25fps",
+            Some(50) => "50fps",
+            _ => "ms",
+        };
+
+        let header = vec![
+            "title".to_string(),
+            "filename".to_string(),
+            format!("start ({fps})"),
+            format!("end ({fps})"),
+            format!("duration ({fps})"),
+            format!("tcin ({fps})"),
+            format!("tcout ({fps})"),
+            "contentid".to_string(),
+            "logo".to_string(),
+        ];
+        let mut data = vec![];
+
+        special_events.iter().for_each(|special_event| {
+            data.push(header.clone());
+            let result = special_event.create_row(cmd, fluid_data_set);
+            for row in result.iter() {
+                data.push(row.clone());
+            }
+            data.push(header.clone());
+            data.push(vec![String::new()]);
+        });
+
+        excel.write_file(&data)?;
 
         Ok(())
     }

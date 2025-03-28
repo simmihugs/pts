@@ -80,6 +80,17 @@ fn main() -> std::io::Result<()> {
                     }
                 }
 
+                if cmd.write_xlsx() {
+                    match dataset.write_special_events_xlsx(&cmd, &fluid_data_base) {
+                        Err(e) => {
+                            if cmd.debug() {
+                                println!("{}", e);
+                            }
+                        }
+                        Ok(..) => println!("Wrote xlsx to '{}'", cmd.xlsx().to_string().cyan()),
+                    }
+                }
+
                 if cmd.update_werbungen() {
                     match dataset.update_commercials(&cmd) {
                         Err(e) => println!("{}", e),

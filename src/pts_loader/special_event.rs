@@ -23,6 +23,7 @@ pub struct SpecialEvent<'a> {
     vec: Vec<&'a Define>,
 }
 
+
 pub fn print_special_events(
     special_events: Vec<&SpecialEvent<'_>>,
     special_event_errors: &Vec<Block<'_>>,
@@ -367,6 +368,102 @@ impl<'a> SpecialEvent<'a> {
 
         special_event
     }
+
+
+    pub fn create_row(&self, cmd: &Commandline, fluid_data_set: &Fluid) -> Vec<Vec<String>> {
+        let mut result = vec![];
+        for s in &self.vec {
+            match s {
+                Define::vaEvent(event) => {
+                    let (logos, logostr): (Vec<_>, String) = self.find_logo_str(event, cmd);
+
+                    let mut title = event.get_title();
+
+                    let contentid = event.get_contentid();
+                    if title.contains(",") {
+                        title = title.replace(",", "-");
+                    } else if contentid == "cb7a119f84cb7b117b1b" {
+                        title += " - Dranbleiben";
+                    } else if contentid == "392654926764849cd5dc" {
+                        title += " - Pausetafel";
+                    } else if contentid == "UHD1_WERBUNG-01" {
+                        title = event.get_title();
+                        if title == " -  UHD1_WERBUNG-01" {
+                            title = "UHD1_WERBUNG-01".to_string();
+                        } else {
+                            let new_title =
+                                title.replace(" - ", "").replace(" UHD1_WERBUNG-01", "");
+                            title = new_title;
+                        }
+                    }
+                    let contentid = event.get_contentid();
+
+                    let (tcin,tcout) = if cmd
+                        .get_content_ids_to_ignore()
+                        .iter()
+                        .any(|x| event.get_contentid().contains(x))
+                        || event.get_title().contains("railer")
+                        || event.get_title().starts_with(" - 00")
+                        || event.get_title().split(" ").collect::<Vec<&str>>()[0]
+                            .to_string()
+                            .parse::<i64>()
+                            .is_ok()
+                    {
+                        ("".to_string(), "".to_string())
+                    } else {
+                        match &event.get_tcin_tcout() {
+                            None => ("".to_string(), "".to_string()),
+                            Some((a, b)) => 
+                                (Event::standalone_duration_to_string(a, cmd.fps()).take(12),
+                                Event::standalone_duration_to_string(b, cmd.fps()).take(12),)
+                            
+                        }
+                    };
+
+                    result.push(vec![title,
+                        match cmd.fluid_csv() {
+                            None => "".to_string(),
+                            Some(..) => {
+                                if event.get_contentid() != "cb7a119f84cb7b117b1b"
+                                    && event.get_contentid() != "392654926764849cd5dc"
+                                {
+                                    match fluid_data_set.query(&event, QueryType::Filename) {
+                                        None => "".to_string(),
+                                        Some(s) => s.to_string(),
+                                    }
+                                } else {
+                                    "".to_string()
+                                }
+                            }
+                        },
+                        event.starttime_to_string(cmd.utc(), cmd.fps()),
+                        event.endtime_to_string(cmd.utc(), cmd.fps()),
+                        event.duration_to_string(cmd.fps()),
+                        tcin,
+                        tcout,
+                        contentid,
+                        logostr,]
+                    );
+                    for logo in &logos {
+                        result.push(vec![
+                            "".to_string(),
+                            "".to_string(),
+                            logo.get_event().starttime_to_string(cmd.utc(), cmd.fps()),
+                            logo.get_event().endtime_to_string(cmd.utc(), cmd.fps()),
+                            logo.get_event().duration_to_string(cmd.fps()),
+                            "".to_string(),
+                            "".to_string(),logo.get_event().get_contentid(),
+                            logo.get_event().get_logo(),
+                        ]);
+                    }
+                }
+                _ => (),
+            }
+        }
+
+        result
+    }
+
 
     fn color_starttime(
         time_errors: &Vec<String>,

@@ -94,6 +94,9 @@ struct Args {
     #[arg(short, long)]
     csv: Option<Option<String>>,
 
+    #[arg(short, long)]
+    xlsx: Option<Option<String>>,
+
     #[arg(short, long, default_value_t = String::from("utf-8"))]
     encoding: String,
 
@@ -361,6 +364,18 @@ impl Commandline {
         }
     }
 
+    pub fn xlsx(&self) -> String {
+        match &self.args.xlsx {
+            None => String::from("YOU_PICK_A_XLSX"),
+            Some(None) => String::from("bloecke.xlsx"),
+            Some(file_name) => format!("{}", file_name.clone().unwrap()),
+        }
+    }
+
+    pub fn write_xlsx(&self) -> bool {
+        self.xlsx() != "YOU_PICK_A_XLSX"
+    }
+
     pub fn write_csv(&self) -> bool {
         self.csv() != "YOU_PICK_A_CSV"
     }
@@ -511,6 +526,7 @@ impl Commandline {
         !(self.look_for_illegalevents()
             || self.all()
             || self.write_csv()
+            || self.write_xlsx()
             || self.ps_event()
             || self.sierrors()
             || self.vaerrors()
