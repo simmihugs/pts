@@ -9,7 +9,7 @@ impl Excel {
     pub fn new(path: &str) -> Self {
         Excel {
             workbook: Workbook::new(),
-            path: format!("{}.xlsx", path),
+            path: format!("{}", path),
         }
     }
 
