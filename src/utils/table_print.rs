@@ -1,5 +1,7 @@
 use crate::utils::take::Take;
 
+use chrono::{DateTime, Utc};
+
 pub fn line(n: usize) -> String {
     "-".repeat(n)
 }
@@ -10,7 +12,8 @@ pub fn print_line(n: usize) {
 
 pub fn print_head() {
     println!(
-        "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+        "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+        "day".to_string().take(11),
         "title".to_string().take(30),
         "filename".to_string().take(50),
         "programid".to_string().take(15),
@@ -26,7 +29,8 @@ pub fn print_head() {
 
 pub fn print_line_cross() {
     println!(
-        "|{}+{}+{}+{}+{}+{}+{}+{}+{}+{}|",
+        "|{}+{}+{}+{}+{}+{}+{}+{}+{}+{}+{}|",
+        line(13),
         line(32),
         line(52),
         line(17),
@@ -37,6 +41,25 @@ pub fn print_line_cross() {
         line(14),
         line(22),
         line(18),
+    );
+}
+
+#[allow(dead_code)]
+pub fn print_day(day: Option<DateTime<Utc>>) {
+    println!(
+        "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+        day.map(|d| d.format("%A").to_string().take(11))
+            .unwrap_or_default(),
+        "".to_string().take(30),
+        "".to_string().take(50),
+        "".to_string().take(15),
+        "".to_string().take(23),
+        "".to_string().take(23),
+        "".to_string().take(12),
+        "".to_string().take(12),
+        "".to_string().take(12),
+        "".to_string().take(20),
+        "".to_string().take(16),
     );
 }
 

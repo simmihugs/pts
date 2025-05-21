@@ -225,7 +225,10 @@ where
 }
 
 pub fn a_duration_from_string(string: String) -> Result<i64, String> {
-    let parts = string.split(".").map(|s| s.to_string()).collect::<Vec<String>>();
+    let parts = string
+        .split(".")
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>();
     let time_string = &format!("00 {}.{}", parts[0], &parts[1][1..]);
     let fmt = "00 %H:%M:%S%.3f";
     let step = NaiveTime::parse_from_str("00 00:00:00.000", "00 %H:%M:%S%.3f").unwrap();

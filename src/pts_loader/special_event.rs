@@ -16,7 +16,7 @@ enum LengthError {
     NoError,
 }
 
-const LINE_WIDTH: usize = 242;
+const LINE_WIDTH: usize = 256;
 
 #[derive(Clone)]
 pub struct SpecialEvent<'a> {
@@ -41,8 +41,7 @@ pub fn print_special_events(
                 let date: NaiveDate;
                 if cmd.day().is_some() {
                     date = cmd.day().unwrap();
-                } else {
-                    //date = Utc::now().date_naive();
+                } else {                    
                     date = cmd.today().unwrap();
                 }
                    let event_date: NaiveDate = special_event.vec[0]
@@ -53,17 +52,17 @@ pub fn print_special_events(
                 if event_date == date {
                     let terrors = special_event.get_time_errors();
                     let (logo_errors, length_errors) =
-                        special_event.print_table(&terrors, summary, cmd, fluid_data_set);
+                        special_event.print_table( &terrors, summary, cmd, fluid_data_set);
                     table_print::print_line_cross();
 
                     summary.logo_errors += logo_errors;
                     summary.time_errors += terrors.len() as i64;
                     summary.length_error += length_errors;
                 }
-            } else {
+            } else {                
                 let terrors = special_event.get_time_errors();
                 let (lerrors, length_errors) =
-                    special_event.print_table(&terrors, summary, cmd, fluid_data_set);
+                    special_event.print_table( &terrors, summary, cmd, fluid_data_set);
                 table_print::print_line_cross();
 
                 summary.logo_errors += lerrors;
@@ -503,29 +502,24 @@ impl<'a> SpecialEvent<'a> {
     }
 
     pub fn print_table(
-        &self,
+        &self,        
         time_errors: &Vec<String>,
         summary: &mut Summary,
         cmd: &Commandline,
         fluid_data_set: &Fluid,
     ) -> (i64, i64) {
         let werbungen = &cmd.werbungen();
-        //let tcins_tcouts = &cmd.tcins_tcouts();
-
         let mut logoerrors = 0;
-        //let mut iderrors = 0;
         let mut length_errors: i64 = 0;
-
         let mut found_first_event: bool = false;
         let mut found_dran_bleiben: bool = false;
-
         let _1min = 60 * 1000;
         let _30sec = _1min / 2;
         let _5min = 5 * _1min;
         let _15min = 15 * _1min;
-
         let mut logo_errors_found = 0;
-        for s in &self.vec {
+        
+        for (index, s) in self.vec.iter().enumerate() {
             match s {
                 Define::vaEvent(event) => {
                     let event_length_error: LengthError = {
@@ -672,17 +666,6 @@ impl<'a> SpecialEvent<'a> {
                         }
                     };
                     
-                    /*
-                    let mut logostr_string =
-                        if logostr.contains("ERROR") && contentid != "UHD1_WERBUNG-01" {
-                            println!("logostr: {:?}\n\n", logostr);
-                            logostr.take(16).red()
-                        } else {
-                            println!("logostr: {:?}\n\n", logostr);
-                            logostr.take(16).red().clear()
-                        };
-                    */
-
                     let mut content_string = if event.get_contentid() != "cb7a119f84cb7b117b1b"
                         && event.get_contentid() != "392654926764849cd5dc"
                     {
@@ -758,9 +741,7 @@ impl<'a> SpecialEvent<'a> {
                         tcin = tcin.red();
                         tcout = tcout.red();
                         contentid_string = contentid_string.bright_red();
-                        //logostr_string = "".to_string().take(16).red().clear();
                     } else if title.starts_with(" - 00") {
-                        //New werbung
                         title_string = title.replace(" - 00", "00").take(30).take(30).yellow();
                         content_string = content_string.yellow();
                         programid_string = programid_string.yellow();
@@ -770,7 +751,6 @@ impl<'a> SpecialEvent<'a> {
                         tcin = tcin.yellow();
                         tcout = tcout.yellow();
                         contentid_string = contentid_string.yellow();
-                        //logostr_string = "".to_string().take(16).red().clear();
                     } else if title.split(" ").collect::<Vec<&str>>()[0]
                         .to_string()
                         .parse::<i64>()
@@ -788,7 +768,6 @@ impl<'a> SpecialEvent<'a> {
                                 tcin = tcin.on_red();
                                 tcout = tcout.on_red();
                                 contentid_string = contentid_string.on_red();
-                                //logostr_string = "".to_string().take(16).red().clear();           
                             } else {
                                 title_string = title_string.black().on_cyan();
                                 content_string = content_string.black().on_cyan();
@@ -799,7 +778,6 @@ impl<'a> SpecialEvent<'a> {
                                 tcin = tcin.black().on_cyan();
                                 tcout = tcout.black().on_cyan();
                                 contentid_string = contentid_string.black().on_cyan();
-                                //logostr_string = "".to_string().take(16).red().clear();           
                             }
                         } else {
                             title_string = title_string.cyan();
@@ -811,8 +789,6 @@ impl<'a> SpecialEvent<'a> {
                             tcin = tcin.cyan();
                             tcout = tcout.cyan();
                             contentid_string = contentid_string.cyan();
-                            //logostr_string = "".to_string().take(16).red().clear();
-    
                         }
                     } else {
                         if contentid == "UHD1_WERBUNG-01" {
@@ -853,7 +829,6 @@ impl<'a> SpecialEvent<'a> {
                                             starttime_string = starttime_string.red();
                                             duration_string = duration_string.red();
                                             contentid_string = contentid_string.red();
-                                            //logostr_string = logostr_string.red();
                                             content_string = content_string.red();
                                             endtime_string = endtime_string.red();
                                             summary.commercial_error += 1;
@@ -863,7 +838,6 @@ impl<'a> SpecialEvent<'a> {
                                             starttime_string = starttime_string.cyan();
                                             duration_string = duration_string.cyan();
                                             contentid_string = contentid_string.cyan();
-                                            //logostr_string = logostr_string.cyan();
                                             content_string = content_string.cyan();
                                             endtime_string = endtime_string.cyan();
                                         }
@@ -880,7 +854,6 @@ impl<'a> SpecialEvent<'a> {
                                     starttime_string = starttime_string.red();
                                     duration_string = duration_string.bright_red();
                                     contentid_string = contentid_string.red();
-                                    //logostr_string = logostr_string.red();
                                     content_string = content_string.red();
                                     endtime_string = endtime_string.red();
                                     tcin = format!(
@@ -895,9 +868,15 @@ impl<'a> SpecialEvent<'a> {
                             None => (),
                         }
                     }
+
                     if cmd.verbose() {
                         println!(
-                            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                            "| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |",
+                            if index == 0 {
+                                event.get_starttime().map(|d| d.format("%A").to_string()).unwrap_or_default().take(11).yellow()
+                            } else {
+                                "".to_string().take(11).red().clear()
+                            },
                             title_string,
                             content_string,
                             programid_string,
@@ -951,7 +930,8 @@ impl<'a> SpecialEvent<'a> {
                             }
                             
                                 println!(
-                                    "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
+                                    "| {:11} | {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {} | {:20} | {} |",
+                                    " ",
                                     " ",
                                     " ",
                                     c_color(logo.get_event().programid_to_string()),
@@ -971,7 +951,8 @@ impl<'a> SpecialEvent<'a> {
                         if logoerrors != logo_errors_found {
                             logo_errors_found = logoerrors;
                             println!(
-                                "| {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:12} | {:12} | {:20} | {} |",
+                                "| {:11} | {:30} | {:50} | {:15} | {:23} | {:23} | {:12} | {:12} | {:12} | {:20} | {} |",
+                                "-".repeat(11).black().on_red(),
                                 "-".repeat(30).black().on_red(),
                                 "-".repeat(50).black().on_red(),
                                 "-".repeat(15).black().on_red(),
